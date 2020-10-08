@@ -1,0 +1,9 @@
+1. git init
+2. git fetch
+3. git reset --hard origin/main
+
+// delete branch locally
+git branch -d localBranchName
+
+// delete branch remotely
+git push origin --delete remoteBranchName
