@@ -1,6 +1,13 @@
 1. git init
 2. git fetch
 3. git reset --hard origin/main
+4. git remote add origin remote repository URL
+
+5. git config --global user.email "you@example.com"
+6. git config --global user.name "Your name"
+7. git add .
+8. git commit -m "test commit"
+
 
 // delete branch locally
 git branch -d localBranchName
