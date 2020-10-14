@@ -199,13 +199,13 @@ if __name__ == "__main__":
     tb_logger = pl_loggers.TensorBoardLogger(logging_loc)
 
     # model = PointNetCls_light(hp)
-    trainer = pl.Trainer(logger=tb_logger, max_epochs=10, log_save_interval=20, fast_dev_run=False,)# gpus=-1)
+    trainer = pl.Trainer(logger=tb_logger, max_epochs=10, log_save_interval=20, fast_dev_run=False, gpus=-1)
     # trainer.fit(model) # train
 
     #test
     # checkpoint_loc = r'/home/jack/OneDrive/Studies/Undergrad_Project/data/logs/default/version_13/checkpoints/epoch=9.ckpt'
     checkpoint_loc = r'C:\Users\RoeePC\Desktop\proj\DeepAdv3D\data\logs\default\version_0\checkpoints\epoch=89.ckpt'
-    hp['batchsize'] = 1 # for testing
+    hp['batchsize'] = 1  # for testing
     model = PointNetCls_light.load_from_checkpoint(checkpoint_loc, **hp)
     trainer.test(model)
 
