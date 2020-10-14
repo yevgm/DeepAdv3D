@@ -1,23 +1,25 @@
 from __future__ import print_function
 import torch.nn as nn
-from util.torch.nn import set_determinsitic_run
+# from util.torch.nn import set_determinsitic_run
 import torch
 import torch.nn.parallel
 import torch.optim as optim
 import torch.utils.data
-from pointnet.dataset import ShapeNetDataset, ModelNetDataset, FaustDataset
+from pointnet.dataset import ShapeNetDataset, ModelNetDataset
+from pointnet.dataset import FaustDataset
 import torch.nn.functional as F
 
 from torch.autograd import Variable
 import numpy as np
 
-set_determinsitic_run() # Set a universal random seed
+# very buggy - Two instances of pytorch lightning working together
+# set_determinsitic_run()     # Set a universal random seed
 
 if __name__ == "__main__":
     import pytorch_lightning as pl
     from pytorch_lightning import loggers as pl_loggers
 
-    class STN3d(pl.LightningModule):
+    class STN3d(nn.Module):
         def __init__(self):
             super().__init__()
             self.conv1 = torch.nn.Conv1d(3, 64, 1)
@@ -54,7 +56,7 @@ if __name__ == "__main__":
             return x
 
 
-    class STNkd(pl.LightningModule):
+    class STNkd(nn.Module):
         def __init__(self, k=64):
             super().__init__()
             self.conv1 = torch.nn.Conv1d(k, 64, 1)
@@ -91,7 +93,7 @@ if __name__ == "__main__":
             x = x.view(-1, self.k, self.k)
             return x
 
-    class PointNetfeat(pl.LightningModule):
+    class PointNetfeat(nn.Module):
         def __init__(self, global_feat = True, feature_transform = False):
             super().__init__()
             self.stn = STN3d()
@@ -133,7 +135,7 @@ if __name__ == "__main__":
                 x = x.view(-1, 1024, 1).repeat(1, 1, n_pts)
                 return torch.cat([x, pointfeat], 1), trans, trans_feat
 
-    class PointNetDenseCls(pl.LightningModule):
+    class PointNetDenseCls(nn.Module):
         def __init__(self, k = 2, feature_transform=False):
             super().__init__()
             self.k = k
@@ -239,10 +241,10 @@ if __name__ == "__main__":
                                                shuffle=True,
                                                num_workers=int(self.workers))
 
-        def val_dataloader(self):
-            return torch.utils.data.DataLoader(self.val_dataset,
-                                               batch_size=self.batchsize,
-                                               num_workers=int(self.workers))
+        # def val_dataloader(self):
+        #     return torch.utils.data.DataLoader(self.val_dataset,
+        #                                        batch_size=self.batchsize,
+        #                                        num_workers=int(self.workers))
 
         def test_dataloader(self):
             return  torch.utils.data.DataLoader(self.test_dataset,
@@ -329,9 +331,12 @@ if __name__ == "__main__":
     # full path
     dataset_loc = r'/home/jack/OneDrive/Studies/Undergrad_Project/data/MPI-FAUST/training/registrations'
     # dataset_loc = r'D:\Roee_Yevgeni\pointnet.pytorch\shapenetcore_partanno_segmentation_benchmark_v0\shapenetcore_partanno_segmentation_benchmark_v0'
-    tb_logger = pl_loggers.TensorBoardLogger('logs/')
+    # dataset_loc = r'/home/jack/OneDrive/Studies/Undergrad_Project/data/shapenetcore_partanno_segmentation_benchmark_v0'
 
-    model = PointNetCls_light(dataset_loc, classes=10, feature_transform=False, batchsize=4
+    logging_loc = r'/home/jack/OneDrive/Studies/Undergrad_Project/data/logs/'
+    tb_logger = pl_loggers.TensorBoardLogger(logging_loc)
+
+    model = PointNetCls_light(dataset_loc, classes=10, feature_transform=False, batchsize=2
                                          , num_points=2500, workers=4, dataset_type='faust')
     trainer = pl.Trainer(logger=tb_logger, max_epochs=1, log_save_interval=20, fast_dev_run=False,)# gpus=-1)
     trainer.fit(model) # train

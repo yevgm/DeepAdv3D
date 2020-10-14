@@ -242,10 +242,10 @@ class FaustDataset(data.Dataset):
         self.f = f
         self.rgb = rgb
 
-        # center and scale - do we need this?
-        # point_set = point_set - np.expand_dims(np.mean(point_set, axis=0), 0)  # center
-        # dist = np.max(np.sqrt(np.sum(point_set ** 2, axis=1)), 0)
-        # point_set = point_set / dist  # scale
+        # # center and scale - do we need this?
+        # v = v - np.expand_dims(np.mean(v, axis=0), 0)  # center
+        # dist = np.max(np.sqrt(np.sum(v ** 2, axis=1)), 0)
+        # v = v / dist  # scale
 
         # if self.data_augmentation:
         #     theta = np.random.uniform(0, np.pi * 2)
@@ -254,32 +254,32 @@ class FaustDataset(data.Dataset):
         #     point_set += np.random.normal(0, 0.02, size=point_set.shape)  # random jitter
 
         v = torch.from_numpy(v.astype(np.float32))
-        cls = torch.Tensor(index % 10)
+        cls = torch.from_numpy(np.array([index % 10]).astype(np.int64))
         return v, cls
 
 
     def __len__(self):
         return len(self.fns)
 
-if __name__ == '__main__':
-    dataset = sys.argv[1]
-    datapath = sys.argv[2]
-
-    if dataset == 'shapenet':
-        d = ShapeNetDataset(root = datapath, class_choice = ['Chair'])
-        print(len(d))
-        ps, seg = d[0]
-        print(ps.size(), ps.type(), seg.size(),seg.type())
-
-        d = ShapeNetDataset(root = datapath, classification = True)
-        print(len(d))
-        ps, cls = d[0]
-        print(ps.size(), ps.type(), cls.size(),cls.type())
-        # get_segmentation_classes(datapath)
-
-    if dataset == 'modelnet':
-        gen_modelnet_id(datapath)
-        d = ModelNetDataset(root=datapath)
-        print(len(d))
-        print(d[0])
+# if __name__ == '__main__':
+#     dataset = sys.argv[1]
+#     datapath = sys.argv[2]
+#
+#     if dataset == 'shapenet':
+#         d = ShapeNetDataset(root = datapath, class_choice = ['Chair'])
+#         print(len(d))
+#         ps, seg = d[0]
+#         print(ps.size(), ps.type(), seg.size(),seg.type())
+#
+#         d = ShapeNetDataset(root = datapath, classification = True)
+#         print(len(d))
+#         ps, cls = d[0]
+#         print(ps.size(), ps.type(), cls.size(),cls.type())
+#         # get_segmentation_classes(datapath)
+#
+#     if dataset == 'modelnet':
+#         gen_modelnet_id(datapath)
+#         d = ModelNetDataset(root=datapath)
+#         print(len(d))
+#         print(d[0])
 
