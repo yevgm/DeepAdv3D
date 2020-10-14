@@ -145,7 +145,8 @@ class ModelNetDataset(data.Dataset):
                  root,
                  npoints=2500,
                  split='train',
-                 data_augmentation=True):
+                 data_augmentation=True,
+                 classification=True):
         self.npoints = npoints
         self.root = root
         self.split = split
@@ -186,6 +187,75 @@ class ModelNetDataset(data.Dataset):
         point_set = torch.from_numpy(point_set.astype(np.float32))
         cls = torch.from_numpy(np.array([cls]).astype(np.int64))
         return point_set, cls
+
+
+    def __len__(self):
+        return len(self.fns)
+
+
+class FaustDataset(data.Dataset):
+    def __init__(self,
+                 root,
+                 npoints=2500,
+                 split='train',
+                 data_augmentation=False,
+                 classification=True):
+        self.root = root
+        self.split = split
+        self.data_augmentation = data_augmentation
+
+        # create list of valid files
+        self.fns = []
+        for file in os.listdir(self.root):
+            if file.endswith(".ply"):
+                self.fns.append(file)
+        assert len(self.fns) == 100 , "assumed that there are 100 train examples"
+
+        # split tran\test
+        if self.split == 'train':
+            self.fns = self.fns[0:80]
+        else:
+            self.fns = self.fns[81:]
+
+    def __getitem__(self, index):
+        if index < 10 :
+            fn = 'tr_reg_00'+str(index)+'.ply'
+        else:
+            fn = 'tr_reg_0' + str(index)+'.ply'
+
+        with open(os.path.join(self.root, fn), 'rb') as f:
+            plydata = PlyData.read(f)
+        x = plydata['vertex']['x']
+        y = plydata['vertex']['y']
+        z = plydata['vertex']['z']
+        v = np.column_stack((x, y, z))
+        if 'red' in plydata['vertex']._property_lookup:
+            r = plydata['vertex']['red']
+            g = plydata['vertex']['green']
+            b = plydata['vertex']['blue']
+            rgb = np.column_stack((r, g, b))
+            rgb = torch.from_numpy(rgb.astype(np.float32))
+        else:
+            rgb = None
+        f = np.stack(plydata['face']['vertex_indices'])
+        f = torch.from_numpy(f.astype(np.float32))
+        self.f = f
+        self.rgb = rgb
+
+        # center and scale - do we need this?
+        # point_set = point_set - np.expand_dims(np.mean(point_set, axis=0), 0)  # center
+        # dist = np.max(np.sqrt(np.sum(point_set ** 2, axis=1)), 0)
+        # point_set = point_set / dist  # scale
+
+        # if self.data_augmentation:
+        #     theta = np.random.uniform(0, np.pi * 2)
+        #     rotation_matrix = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
+        #     point_set[:, [0, 2]] = point_set[:, [0, 2]].dot(rotation_matrix)  # random rotation
+        #     point_set += np.random.normal(0, 0.02, size=point_set.shape)  # random jitter
+
+        v = torch.from_numpy(v.astype(np.float32))
+        cls = torch.Tensor(index % 10)
+        return v, cls
 
 
     def __len__(self):

@@ -1,0 +1,10 @@
+First steps toward recreating the paper
+"Generating Adversarial Surfaces via Band-Limited Perturbations"
+for kickoff presentation:
+
+1. Train a PointNet classifier (afterwards use a better classifier for 3d meshes/point 		clouds)
+2. Create a Targeted attack on a point cloud, Check (Visualize) if the results are 			similar to what we've seen in the paper
+3. Create an Untargeted attack on a point cloud, Check the results in the same manner
+
+Next steps:
+* Thinking about our actual contribution to this...
