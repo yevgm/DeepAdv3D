@@ -6,7 +6,7 @@ import torch.utils.data
 from torch.autograd import Variable
 import numpy as np
 import torch.nn.functional as F
-import pytorch_lightning as pl
+# import pytorch_lightning as pl
 
 class STN3d(nn.Module):
     def __init__(self):
