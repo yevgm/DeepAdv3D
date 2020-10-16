@@ -5,33 +5,37 @@ import torch
 import torch.nn.parallel
 import torch.optim as optim
 import torch.utils.data
-from pointnet.dataset import ShapeNetDataset, ModelNetDataset
-from pointnet.dataset import FaustDataset
-import pointnet.model as mod
+from pytorch_lightning import seed_everything
+from models.pointnet.pointnet.dataset import ShapeNetDataset, ModelNetDataset, FaustDataset
+import models.pointnet.pointnet.model as mod
 import torch.nn.functional as F
-
-from torch.autograd import Variable
 import numpy as np
+from pytorch_lightning import loggers as pl_loggers
+
+# import lightning.assets.plotter
+
 
 # very buggy - Two instances of pytorch lightning working together
 # set_determinsitic_run()     # Set a universal random seed
 
 if __name__ == "__main__":
     import pytorch_lightning as pl
-    from pytorch_lightning import loggers as pl_loggers
 
     class PointNetCls_light(pl.LightningModule):
 
-        def __init__(self,dataset_loc, classes, feature_transform = False, batchsize=32 \
-                         ,num_points=2500,workers=4, dataset_type = 'shapenet'):
+        def __init__(self, hparams):
             super(PointNetCls_light, self).__init__()
-            self.batchsize = batchsize
-            self.num_points = num_points
-            self.workers = workers
-            self.dataset_type = dataset_type
-            self.feature_transform = feature_transform
-            self.classes = classes
-            self.dataset = dataset_loc
+
+            self.batchsize = hparams.get('batchsize', 32)
+            self.num_points = hparams.get('num_points', 2500)
+            self.workers = hparams.get('workers', 4)
+            self.dataset_type = hparams.get('dataset_type', 'shapenet')
+            self.feature_transform = hparams.get('feature_transform', False)
+            self.classes = hparams['classes']
+            self.dataset = hparams['dataset_loc']
+
+            # self.plotter_class = hparams.get('plotter', False)
+            # self._init_training_assets()
 
             self.feat = mod.PointNetfeat(global_feat=True, feature_transform=self.feature_transform)
             self.fc1 = nn.Linear(1024, 512)
@@ -91,7 +95,7 @@ if __name__ == "__main__":
                                                shuffle=True,
                                                num_workers=int(self.workers))
 
-        # def val_dataloader(self):
+        # def val_dataloader(self): # debugging - dont forget to change to val_dataset
         #     return torch.utils.data.DataLoader(self.val_dataset,
         #                                        batch_size=self.batchsize,
         #                                        num_workers=int(self.workers))
@@ -104,7 +108,7 @@ if __name__ == "__main__":
 
 
         def configure_optimizers(self):
-            optimizer = optim.Adam(self.parameters(), lr=1e-4, betas=(0.9, 0.999))
+            optimizer = optim.Adam(self.parameters(), lr=1e-3, betas=(0.9, 0.999))
             scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.5)
             return [optimizer], [scheduler]
 
@@ -125,7 +129,7 @@ if __name__ == "__main__":
             pred_choice = pred.data.max(1)[1]
             correct = pred_choice.eq(target.data).sum()
             acc = correct.item() / self.batchsize
-            logs = {'loss': loss, 'train_acc': acc}
+            logs = {'train loss': loss, 'train_acc': acc}
             return {'loss': loss, 'log': logs, 'train_acc': acc}
 
         # def validation_step(self, batch, batch_idx):
@@ -173,28 +177,58 @@ if __name__ == "__main__":
             print('\nAvg test loss: ',avg_loss,'\n','Avg test acc: ', test_acc)
             return {'test_loss_mean': avg_loss, 'test_acc_mean': test_acc, 'log': end_log}
 
+        def finalize(self):
+            pass
+            # Called after all epochs, for cleanup
+            # If needed, send the final report via email:
+            # if self.emailer is not None:  # Long enough train, or test only
+            #     if self.nn.current_epoch >= self.hp.MIN_EPOCHS_TO_SEND_EMAIL_RECORD or self.testing_only:
+            #         log.info("Sending zip with experiment specs to configured inbox")
+            #         self.emailer.send_report(self.trainer.final_result_str)
+            #     else:
+            #         log.info("Model has not been trained for enough epochs - skipping attachment send")
+
+            # if self.plt is not None and self.plt.is_alive():
+            #     self.plt.finalize()
+            # if self.tb_sup is not None:
+            #     self.tb_sup.finalize()
+
+            # log.info("Cleaning up GPU memory")
+            # torch.cuda.empty_cache()
 
     # train
     # to open tensorboard, run this command in terminal and open the browser:
     # tensorboard --logdir ./logs/
-
+    ## Define train parameters:
     # full path
     dataset_loc = r'/home/jack/OneDrive/Studies/Undergrad_Project/data/MPI-FAUST/training/registrations'
     # dataset_loc = r'D:\Roee_Yevgeni\pointnet.pytorch\shapenetcore_partanno_segmentation_benchmark_v0\shapenetcore_partanno_segmentation_benchmark_v0'
     # dataset_loc = r'/home/jack/OneDrive/Studies/Undergrad_Project/data/shapenetcore_partanno_segmentation_benchmark_v0'
 
-    logging_loc = r'/home/jack/OneDrive/Studies/Undergrad_Project/data/logs/'
-    tb_logger = pl_loggers.TensorBoardLogger(logging_loc)
+    hp = {
+        "dataset_loc": dataset_loc,
+        "classes": 10,
+        "feature_transform": False,
+        "batchsize": 8,                # for shapenet 32
+        "num_points": 2500,
+        "workers": 4,
+        "dataset_type": 'faust'
+    }
+    seed_everything(42)
 
-    model = PointNetCls_light(dataset_loc, classes=10, feature_transform=False, batchsize=4
-                                         , num_points=2500, workers=4, dataset_type='faust')
-    trainer = pl.Trainer(logger=tb_logger, max_epochs=1, log_save_interval=20, fast_dev_run=False,)# gpus=-1)
+    logging_loc = r'/home/jack/OneDrive/Studies/Undergrad_Project/data/logs/'
+    tb_logger = pl_loggers.TensorBoardLogger(logging_loc, name='pointnet classifier')
+
+    model = PointNetCls_light(hp)
+    trainer = pl.Trainer(logger=tb_logger, max_epochs=5, deterministic=True, log_save_interval=10, row_log_interval=10, fast_dev_run=False,)# gpus=-1)
     trainer.fit(model) # train
+    trainer.test(model)
 
     #test
-    # model = PointNetCls_light.load_from_checkpoint(r'D:\Roee_Yevgeni\pointnet.pytorch\logs\default\version_12\checkpoints\epoch=38.ckpt')
-
-    # trainer.test(model) # test
+    # checkpoint_loc = r'/home/jack/OneDrive/Studies/Undergrad_Project/data/logs/default/version_13/checkpoints/epoch=9.ckpt'
+    # hp['batchsize'] = 1 # for testing
+    # model = PointNetCls_light.load_from_checkpoint(checkpoint_loc, **hp)
+    # trainer.test(model)
 
     # %load_ext tensorboard
     # %tensorboard --logdir lightning_logs/

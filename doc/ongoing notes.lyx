@@ -78,17 +78,50 @@
 \begin_body
 
 \begin_layout Section*
-our pointnet classifier
+Project ongoing notes
+\end_layout
+
+\begin_layout Subsubsection*
+Tentative
+\end_layout
+
+\begin_layout Itemize
+Add plotter for good visualization of classification results
+\end_layout
+
+\begin_layout Itemize
+overfitting? early stopping? cross-validation?
+\end_layout
+
+\begin_layout Subsubsection*
+Done
 \end_layout
 
 \begin_layout Enumerate
-added FAUST dataset loader to dataset.py.
- train seems to run but not reducing the loss ( a small amount of data?
- )
+Added FAUST dataset loader to dataset.py
 \end_layout
 
 \begin_layout Enumerate
-s
+Found original article git repository
+\end_layout
+
+\begin_layout Enumerate
+Fix tensorboard not showing train logging
+\end_layout
+
+\begin_layout Enumerate
+Succesfully train the classifier with faust dataset by choosing the right
+ HP
+\end_layout
+
+\begin_layout Enumerate
+Removed two learned matrix transforms from pointnet classifier as done by
+ original paper
+\end_layout
+
+\begin_layout Enumerate
+Normalizing faust data before entering classifier (slightly better training
+ graph)
 \end_layout
 
 \end_body

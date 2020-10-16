@@ -242,8 +242,9 @@ class FaustDataset(data.Dataset):
         self.f = f
         self.rgb = rgb
 
-        # # center and scale - do we need this?
-        # v = v - np.expand_dims(np.mean(v, axis=0), 0)  # center
+        # # center and scale
+        v = v - np.expand_dims(np.mean(v, axis=0), 0)  # center
+
         # dist = np.max(np.sqrt(np.sum(v ** 2, axis=1)), 0)
         # v = v / dist  # scale
 

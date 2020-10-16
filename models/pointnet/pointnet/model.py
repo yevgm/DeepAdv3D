@@ -6,7 +6,6 @@ import torch.utils.data
 from torch.autograd import Variable
 import numpy as np
 import torch.nn.functional as F
-import pytorch_lightning as pl
 
 class STN3d(nn.Module):
     def __init__(self):
@@ -101,10 +100,11 @@ class PointNetfeat(nn.Module):
 
     def forward(self, x):
         n_pts = x.size()[2]
-        trans = self.stn(x)
-        x = x.transpose(2, 1)
-        x = torch.bmm(x, trans)
-        x = x.transpose(2, 1)
+        # trans = self.stn(x)
+        # x = x.transpose(2, 1)
+        # x = torch.bmm(x, trans)
+        # x = x.transpose(2, 1)
+        trans = None
         x = F.relu(self.bn1(self.conv1(x)))
 
         if self.feature_transform:
