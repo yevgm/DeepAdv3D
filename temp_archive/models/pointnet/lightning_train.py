@@ -33,9 +33,12 @@ if __name__ == "__main__":
             self.feature_transform = hparams.get('feature_transform', False)
             self.classes = hparams['classes']
             self.dataset = hparams['dataset_loc']
+<<<<<<< HEAD:temp_archive/models/pointnet/lightning_train.py
 
             # self.plotter_class = hparams.get('plotter', False)
             # self._init_training_assets()
+=======
+>>>>>>> de0a54e05ec35ba32af815b09617cbba8097b650:models/pointnet.pytorch-master/lightning_train.py
 
             self.feat = mod.PointNetfeat(global_feat=True, feature_transform=self.feature_transform)
             self.fc1 = nn.Linear(1024, 512)
@@ -202,6 +205,7 @@ if __name__ == "__main__":
     ## Define train parameters:
     # full path
     dataset_loc = r'/home/jack/OneDrive/Studies/Undergrad_Project/data/MPI-FAUST/training/registrations'
+    dataset_loc = r'C:\Users\RoeePC\Desktop\proj\DeepAdv3D\data\MPI-FAUST\training\registrations'  # FAUST roee's PC
     # dataset_loc = r'D:\Roee_Yevgeni\pointnet.pytorch\shapenetcore_partanno_segmentation_benchmark_v0\shapenetcore_partanno_segmentation_benchmark_v0'
     # dataset_loc = r'/home/jack/OneDrive/Studies/Undergrad_Project/data/shapenetcore_partanno_segmentation_benchmark_v0'
 
@@ -209,11 +213,16 @@ if __name__ == "__main__":
         "dataset_loc": dataset_loc,
         "classes": 10,
         "feature_transform": False,
+<<<<<<< HEAD:temp_archive/models/pointnet/lightning_train.py
         "batchsize": 8,                # for shapenet 32
+=======
+        "batchsize": 4,
+>>>>>>> de0a54e05ec35ba32af815b09617cbba8097b650:models/pointnet.pytorch-master/lightning_train.py
         "num_points": 2500,
         "workers": 4,
         "dataset_type": 'faust'
     }
+<<<<<<< HEAD:temp_archive/models/pointnet/lightning_train.py
     seed_everything(42)
 
     logging_loc = r'/home/jack/OneDrive/Studies/Undergrad_Project/data/logs/'
@@ -229,6 +238,23 @@ if __name__ == "__main__":
     # hp['batchsize'] = 1 # for testing
     # model = PointNetCls_light.load_from_checkpoint(checkpoint_loc, **hp)
     # trainer.test(model)
+=======
+
+    # logging_loc = r'/home/jack/OneDrive/Studies/Undergrad_Project/data/logs/'
+    logging_loc = r'C:\Users\RoeePC\Desktop\proj\DeepAdv3D\data\logs'
+    tb_logger = pl_loggers.TensorBoardLogger(logging_loc)
+
+    # model = PointNetCls_light(hp)
+    trainer = pl.Trainer(logger=tb_logger, max_epochs=10, log_save_interval=20, fast_dev_run=False, gpus=-1)
+    # trainer.fit(model) # train
+
+    #test
+    # checkpoint_loc = r'/home/jack/OneDrive/Studies/Undergrad_Project/data/logs/default/version_13/checkpoints/epoch=9.ckpt'
+    checkpoint_loc = r'C:\Users\RoeePC\Desktop\proj\DeepAdv3D\data\logs\default\version_0\checkpoints\epoch=89.ckpt'
+    hp['batchsize'] = 1  # for testing
+    model = PointNetCls_light.load_from_checkpoint(checkpoint_loc, **hp)
+    trainer.test(model)
+>>>>>>> de0a54e05ec35ba32af815b09617cbba8097b650:models/pointnet.pytorch-master/lightning_train.py
 
     # %load_ext tensorboard
     # %tensorboard --logdir lightning_logs/

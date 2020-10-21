@@ -6,6 +6,10 @@ import torch.utils.data
 from torch.autograd import Variable
 import numpy as np
 import torch.nn.functional as F
+<<<<<<< HEAD:temp_archive/models/pointnet/pointnet/model.py
+=======
+# import pytorch_lightning as pl
+>>>>>>> de0a54e05ec35ba32af815b09617cbba8097b650:models/pointnet.pytorch-master/pointnet/model.py
 
 class STN3d(nn.Module):
     def __init__(self):
