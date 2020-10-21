@@ -1,3 +1,13 @@
-./data/
-./.idea/
-./__pychache__
+**/__pycache__
+**/.vscode
+.vs/**
+**/desktop.ini
+**/.ipynb_checkpoints
+model_data/**
+datasets/**
+experiments/**
+src/ChamferDistancePytorch/**
+src/KNN_CUDA
+coma/**
+.idea/**
+.ipynb_checkpoints/**

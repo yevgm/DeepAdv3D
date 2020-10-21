@@ -124,5 +124,38 @@ Normalizing faust data before entering classifier (slightly better training
  graph)
 \end_layout
 
+\begin_layout Section*
+Original paper git code
+\end_layout
+
+\begin_layout Subsubsection*
+Tentative
+\end_layout
+
+\begin_layout Itemize
+understand how to create adversarial examples with the paper's original
+ git
+\end_layout
+
+\begin_layout Itemize
+add pyvista support
+\end_layout
+
+\begin_layout Itemize
+next steps?
+\end_layout
+
+\begin_layout Subsubsection*
+Done
+\end_layout
+
+\begin_layout Enumerate
+Added a way to train faust dataset on original pointnet classifier
+\end_layout
+
+\begin_layout Enumerate
+Train a pointnet network with faust dataset
+\end_layout
+
 \end_body
 \end_document
