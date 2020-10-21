@@ -16,11 +16,11 @@
 #---------------------------------------------------------------------------------------------#
 # Opens and activates a conda env for Python 3.7.6 named DeepShape
 git config --global user.name "Man Yevgeniy"
-git config --global user.email "yevgenimen@camous.technion.ac.il"
+git config --global user.email "yevgenimen@campus.technion.ac.il"
 git remote set-url origin https://github.com/yevgm/DeepAdv3D
 eval "$(conda shell.bash hook)"
 conda update -y -n base -c defaults conda
-conda create -y -n DeepAdv3D python=3.7.0
+conda create -y -n DeepAdv3D python=3.8.0
 conda activate DeepAdv3D
 #---------------------------------------------------------------------------------------------#
 #                                     	Primary Dependencies
@@ -57,7 +57,7 @@ pip install yagmail
 pip install meshio
 pip install tqdm
 pip install plyfile
-
+pip install sklearn
 
 conda install -y -c open3d-admin open3d # Last due to problems
 # TO REMOVE: 

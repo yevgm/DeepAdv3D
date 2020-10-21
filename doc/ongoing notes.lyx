@@ -133,16 +133,19 @@ Tentative
 \end_layout
 
 \begin_layout Itemize
-understand how to create adversarial examples with the paper's original
- git
+change plotly to vista (Ido's code) for good viualization
 \end_layout
 
 \begin_layout Itemize
-add pyvista support
+Add plotter for background running
 \end_layout
 
 \begin_layout Itemize
-next steps?
+Create good quality visualizations for our kickoff meeting
+\end_layout
+
+\begin_layout Itemize
+Fix setup.sh to create an environment automatically
 \end_layout
 
 \begin_layout Subsubsection*
@@ -155,6 +158,24 @@ Added a way to train faust dataset on original pointnet classifier
 
 \begin_layout Enumerate
 Train a pointnet network with faust dataset
+\end_layout
+
+\begin_layout Enumerate
+Enable plotly visualization in jupyter notebook
+\end_layout
+
+\begin_layout Enumerate
+understand how to create adversarial examples with the paper's original
+ git
+\end_layout
+
+\begin_layout Enumerate
+create some nice adversarial examples to show Ido, Talking about kickoff
+ meeting
+\end_layout
+
+\begin_layout Enumerate
+major git repository fixes
 \end_layout
 
 \end_body

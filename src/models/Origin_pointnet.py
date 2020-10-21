@@ -6,7 +6,6 @@ import torch.utils.data
 from torch.autograd import Variable
 import numpy as np
 import torch.nn.functional as F
-import pytorch_lightning as pl
 
 class STN3d(nn.Module):
     def __init__(self):
@@ -39,6 +38,7 @@ class STN3d(nn.Module):
         x = self.fc3(x)
 
         iden = Variable(torch.from_numpy(np.array([1,0,0,0,1,0,0,0,1]).astype(np.float32))).view(1,9).repeat(batchsize,1)
+        iden = iden.to(x.device)
         x = x + iden
         x = x.view(-1, 3, 3)
         return x
