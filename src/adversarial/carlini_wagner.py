@@ -84,7 +84,8 @@ class CWAdversarialExample(AdversarialExample):
     regularization_coeff:float,
     minimization_iterations:int,
     learning_rate:float,    
-    additional_model_args:dict):
+    additional_model_args:dict,
+    true_y:torch.Tensor): # fixed a bug of unexpected variable
 
     super().__init__(
         pos=pos, edges=edges, faces=faces,
@@ -111,6 +112,7 @@ class CWAdversarialExample(AdversarialExample):
     self.similarity_loss = None
     self.regularization_loss = lambda :self._zero
     self._zero = torch.tensor(0,dtype=self.dtype_float,device=self.device)
+    self.true_y = true_y
 
   @property
   def perturbed_pos(self):
@@ -122,7 +124,7 @@ class CWAdversarialExample(AdversarialExample):
     self.logger.reset()
     
     # compute gradient w.r.t. the perturbation
-    optimizer = torch.optim.Adam([self.perturbation.r], lr=self.learning_rate,betas=(0.5,0.75))
+    optimizer = torch.optim.Adam([self.perturbation.r], lr=self.learning_rate,betas=(0.9, 0.999))#betas=(0.5,0.75))
 
     if usetqdm is None or usetqdm == False:
       iterations =  range(self.minimization_iterations)
@@ -156,12 +158,16 @@ class CWAdversarialExample(AdversarialExample):
             flag= True
       else: 
         counter = patience
-
-      if flag and not is_successful:
+      # Debug:
+      # flag=True
+      # is_successful = False
+      if (flag and not is_successful):
         self.perturbation.reset() # NOTE required to clean cache
         self.perturbation.r.data = last_r
         break;     # cutoff policy used to speed-up the tests
-
+      if (self.true_y == self.target):
+          print('Given mesh class is equal to the target, continuing..')
+          break
       # backpropagate
       loss.backward()
       optimizer.step()
@@ -240,6 +246,9 @@ class CWBuilder(Builder):
       # get perturbation
       r = adex.perturbation.r
       adex.adversarial_loss().item()
+
+      # add true classs to adversarial object
+      adex.y = self.adex_data['true_y']
 
       # update best estimation
       if adex.is_successful:
@@ -538,7 +547,7 @@ def generate_adversarial_example(
     similarity_loss="local_euclidean", 
     regularization="none", **args) -> CWAdversarialExample:
     
-    builder = CWBuilder(search_iterations).set_mesh(mesh.pos,mesh.edge_index.t(), mesh.face.t())
+    builder = CWBuilder(search_iterations).set_mesh(mesh.pos,mesh.edge_index.t(), mesh.face.t(), mesh.y)
     builder.set_classifier(classifier).set_target(target)
 
     # set type of perturbation

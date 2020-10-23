@@ -60,7 +60,7 @@ def plot_mesh(v, f=None, n=None, strategy='mesh', grid_on=False, clr='lightcoral
 def plot_mesh_montage(vb, fb=None, nb=None, strategy='mesh', labelb=None, grid_on=False, clrb='lightcoral',
                       normal_clr='lightblue', smooth_shade_on=True, show_edges=False, normal_scale=1, auto_close=True,
                       camera_pos=((0, 0, 5.5), (0, 0, 0), (0, 1, 0)), lighting=None,link_plots=True,ext_func=None,
-                      opacity=1.0, bar=True, slabelb=None):
+                      opacity=1.0, bar=True, slabelb=None, success=None, cmap='rainbow'):
     """
     :param vb: tensor | list - [b x nv x 3] batch of meshes or list of length b with tensors [nvx3]
     :param fb: tensor | list | None - (optional) [b x nf x 3]
@@ -125,11 +125,12 @@ def plot_mesh_montage(vb, fb=None, nb=None, strategy='mesh', labelb=None, grid_o
                 faces = f
                 colors = clr
                 Opacity = opac
+                labelC = success[i] if success is not None else None
 
             _, m = add_mesh(p, v=verts, f=faces, n=n, strategy=strategy, label=label, grid_on=grid_on,
-                            normal_scale=normal_scale, camera_pos=camera_pos,
+                            normal_scale=normal_scale, camera_pos=camera_pos, cmap=cmap,
                             clr=colors, normal_clr=normal_clr, smooth_shade_on=smooth_shade_on, show_edges=show_edges,
-                            lighting=lighting, opacity=Opacity, bar=cbar, slabel=slabel)
+                            lighting=lighting, opacity=Opacity, bar=cbar, slabel=slabel, label_color=labelC)
 
         if ext_func is not None:
             ext_func(p,m,i)
@@ -228,7 +229,7 @@ def add_vectorfield(p, v, f, vf, clr='lightblue', normal_scale=1, colormap='rain
 def add_mesh(p, v, f=None, n=None, strategy='spheres', grid_on=False, clr='lightcoral',
              normal_clr='lightblue', label=None, smooth_shade_on=True, show_edges=False, cmap='rainbow',
              normal_scale=1, camera_pos=((0, 0, 5.5), (0, 0, 0), (0, 1.5, 0)), lines=None, opacity=1.0,
-             point_size=None, lighting=None, eye_dome=False, bar=True, slabel=''):
+             point_size=None, lighting=None, eye_dome=False, bar=True, slabel='', label_color=None):
     # TODO - Clean this shit function up
     # Align arrays:
     cpu = torch.device("cpu")
@@ -268,7 +269,12 @@ def add_mesh(p, v, f=None, n=None, strategy='spheres', grid_on=False, clr='light
         clr_str = clr
         rgb = True
     else:
-        clr_str = 'w'
+        if (label_color is not None) and (label_color==1):
+            clr_str = 'g'
+        elif (label_color is not None) and (label_color==0):
+            clr_str = 'r'
+        else:
+            clr_str = 'w'
         scalars = clr
         rgb = isinstance(clr, (np.ndarray, np.generic)) and clr.squeeze().ndim == 2  # RGB Vector
     # TODO - use a kwargs approach to solve messiness
@@ -277,7 +283,7 @@ def add_mesh(p, v, f=None, n=None, strategy='spheres', grid_on=False, clr='light
         d_light = {'ambient': 0.0, 'diffuse': 1.0, 'specular': 0.0, 'specular_power': 100.0}
     else:
         # Our Default Lighting
-        d_light = {'ambient': 0.3, 'diffuse': 0.6, 'specular': 1, 'specular_power': 5}
+        d_light = {'ambient': 0.2, 'diffuse': 0.6, 'specular': 1, 'specular_power': 2}
 
     # scalar-bar arguments
     sargs = dict(height=0.45, vertical=True, position_x=0.15, position_y=0.15, width=0.05)
@@ -302,7 +308,7 @@ def add_mesh(p, v, f=None, n=None, strategy='spheres', grid_on=False, clr='light
     # Book-keeping:
     if label is not None and label:
         siz = 0.2
-        p.add_legend(labels=[(label, clr_str)], size=[siz, siz / 2])
+        p.add_legend(labels=[(label, clr_str)], size=[siz, siz / 2], bcolor=(1, 1, 1))
     if grid_on:
         p.show_grid()
 

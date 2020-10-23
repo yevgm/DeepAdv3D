@@ -89,10 +89,11 @@ class Builder(object):
     super().__init__()
     self.adex_data = dict()
 
-  def set_mesh(self, pos, edges, faces):
+  def set_mesh(self, pos, edges, faces, true_y):
     self.adex_data["pos"] = pos
     self.adex_data["edges"] = edges
     self.adex_data["faces"] = faces
+    self.adex_data["true_y"] = true_y
     return self
     
   def set_target(self, t:int):
