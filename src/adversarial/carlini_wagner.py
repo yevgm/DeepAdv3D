@@ -419,9 +419,9 @@ class LocalEuclideanSimilarity(LossFunction):
         return dist_loss
 
 try:
-  from knn_cuda import KNN
+    from knn_cuda import KNN
 
-  def _grad_distances(ref, query, n, k, knn) -> torch.Tensor: #NOTE output tensor shape [n,k,3]
+    def _grad_distances(ref, query, n, k, knn) -> torch.Tensor: #NOTE output tensor shape [n,k,3]
         ref = ref.view(1,n,3)
         query = query.view(1,n,3)
         d, I = knn(ref=ref, query=query)
@@ -429,7 +429,7 @@ try:
         #print((d.view(-1) - diff.norm(p=2,dim=-1).view(-1)).abs().max()) #NOTE check if correct
         return diff.view(n,k,3), I
 
-  class RAOChamferSimilarity(LossFunction):
+    class RAOChamferSimilarity(LossFunction):
       def __init__(self, adv_example:AdversarialExample):
           super().__init__(adv_example)
           self.knn = KNN(1, transpose_mode=True)
@@ -437,12 +437,12 @@ try:
       def __call__(self):
         pos, ppos = self.adv_example.pos, self.adv_example.perturbed_pos
         n, k = self.adv_example.vertex_count, 1
-        
+
         diff, _ = _grad_distances(ref=pos,query=ppos,n=n,k=1, knn=self.knn)
-        term = torch.bmm(diff.view(n*k,1,3), diff.view(n*k,3,1)).mean() 
+        term = torch.bmm(diff.view(n*k,1,3), diff.view(n*k,3,1)).mean()
         return term
 
-  class RAOSmoothSimilarity(LossFunction):
+    class RAOSmoothSimilarity(LossFunction):
       def __init__(self, adv_example:AdversarialExample, K:int, wp_threshold_coeff:float=1):
           super().__init__(adv_example)
           self.K = K
@@ -452,7 +452,7 @@ try:
       def __call__(self):
         pos, ppos = self.adv_example.pos, self.adv_example.perturbed_pos
         n, k = self.adv_example.vertex_count, self.K
-        
+
         diff, _ = _grad_distances(ref=pos, query=ppos,n=n, k=k, knn=self.knn)
         dists = torch.bmm(diff.view(n*k,1,3), diff.view(n*k,3,1)).view(n,k).mean(dim=1)
         wp_mask = dists >= self.wp_threshold_coeff*dists.std()
@@ -460,7 +460,7 @@ try:
         term = dists_masked.mean()
         return term
 
-  class ChamferSimilarity(LossFunction):
+    class ChamferSimilarity(LossFunction):
       def __init__(self, adv_example:AdversarialExample):
           super().__init__(adv_example)
           self.knn = KNN(1, transpose_mode=True)
@@ -468,15 +468,15 @@ try:
       def __call__(self):
         pos, ppos = self.adv_example.pos, self.adv_example.perturbed_pos
         n, k = self.adv_example.vertex_count, 1
-        
+
         diff, _ = _grad_distances(ref=pos,query=ppos,n=n,k=1, knn=self.knn)
-        term1 = torch.bmm(diff.view(n*k,1,3), diff.view(n*k,3,1)).mean() 
+        term1 = torch.bmm(diff.view(n*k,1,3), diff.view(n*k,3,1)).mean()
 
         diff, _ = _grad_distances(ref=ppos,query=pos,n=n,k=k, knn=self.knn)
         term2 = torch.bmm(diff.view(n*k,1,3), diff.view(n*k,3,1)).mean()
         return term1 + term2
 
-  class HausdorffSimilarity(LossFunction):
+    class HausdorffSimilarity(LossFunction):
       def __init__(self, adv_example:AdversarialExample):
           super().__init__(adv_example)
           self.knn = KNN(1, transpose_mode=True)
@@ -489,39 +489,40 @@ try:
         loss = torch.bmm(diff.view(n*k,1,3), diff.view(n*k,3,1)).max()
         return loss
 
-  class CurvatureSimilarity(LossFunction):
-    def __init__(self, adv_example:AdversarialExample, neighbourhood=30):
-        super().__init__(adv_example)
-        self.k = neighbourhood
-        self.knn = KNN(self.k+1, transpose_mode=True)
-        self.nn = KNN(1, transpose_mode=True)
-        self.normals = utils.misc.pos_normals(adv_example.pos, adv_example.faces)
-        self.curv = self._curvature(adv_example.pos, self.normals)
+    class CurvatureSimilarity(LossFunction):
+        def __init__(self, adv_example:AdversarialExample, neighbourhood=30):
+            super().__init__(adv_example)
+            self.k = neighbourhood
+            self.knn = KNN(self.k+1, transpose_mode=True)
+            self.nn = KNN(1, transpose_mode=True)
+            self.normals = utils.misc.pos_normals(adv_example.pos, adv_example.faces)
+            self.curv = self._curvature(adv_example.pos, self.normals)
 
-    def _curvature(self, pos, normals):
-      n, k = self.adv_example.vertex_count, self.k
-      diff, knn_idx = _grad_distances(ref=pos, query=pos,n=n, k=k+1, knn=self.knn)
-      normalized_diff = torch.nn.functional.normalize(diff, p=2, dim=-1)  # NOTE shape [N,k+1,3]
+        def _curvature(self, pos, normals):
+          n, k = self.adv_example.vertex_count, self.k
+          diff, knn_idx = _grad_distances(ref=pos, query=pos,n=n, k=k+1, knn=self.knn)
+          normalized_diff = torch.nn.functional.normalize(diff, p=2, dim=-1)  # NOTE shape [N,k+1,3]
 
-      cosine_sim = torch.bmm(
-        normalized_diff.view(n, k+1, 3),
-        normals.view(n, 3, 1))
+          cosine_sim = torch.bmm(
+            normalized_diff.view(n, k+1, 3),
+            normals.view(n, 3, 1))
 
-      abs_cosine_sim = cosine_sim.abs().view(n, k+1)
-      curvature = abs_cosine_sim[:,1:].mean(dim=1) #remove first column (all zeros) and compute the cosine mean for each column
-      return curvature
+          abs_cosine_sim = cosine_sim.abs().view(n, k+1)
+          curvature = abs_cosine_sim[:,1:].mean(dim=1) #remove first column (all zeros) and compute the cosine mean for each column
+          return curvature
 
-    def __call__(self):
-      pos, ppos = self.adv_example.pos, self.adv_example.perturbed_pos
-      n = self.adv_example.vertex_count
+        def __call__(self):
+          pos, ppos = self.adv_example.pos, self.adv_example.perturbed_pos
+          n = self.adv_example.vertex_count
 
-      _, nn_idx = self.nn(ref=pos.view(1,n,3), query=ppos.view(1,n,3))
-      perturbed_normals = self.normals[nn_idx.view(-1),:]
-      diff = self.curv - self._curvature(ppos, perturbed_normals)
-      loss = (diff**2).mean()
-      return loss
+          _, nn_idx = self.nn(ref=pos.view(1,n,3), query=ppos.view(1,n,3))
+          perturbed_normals = self.normals[nn_idx.view(-1),:]
+          diff = self.curv - self._curvature(ppos, perturbed_normals)
+          loss = (diff**2).mean()
+          return loss
 
-  class GeoA3Similarity(LossFunction):
+
+    class GeoA3Similarity(LossFunction):
       def __init__(self, adv_example:AdversarialExample, lambda1:float=0.1, lambda2:float=1, neighbourhood:int=16):
           super().__init__(adv_example)
           self.curvature_loss = CurvatureSimilarity(adv_example=adv_example, neighbourhood=neighbourhood)
@@ -536,6 +537,7 @@ try:
 
 except ImportError as e:
     pass
+
 
 #==============================================================================
 #------------------------------------------------------------------------------
