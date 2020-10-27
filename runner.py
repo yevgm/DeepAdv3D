@@ -239,10 +239,10 @@ if __name__ == "__main__":
         CWBuilder.REG_COEFF: 15,
         LowbandPerturbation.EIGS_NUMBER: 40}
     hyperParams = {
-            'search_iterations': 5,
+            'search_iterations': 1,
             'lowband_perturbation' : True,
             'adversarial_loss' : "carlini_wagner",
-            'similarity_loss' : "local_euclidean"}
+            'similarity_loss' : "local_euclidean"} # local_euclidean
 
     example_list = find_perturbed_shape('rand', testdata, model, CWparams, **hyperParams)  # rand/all at first param
 
