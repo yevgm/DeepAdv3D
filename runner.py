@@ -14,8 +14,9 @@ import pyvista as pv
 from torch import nn
 
 # variable definitions
-REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath('__file__')),".."))
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath('__file__')),""))  # need ".." in linux
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+# DEVICE = torch.device("cpu")
 SRC_DIR = os.path.join(REPO_ROOT,"src")
 FAUST = os.path.join(REPO_ROOT,"datasets/faust")
 PARAMS_FILE = os.path.join(REPO_ROOT, "model_data/FAUST10_pointnet.pt")
@@ -105,7 +106,7 @@ def show_perturbation(example_list):
     clist = [torch.zeros_like(color)+gt_const_min, color, [torch.zeros_like(color)+gt_const_mid, color]]
     Opacitylist = [1, 1, [0.35, 1]]
     plot_mesh_montage(vlist, fb=flist, clrb=clist, labelb=['Ground Truth', 'Perturbed', 'Both'],
-                      slabelb=[ 'GT', 'L2 difference', 'L2 difference'], lighting=1,
+                      slabelb=[ 'GT', 'L2 difference', 'L2 difference'],
                       opacity=Opacitylist, cmap='YlOrRd')
 
 def show_all_perturbations(example_list):
@@ -136,7 +137,7 @@ def show_all_perturbations(example_list):
 
     # Plot all:
     plot_mesh_montage(perturbed_l, fb=faces_l, clrb=color_l, labelb=target_l,
-                      lighting=1, success=success_l, cmap='YlOrRd') #slabelb=original_classes
+                      success=success_l, cmap='YlOrRd') # slabelb=original_classes  ,lightning = 1 for oil
 
 def find_perturbed_shape(to_class, testdata, model, params, **hyperParams):
     '''
@@ -169,7 +170,7 @@ def find_perturbed_shape(to_class, testdata, model, params, **hyperParams):
 
     example_list = []
     #Debug - reduce number or classes
-    # nclasses = 5
+    #nclasses = 3
     for gt_class in np.arange(0, nclasses, 1):
         for adv_target in np.arange(0, nclasses, 1):
             # search for adversarial example
@@ -195,6 +196,7 @@ def find_perturbed_shape(to_class, testdata, model, params, **hyperParams):
 
 if __name__ == "__main__":
     model = PointNetCls(k=10, feature_transform=False)
+    model = model.to(DEVICE)
     # print(model)
     trainLoader,testLoader, traindata, testdata = load_datasets(train_batch=8, test_batch=20)
 
@@ -231,7 +233,7 @@ if __name__ == "__main__":
 
     CWparams = {
         CWBuilder.USETQDM: True,
-        CWBuilder.MIN_IT: 150,
+        CWBuilder.MIN_IT: 200,
         CWBuilder.LEARN_RATE: 1e-4,
         CWBuilder.ADV_COEFF: 1,
         CWBuilder.REG_COEFF: 15,
@@ -242,7 +244,7 @@ if __name__ == "__main__":
             'adversarial_loss' : "carlini_wagner",
             'similarity_loss' : "local_euclidean"}
 
-    example_list = find_perturbed_shape('rand', testdata, model, CWparams, **hyperParams)
+    example_list = find_perturbed_shape('rand', testdata, model, CWparams, **hyperParams)  # rand/all at first param
 
     if len(example_list) == 1:
         # show the original shape, the perturbed figure and both of them overlapped
