@@ -12,8 +12,9 @@ import torch.nn.functional as func
 import random
 
 # variable definitions
-REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath('__file__')),".."))
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath('__file__')),""))  # need ".." in linux
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+# DEVICE = torch.device("cpu")
 SRC_DIR = os.path.join(REPO_ROOT,"src")
 FAUST = os.path.join(REPO_ROOT,"datasets/faust")
 PARAMS_FILE = os.path.join(REPO_ROOT, "model_data/FAUST10_pointnet.pt")
@@ -76,6 +77,7 @@ def show_model_accuracy(PARAMS_FILE,model):
     print('test mean loss:', test_mean_loss, ' test_accuracy:', test_accuracy)
 
 
+
 def find_perturbed_shape(to_class, testdata, model, params, **hyperParams):
     '''
     to_class = 'rand'/'all' choose how many output shapes to find
@@ -107,7 +109,8 @@ def find_perturbed_shape(to_class, testdata, model, params, **hyperParams):
 
     example_list = []
     #Debug - reduce number or classes
-    nclasses = 2
+
+    #nclasses = 3
     for gt_class in np.arange(0, nclasses, 1):
         for adv_target in np.arange(0, nclasses, 1):
             # search for adversarial example
@@ -131,6 +134,7 @@ def find_perturbed_shape(to_class, testdata, model, params, **hyperParams):
 
 if __name__ == "__main__":
     model = PointNetCls(k=10, feature_transform=False)
+    model = model.to(DEVICE)
     # print(model)
     trainLoader,testLoader, traindata, testdata = load_datasets(train_batch=8, test_batch=20)
 
@@ -178,9 +182,11 @@ if __name__ == "__main__":
             'adversarial_loss' : "carlini_wagner",
             'similarity_loss' : "local_euclidean"}
 
-    example_list = find_perturbed_shape('all', testdata, model, CWparams, **hyperParams)
+
+    example_list = find_perturbed_shape('all', testdata, model, CWparams, **hyperParams) # rand/all at first param
 
     op.save_results(example_list)
+
 
     if len(example_list) == 1:
         # show the original shape, the perturbed figure and both of them overlapped
