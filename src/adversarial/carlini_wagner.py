@@ -187,6 +187,8 @@ class CWBuilder(Builder):
     MIN_IT = "minimization_iterations"
     LEARN_RATE = "learning_rate"
     MODEL_ARGS = "additional_model_args"
+    K_nn = "k_nearest_neighbors"
+    NN_CUTOFF = "knn_cutoff_parameter"
 
     def __init__(self, search_iterations=1):
         super().__init__()
@@ -224,6 +226,8 @@ class CWBuilder(Builder):
         self.adex_data[CWBuilder.REG_COEFF] = args.get(CWBuilder.REG_COEFF, 1)
         self.adex_data[CWBuilder.LEARN_RATE] = args.get(CWBuilder.LEARN_RATE, 1e-3)
         self.adex_data[CWBuilder.MODEL_ARGS] = args.get(CWBuilder.MODEL_ARGS, dict())
+        self.K_nn = args.get(CWBuilder.K_nn, 140)
+        self.cutoff = args.get(CWBuilder.NN_CUTOFF, 40)
 
         # exponential search variables
         start_adv_coeff = self.adex_data[CWBuilder.ADV_COEFF]
@@ -247,7 +251,7 @@ class CWBuilder(Builder):
 
             adex.adversarial_loss = self._adversarial_loss_factory(adex)
             adex.perturbation = self._perturbation_factory(adex)
-            adex.similarity_loss = self._similarity_loss_factory(adex)
+            adex.similarity_loss = self._similarity_loss_factory(adex, K=self.K_nn, cutoff=self.cutoff)
             adex.regularization_loss = self._regularizer_factory(adex)
             adex.logger = self._logger_factory(adex)
             adex.compute(usetqdm=usetqdm)
@@ -414,14 +418,15 @@ class L2Similarity(LossFunction):
 
 
 class LocalEuclideanSimilarity(LossFunction):
-    def __init__(self, adv_example: AdversarialExample, K: int = 140):  # was 30
+    def __init__(self, adv_example: AdversarialExample, K: int = 140,
+                 cutoff: int = 40):  # was 30
         super().__init__(adv_example)
         self.neighborhood = K
         self.kNN = utils.misc.kNN(
             pos=self.adv_example.pos,
             edges=self.adv_example.edges,
             neighbors_num=self.neighborhood,
-            cutoff=40)  # was 5 TODO try to find a way to automatically compute cut-off
+            cutoff=cutoff)  # was 5 TODO try to find a way to automatically compute cut-off
 
     def __call__(self) -> torch.Tensor:
         n = self.adv_example.vertex_count

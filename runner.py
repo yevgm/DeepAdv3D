@@ -1,6 +1,7 @@
 # built-in libraries
 import sys
 import os
+from datetime import datetime
 
 # third party libraries
 import matplotlib
@@ -12,7 +13,7 @@ import torch.nn.functional as func
 import random
 
 # variable definitions
-REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath('__file__')),""))  # need ".." in linux
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath('__file__')),".."))  # need ".." in linux
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 # DEVICE = torch.device("cpu")
 SRC_DIR = os.path.join(REPO_ROOT,"src")
@@ -78,7 +79,7 @@ def show_model_accuracy(PARAMS_FILE,model):
 
 
 
-def find_perturbed_shape(to_class, testdata, model, params, **hyperParams):
+def find_perturbed_shape(to_class, testdata, model, params, max_dim=None, **hyperParams):
     '''
     to_class = 'rand'/'all' choose how many output shapes to find
     model = attacked classification torch model
@@ -107,10 +108,11 @@ def find_perturbed_shape(to_class, testdata, model, params, **hyperParams):
     else:
         assert False, 'Provided bad to_class argument'
 
-    example_list = []
-    #Debug - reduce number or classes
+    #Debug - reduce number of classes
+    if (max_dim is not None) & (to_class == 'all'):
+        nclasses = max_dim
 
-    #nclasses = 3
+    example_list = []
     for gt_class in np.arange(0, nclasses, 1):
         for adv_target in np.arange(0, nclasses, 1):
             # search for adversarial example
@@ -169,23 +171,32 @@ if __name__ == "__main__":
     model.eval()
     # show_model_accuracy(PARAMS_FILE, model)
 
+    # ------------------------ hyper parameters ------------------------------
+    # ------------------------------------------------------------------------
     CWparams = {
         CWBuilder.USETQDM: True,
         CWBuilder.MIN_IT: 200,
         CWBuilder.LEARN_RATE: 1e-4,
         CWBuilder.ADV_COEFF: 1,
         CWBuilder.REG_COEFF: 15,
+        CWBuilder.K_nn: 140,
+        CWBuilder.NN_CUTOFF: 40,
         LowbandPerturbation.EIGS_NUMBER: 10} # 10 is good
     hyperParams = {
             'search_iterations': 1,
             'lowband_perturbation' : True,
             'adversarial_loss' : "carlini_wagner",
             'similarity_loss' : "local_euclidean"}
+    generate_examples = 2 # how many potential random examples to create in output folder
+    # ------------------------------------------------------------------------
 
-
-    example_list = find_perturbed_shape('all', testdata, model, CWparams, **hyperParams) # rand/all at first param
-
-    op.save_results(example_list)
+    now = datetime.now()
+    d = now.strftime("_%b-%d-%Y_%H-%M-%S")
+    for example in np.arange(0, generate_examples, 1):
+        print('------- example number '+str(example)+' --------')
+        example_list = find_perturbed_shape('rand', testdata, model, CWparams,
+                                            **hyperParams, max_dim=2)
+        op.save_results(example_list, batch_time=d)
 
 
     if len(example_list) == 1:

@@ -11,6 +11,13 @@
 # [4] Run this script by opening up the GitBash shell in the code and running: 
 #     Command: bash ./requirements.txt
 # [5] Install support for \\gip-main\data on Z: and \\132.68.39.11\gipfs on R:  # 132.68.39.13
+#
+# - if conda commands isn't recognised, you need to add to the PATH variable conda dir:
+#   set PATH=%PATH%;"C:\Users\Anaconda3";"C:\Users\Anaconda3\Scripts" in powershell
+# [6] Datasets:
+#	    -FAUST: http://faust.is.tue.mpg.de/
+# [7] create a folder datasets/faust/raw <- put here the test data
+# [8] create model_data folder and put there the network's variables
 #---------------------------------------------------------------------------------------------#
 #                                       	
 #---------------------------------------------------------------------------------------------#
