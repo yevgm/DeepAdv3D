@@ -159,8 +159,8 @@ class CWAdversarialExample(AdversarialExample):
       else: 
         counter = patience
       # Debug:
-      # flag=True
-      # is_successful = False
+      flag=True
+      is_successful = False
       if (flag and not is_successful):
         self.perturbation.reset() # NOTE required to clean cache
         self.perturbation.r.data = last_r
@@ -396,14 +396,14 @@ class L2Similarity(LossFunction):
         return L2
 
 class LocalEuclideanSimilarity(LossFunction):
-    def __init__(self, adv_example:AdversarialExample, K:int=30):
+    def __init__(self, adv_example:AdversarialExample, K:int=5):# 30, 70
         super().__init__(adv_example)
         self.neighborhood = K
         self.kNN = utils.misc.kNN(
             pos=self.adv_example.pos, 
             edges=self.adv_example.edges, 
             neighbors_num=self.neighborhood, 
-            cutoff=5) # TODO try to find a way to automatically compute cut-off
+            cutoff=3) #20 TODO try to find a way to automatically compute cut-off 5
 
     def __call__(self) -> torch.Tensor:
         n = self.adv_example.vertex_count

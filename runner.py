@@ -10,8 +10,6 @@ import tqdm
 import torch
 import torch.nn.functional as func
 import random
-import pyvista as pv
-from torch import nn
 
 # variable definitions
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath('__file__')),".."))
@@ -22,8 +20,11 @@ PARAMS_FILE = os.path.join(REPO_ROOT, "model_data/FAUST10_pointnet.pt")
 
 # repository modules
 sys.path.insert(0, SRC_DIR)
-import vista
-from vista import plot_mesh, plot_mesh_montage
+from utils.ios import write_off
+import vista.adv_plotter
+from vista.adv_plotter import show_perturbation, show_all_perturbations
+import adversarial.output_handler as op
+
 import models
 # import train
 import ntrain
@@ -74,69 +75,6 @@ def show_model_accuracy(PARAMS_FILE,model):
 
     print('test mean loss:', test_mean_loss, ' test_accuracy:', test_accuracy)
 
-def show_perturbation(example_list):
-    adex = example_list[0] # unpack from list
-
-    perturbed = adex.perturbed_pos.cpu()
-    pos = adex.pos.cpu()
-    p1 = adex.logits.cpu().detach().numpy()
-    p2 = adex.perturbed_logits.cpu().detach().numpy()
-    m = min([p1.min(), p2.min()])
-    num_classes = p1.shape[1]
-
-    x_ticks = np.array(range(num_classes), dtype=float)
-    ax = plt.subplot(111)
-    ax.bar(x_ticks - 0.2, (p1 - m)[0], width=0.4, color='b', align='center')
-    ax.bar(x_ticks + 0.2, (p2 - m)[0], width=0.4, color='y', align='center')
-    ax.legend(["standard", "perturbed towards " + str(adex.target.item())])
-    ax.set_title("Class Probabilities with/without Perturbation")
-    plt.show()
-    color = (pos - perturbed).norm(p=2, dim=-1)
-
-    # Plot one mesh:
-    # plot_mesh(perturbed, f=adex.faces, clr=color, label='Perturbed',
-    #           slabel='L2 perturbation difference', lighting=1, clr_map='rainbow')
-
-    # Plot three meshes using lists:
-    gt_const_mid = color.max().item() / 2
-    gt_const_min = color.min().item()
-    vlist = [pos, perturbed, [pos, perturbed]]
-    flist = [adex.faces, adex.faces, [adex.faces, adex.faces]]
-    clist = [torch.zeros_like(color)+gt_const_min, color, [torch.zeros_like(color)+gt_const_mid, color]]
-    Opacitylist = [1, 1, [0.35, 1]]
-    plot_mesh_montage(vlist, fb=flist, clrb=clist, labelb=['Ground Truth', 'Perturbed', 'Both'],
-                      slabelb=[ 'GT', 'L2 difference', 'L2 difference'], lighting=1,
-                      opacity=Opacitylist, cmap='YlOrRd')
-
-def show_all_perturbations(example_list):
-    perturbed_l = []
-    faces_l = []
-    color_l = []
-    original_classes = []
-    target_l = []
-    success_l = []
-    # fill the lists with needed information from main list
-    for adex in example_list:
-        perturbed = adex.perturbed_pos.cpu()
-        pos = adex.pos.cpu()
-        color = (pos - perturbed).norm(p=2, dim=-1)
-        original_class = adex.y.item()
-        classified_as = adex.logits.argmax().item()
-        perturbed_class = adex.perturbed_logits.argmax().item()
-        target = adex.target.item()
-
-        success_l.append(((classified_as == original_class) & (perturbed_class == target))
-                         | (original_class == target) )
-        # target_l.append('Ground '+ str(original_class)+'\nSeen as '+ str(classified_as) + '\nPerturb to '+str(target))
-        target_l.append('(' + str(original_class) + ',' + str(classified_as) + ') -> '+str(target))
-        original_classes.append(str(original_class))
-        perturbed_l.append(perturbed)
-        faces_l.append(adex.faces)
-        color_l.append(color)
-
-    # Plot all:
-    plot_mesh_montage(perturbed_l, fb=faces_l, clrb=color_l, labelb=target_l,
-                      lighting=1, success=success_l, cmap='YlOrRd') #slabelb=original_classes
 
 def find_perturbed_shape(to_class, testdata, model, params, **hyperParams):
     '''
@@ -169,7 +107,7 @@ def find_perturbed_shape(to_class, testdata, model, params, **hyperParams):
 
     example_list = []
     #Debug - reduce number or classes
-    # nclasses = 5
+    nclasses = 2
     for gt_class in np.arange(0, nclasses, 1):
         for adv_target in np.arange(0, nclasses, 1):
             # search for adversarial example
@@ -178,10 +116,7 @@ def find_perturbed_shape(to_class, testdata, model, params, **hyperParams):
                 adv_target = target
             else:
                 mesh = testdata[int(gt_class)]
-            # TODO: skip if nothing to do - depends on the visualization
-            # TODO: choose what to do with misclassification, ignore?
-            # TODO: When done, test with bigger screen with more adversarial examples
-            # TODO: Those with target == ground_class , skip the work, add a comment
+
             # perturb target toward adv_target
             adex = cw.generate_adversarial_example(
                 mesh=mesh, classifier=model, target=int(adv_target),
@@ -192,6 +127,7 @@ def find_perturbed_shape(to_class, testdata, model, params, **hyperParams):
                 **params)
             example_list.append(adex)
     return example_list
+
 
 if __name__ == "__main__":
     model = PointNetCls(k=10, feature_transform=False)
@@ -231,18 +167,20 @@ if __name__ == "__main__":
 
     CWparams = {
         CWBuilder.USETQDM: True,
-        CWBuilder.MIN_IT: 150,
+        CWBuilder.MIN_IT: 200,
         CWBuilder.LEARN_RATE: 1e-4,
         CWBuilder.ADV_COEFF: 1,
         CWBuilder.REG_COEFF: 15,
-        LowbandPerturbation.EIGS_NUMBER: 40}
+        LowbandPerturbation.EIGS_NUMBER: 10} # 10 is good
     hyperParams = {
             'search_iterations': 1,
             'lowband_perturbation' : True,
             'adversarial_loss' : "carlini_wagner",
-            'similarity_loss' : "local_euclidean"} # local_euclidean
+            'similarity_loss' : "local_euclidean"}
 
-    example_list = find_perturbed_shape('rand', testdata, model, CWparams, **hyperParams)
+    example_list = find_perturbed_shape('all', testdata, model, CWparams, **hyperParams)
+
+    op.save_results(example_list)
 
     if len(example_list) == 1:
         # show the original shape, the perturbed figure and both of them overlapped
@@ -251,21 +189,5 @@ if __name__ == "__main__":
         # show only the perturbed shape
         show_all_perturbations(example_list)
 
-    # # DEBUG vista
-    mesh = testdata[1]
-    pos = mesh.pos
-    perturbed = mesh.pos
-    faces = mesh.face
-    color = (pos - perturbed+1).norm(p=2, dim=-1)
-    # vlist = [pos,pos]
-    # flist = [faces.T, faces.T]
-    # clist = [color, color]
-    # plot_mesh_montage(vlist, fb=flist, clrb=clist, labelb=['test1','test2'], slabelb=['L2 perturbation difference', 'original'],
-    #           lighting=1)
-    # vlist = [pos, pos, [pos, pos]]
-    # flist = [faces.T, faces.T, [faces.T, faces.T]]
-    # clist = [torch.zeros_like(color), color, [torch.zeros_like(color), color]]
-    # plot_mesh_montage(vlist, fb=flist, clrb=clist, labelb=['Ground Truth', 'Perturbed', 'Both'],
-    #                   slabelb=[ 'GT', 'L2 difference', 'L2 difference'], lighting=1)
-    # plot_mesh(perturbed, f=faces.T, clr=color, label='test', slabel='L2 perturbation difference',
-    #           lighting=1)
+
+

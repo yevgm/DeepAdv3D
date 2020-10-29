@@ -14,24 +14,25 @@
 #---------------------------------------------------------------------------------------------#
 #                                       	
 #---------------------------------------------------------------------------------------------#
-# Opens and activates a conda env for Python 3.7.6 named DeepShape
+# Opens and activates a conda env for Python 3.7.6 named 
 git config --global user.name "Man Yevgeniy"
 git config --global user.email "yevgenimen@campus.technion.ac.il"
 git remote set-url origin https://github.com/yevgm/DeepAdv3D
 eval "$(conda shell.bash hook)"
 conda update -y -n base -c defaults conda
-conda create -y -n DeepAdv3D python=3.8.0
+conda create -y -n DeepAdv3D python=3.7.0
 conda activate DeepAdv3D
 #---------------------------------------------------------------------------------------------#
 #                                     	Primary Dependencies
 #---------------------------------------------------------------------------------------------#
 # Installs torch for Python 3.7 + Cuda 10.2 and Pytorch Geometric 
-conda install pytorch==1.4.0 torchvision==0.6.0 cudatoolkit=10.2 -c pytorch
-pip install torch-geometric==1.3.2
-pip install torch-scatter==1.4+cu102 -f https://pytorch-geometric.com/whl/torch-1.5.0.html
-pip install torch-sparse==0.4.3+cu102 -f https://pytorch-geometric.com/whl/torch-1.5.0.html
-pip install torch-cluster==1.4.5+cu102 -f https://pytorch-geometric.com/whl/torch-1.5.0.html
-# pip install torch-spline-conv==latest+cu102 -f https://pytorch-geometric.com/whl/torch-1.5.0.html
+conda install -y pytorch==1.5.0 torchvision==0.6.0 cudatoolkit=10.2 -c pytorch
+
+pip install torch-scatter==latest+cu102 -f https://pytorch-geometric.com/whl/torch-1.5.0.html
+pip install torch-sparse==latest+cu102 -f https://pytorch-geometric.com/whl/torch-1.5.0.html
+pip install torch-cluster==latest+cu102 -f https://pytorch-geometric.com/whl/torch-1.5.0.html
+pip install torch-spline-conv==latest+cu102 -f https://pytorch-geometric.com/whl/torch-1.5.0.html
+pip install torch-geometric
 
 # pip install tensorflow # Optional 
 pip install tensorboard
@@ -56,14 +57,10 @@ pip install numpy
 pip install scipy
 pip install yagmail
 pip install meshio
+pip install openmesh
 pip install tqdm
 pip install plyfile
 pip install sklearn
-# pip install --upgrade https://github.com/unlimblue/KNN_CUDA/releases/download/0.2/KNN_CUDA-0.2-py3-none-any.whl
-# sudo wget -P /usr/bin https://github.com/unlimblue/KNN_CUDA/raw/master/ninja
-git clone https://github.com/unlimblue/KNN_CUDA.git
-cd KNN_CUDA
-make && make install
 
 conda install -y -c open3d-admin open3d # Last due to problems
 # TO REMOVE: 

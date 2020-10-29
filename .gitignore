@@ -11,3 +11,4 @@ src/KNN_CUDA
 coma/**
 .idea/**
 .ipynb_checkpoints/**
+outputFolder/**

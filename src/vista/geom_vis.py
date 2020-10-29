@@ -30,7 +30,8 @@ def plotter(theme='document'):
 # noinspection PyIncorrectDocstring
 def plot_mesh(v, f=None, n=None, strategy='mesh', grid_on=False, clr='lightcoral', normal_clr='lightblue',
               label=None, smooth_shade_on=True, show_edges=False, clr_map='rainbow', normal_scale=1, point_size=None,
-              lighting=None, camera_pos=((0, 0, 5.5), (0, 0, 0), (0, 1.5, 0)), opacity=1.0, bar=True, slabel=''):
+              lighting=None, camera_pos=((0, 0, 5.5), (0, 0, 0), (0, 1.5, 0)), opacity=1.0, bar=True, slabel=''
+              ,screenshot=False):
     """
     :param v: tensor - A numpy or torch [nv x 3] vertex tensor
     :param f: tensor |  None - (optional) A numpy or torch [nf x 3] vertex tensor OR None
@@ -60,7 +61,8 @@ def plot_mesh(v, f=None, n=None, strategy='mesh', grid_on=False, clr='lightcoral
 def plot_mesh_montage(vb, fb=None, nb=None, strategy='mesh', labelb=None, grid_on=False, clrb='lightcoral',
                       normal_clr='lightblue', smooth_shade_on=True, show_edges=False, normal_scale=1, auto_close=True,
                       camera_pos=((0, 0, 5.5), (0, 0, 0), (0, 1, 0)), lighting=None,link_plots=True,ext_func=None,
-                      opacity=1.0, bar=True, slabelb=None, success=None, cmap='rainbow'):
+                      opacity=1.0, bar=True, slabelb=None, success=None, classifier_success=None,
+                      cmap='rainbow', screenshot=False):
     """
     :param vb: tensor | list - [b x nv x 3] batch of meshes or list of length b with tensors [nvx3]
     :param fb: tensor | list | None - (optional) [b x nf x 3]
@@ -82,7 +84,7 @@ def plot_mesh_montage(vb, fb=None, nb=None, strategy='mesh', labelb=None, grid_o
     n_cols = math.ceil(n_meshes / n_rows)
 
     shape = (n_rows, n_cols)
-    p = pv.Plotter(shape=shape)
+    p = pv.Plotter(shape=shape, off_screen=screenshot)
     r, c = np.unravel_index(range(n_meshes), shape)
     ms = []
     for i in range(n_meshes):
@@ -102,13 +104,15 @@ def plot_mesh_montage(vb, fb=None, nb=None, strategy='mesh', labelb=None, grid_o
         opac = opacity[i] if isinstance(opacity, list) else opacity
         slabel = slabelb if slabelb is None else slabelb[i]
 
-        # is it's ground truth don't show colorbar
+        # if it's ground truth don't show colorbar
         if slabel == 'GT':
             cbar = False
         else:
             cbar = bar
 
         p.subplot(r[i], c[i])
+        # if r[i] == c[i]:
+        #     p.add_background_image('back.png', as_global=False, auto_resize=True)
 
         if isinstance(clr, list):
             loop_len = len(clr)
@@ -125,21 +129,30 @@ def plot_mesh_montage(vb, fb=None, nb=None, strategy='mesh', labelb=None, grid_o
                 faces = f
                 colors = clr
                 Opacity = opac
-                labelC = success[i] if success is not None else None
 
-            _, m = add_mesh(p, v=verts, f=faces, n=n, strategy=strategy, label=label, grid_on=grid_on,
+            label1C = classifier_success[i] if classifier_success is not None else None
+            label2C = success[i] if success is not None else None
+            if label1C is not None:
+                labelC = [label1C, label2C]
+            else:
+                labelC = label2C
+
+            _, m = add_mesh(p, v=verts, f=faces, n=n, strategy=strategy, title=label, grid_on=grid_on,
                             normal_scale=normal_scale, camera_pos=camera_pos, cmap=cmap,
                             clr=colors, normal_clr=normal_clr, smooth_shade_on=smooth_shade_on, show_edges=show_edges,
                             lighting=lighting, opacity=Opacity, bar=cbar, slabel=slabel, label_color=labelC)
 
         if ext_func is not None:
-            ext_func(p,m,i)
+            ext_func(p, m, i)
         # add_spheres(p,vb[i][1,:][None,:])
         ms.append(m)
 
     if link_plots:
         p.link_views()
-    p.show(auto_close=auto_close, interactive_update=not auto_close, interactive=auto_close, full_screen=True)
+
+    if screenshot==False:
+        p.show(auto_close=auto_close, interactive_update=not auto_close, interactive=auto_close, full_screen=True)
+
     return p, ms
 
 
@@ -227,7 +240,7 @@ def add_vectorfield(p, v, f, vf, clr='lightblue', normal_scale=1, colormap='rain
 
 
 def add_mesh(p, v, f=None, n=None, strategy='spheres', grid_on=False, clr='lightcoral',
-             normal_clr='lightblue', label=None, smooth_shade_on=True, show_edges=False, cmap='rainbow',
+             normal_clr='lightblue', title=None, smooth_shade_on=True, show_edges=False, cmap='rainbow',
              normal_scale=1, camera_pos=((0, 0, 5.5), (0, 0, 0), (0, 1.5, 0)), lines=None, opacity=1.0,
              point_size=None, lighting=None, eye_dome=False, bar=True, slabel='', label_color=None):
     # TODO - Clean this shit function up
@@ -269,12 +282,22 @@ def add_mesh(p, v, f=None, n=None, strategy='spheres', grid_on=False, clr='light
         clr_str = clr
         rgb = True
     else:
-        if (label_color is not None) and (label_color==1):
-            clr_str = 'g'
-        elif (label_color is not None) and (label_color==0):
-            clr_str = 'r'
+        if isinstance(label_color, list): #& (label_color[0] is not None):
+            if label_color[0] == True:
+                original_color = 'g'
+            else:
+                original_color = 'r'
+            if label_color[1] == True:
+                perturbed_color = 'g'
+            else:
+                perturbed_color = 'r'
         else:
-            clr_str = 'w'
+            if label_color is True:
+                clr_str = 'g'
+            elif label_color is False:
+                clr_str = 'r'
+            else:
+                clr_str = 'b'
         scalars = clr
         rgb = isinstance(clr, (np.ndarray, np.generic)) and clr.squeeze().ndim == 2  # RGB Vector
     # TODO - use a kwargs approach to solve messiness
@@ -306,9 +329,14 @@ def add_mesh(p, v, f=None, n=None, strategy='spheres', grid_on=False, clr='light
         add_vectorfield(p, v, f, n, clr=normal_clr, normal_scale=normal_scale)
 
     # Book-keeping:
-    if label is not None and label:
-        siz = 0.2
-        p.add_legend(labels=[(label, clr_str)], size=[siz, siz / 2], bcolor=(1, 1, 1))
+    # if label is not None and label:
+    #     siz = 0.2
+    #     p.add_legend(labels=[(label, clr_str)], size=[siz, siz / 2], bcolor=(1, 1, 1))
+    if isinstance(title, list):
+        p.add_text(title[0], font_size=9, position='upper_edge', color=original_color)
+        p.add_text('\n'+title[1], font_size=9, position='upper_edge', color=perturbed_color)
+    else:
+        p.add_text(title, font_size=11, position='upper_edge', color=clr_str)
     if grid_on:
         p.show_grid()
 

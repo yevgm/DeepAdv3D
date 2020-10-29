@@ -133,19 +133,7 @@ Tentative
 \end_layout
 
 \begin_layout Itemize
-change plotly to vista (Ido's code) for good viualization
-\end_layout
-
-\begin_layout Itemize
 Add plotter for background running
-\end_layout
-
-\begin_layout Itemize
-Create good quality visualizations for our kickoff meeting
-\end_layout
-
-\begin_layout Itemize
-Fix setup.sh to create an environment automatically
 \end_layout
 
 \begin_layout Subsubsection*
@@ -175,7 +163,19 @@ create some nice adversarial examples to show Ido, Talking about kickoff
 \end_layout
 
 \begin_layout Enumerate
-fix the git repository
+major git repository fixes
+\end_layout
+
+\begin_layout Enumerate
+change plotly to vista (Ido's code) for good viualization
+\end_layout
+
+\begin_layout Enumerate
+Create good quality visualizations for our kickoff meeting
+\end_layout
+
+\begin_layout Enumerate
+Fix setup.sh to create an environment automatically
 \end_layout
 
 \end_body
