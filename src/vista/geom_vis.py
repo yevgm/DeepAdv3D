@@ -1,5 +1,4 @@
 import math
-
 import numpy as np
 import pyvista as pv
 import torch
@@ -354,16 +353,6 @@ def add_mesh(p, v, f=None, n=None, strategy='spheres', grid_on=False, clr='light
 #                                                    Test Suite
 # ---------------------------------------------------------------------------------------------------------------------#
 
-
-def _eyedome_tester():
-    from cfg import Assets
-    p = plotter('dark')
-    v, f = Assets.MAN.load()
-    add_mesh(p, v, f, strategy='mesh', clr='aqua', eye_dome=True)
-    # add_integer_vertex_labels(p, v)
-    p.show()
-
-
 # ---------------------------------------------------------------------------------------------------------------------#
 #
 # ---------------------------------------------------------------------------------------------------------------------#
@@ -390,4 +379,4 @@ def _eyedome_tester():
 #
 # ---------------------------------------------------------------------------------------------------------------------#
 if __name__ == '__main__':
-    _eyedome_tester()
+    pass

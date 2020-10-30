@@ -231,6 +231,7 @@ class CWBuilder(Builder):
 
         # exponential search variables
         start_adv_coeff = self.adex_data[CWBuilder.ADV_COEFF]
+        optimal_adversarial_coeff = start_adv_coeff
         range_min, range_max = 0, start_adv_coeff
         optimal_example = None
         exp_search = True  # flag used to detected whether it is the
@@ -266,6 +267,7 @@ class CWBuilder(Builder):
             # update best estimation
             if adex.is_successful:
                 optimal_example = adex
+                optimal_adversarial_coeff = c
 
             # update loop variables
             if exp_search and not adex.is_successful:
@@ -277,12 +279,13 @@ class CWBuilder(Builder):
                 range_max = range_max if not adex.is_successful else midvalue
                 range_min = midvalue if not adex.is_successful else range_min
 
-        # reset the adversarial example to the original state
         self.adex_data[CWBuilder.ADV_COEFF] = start_adv_coeff
+
 
         # if unable to find a good c,r pair, return the best found solution
         is_successful = optimal_example is not None
         if not is_successful: optimal_example = adex
+        optimal_example.adversarial_coeff = optimal_adversarial_coeff
         return optimal_example
 
 

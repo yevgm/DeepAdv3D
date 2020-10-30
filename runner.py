@@ -179,15 +179,15 @@ if __name__ == "__main__":
         CWBuilder.LEARN_RATE: 1e-4,
         CWBuilder.ADV_COEFF: 1,
         CWBuilder.REG_COEFF: 15,
-        CWBuilder.K_nn: 140,
-        CWBuilder.NN_CUTOFF: 40,
-        LowbandPerturbation.EIGS_NUMBER: 10} # 10 is good
+        CWBuilder.K_nn: 60,# 140
+        CWBuilder.NN_CUTOFF: 15, # 40
+        LowbandPerturbation.EIGS_NUMBER: 40} # 10 is good
     hyperParams = {
-            'search_iterations': 1,
+            'search_iterations': 3,
             'lowband_perturbation' : True,
             'adversarial_loss' : "carlini_wagner",
             'similarity_loss' : "local_euclidean"}
-    generate_examples = 2 # how many potential random examples to create in output folder
+    generate_examples = 1 # how many potential random examples to create in output folder
     # ------------------------------------------------------------------------
 
     now = datetime.now()
@@ -196,7 +196,8 @@ if __name__ == "__main__":
         print('------- example number '+str(example)+' --------')
         example_list = find_perturbed_shape('rand', testdata, model, CWparams,
                                             **hyperParams, max_dim=2)
-        op.save_results(example_list, batch_time=d)
+        op.save_results(example_list, CWparams=CWparams, hyperParams=hyperParams
+                        , batch_time=d)
 
 
     if len(example_list) == 1:
