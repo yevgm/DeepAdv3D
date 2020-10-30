@@ -3,7 +3,6 @@
 .vs/**
 **/desktop.ini
 **/.ipynb_checkpoints
-model_data/**
 datasets/**
 experiments/**
 src/ChamferDistancePytorch/**

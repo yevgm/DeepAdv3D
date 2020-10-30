@@ -13,7 +13,7 @@ import torch.nn.functional as func
 import random
 
 # variable definitions
-REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath('__file__')),".."))  # need ".." in linux
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath('__file__')),""))  # need ".." in linux
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 # DEVICE = torch.device("cpu")
 SRC_DIR = os.path.join(REPO_ROOT,"src")
@@ -175,29 +175,29 @@ if __name__ == "__main__":
     # ------------------------------------------------------------------------
     CWparams = {
         CWBuilder.USETQDM: True,
-        CWBuilder.MIN_IT: 200,
+        CWBuilder.MIN_IT: 500,
         CWBuilder.LEARN_RATE: 1e-4,
         CWBuilder.ADV_COEFF: 1,
         CWBuilder.REG_COEFF: 15,
-        CWBuilder.K_nn: 60,# 140
-        CWBuilder.NN_CUTOFF: 15, # 40
+        CWBuilder.K_nn: 140,# 140
+        CWBuilder.NN_CUTOFF: 20, # 40
         LowbandPerturbation.EIGS_NUMBER: 40} # 10 is good
     hyperParams = {
-            'search_iterations': 3,
+            'search_iterations': 5,
             'lowband_perturbation' : True,
             'adversarial_loss' : "carlini_wagner",
             'similarity_loss' : "local_euclidean"}
-    generate_examples = 1 # how many potential random examples to create in output folder
+    generate_examples = 20 # how many potential random examples to create in output folder
     # ------------------------------------------------------------------------
 
     now = datetime.now()
-    d = now.strftime("_%b-%d-%Y_%H-%M-%S")
+    d = now.strftime("%b-%d-%Y_%H-%M-%S")
     for example in np.arange(0, generate_examples, 1):
         print('------- example number '+str(example)+' --------')
         example_list = find_perturbed_shape('rand', testdata, model, CWparams,
                                             **hyperParams, max_dim=2)
         op.save_results(example_list, CWparams=CWparams, hyperParams=hyperParams
-                        , batch_time=d)
+                        , folder_name=d, file_name=str(example))
 
 
     if len(example_list) == 1:

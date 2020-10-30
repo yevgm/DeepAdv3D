@@ -6,8 +6,8 @@ import vista.adv_plotter
 from vista.adv_plotter import show_perturbation, show_all_perturbations
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath('__file__')),".."))
 
-def save_results(example_list:list, batch_time=None,
-                 CWparams=None, hyperParams=None):
+def save_results(example_list:list, CWparams=None, hyperParams=None,
+                 folder_name=None, file_name=None):
     '''
     If saving one figure at a time, you mut pass a unique folder ID -
         batch_time
@@ -39,10 +39,11 @@ def save_results(example_list:list, batch_time=None,
             print('Attack is not successful, saving .obj file aborted')
             return
         else:
-            rand_example_path = os.path.join(rand_example_path, batch_time)
-            os.mkdir(os.path.join(rand_example_path, batch_time))
+            rand_example_path = os.path.join(rand_example_path, folder_name)
+            if not os.path.isdir(rand_example_path):
+                os.mkdir(rand_example_path)
 
-            file_str = str(original_class) + '_to_' + str(target) + batch_time
+            file_str = file_name + '-' + str(original_class) + '_PerturbedTo_' + str(target)
             file_path = os.path.join(rand_example_path, file_str)
 
             v = adex.perturbed_pos.cpu().detach().numpy()
@@ -73,7 +74,7 @@ def add_hp_to_csv(mapper_location, filename,  CWparams, hyperParams, adv_coeff):
     '''
     This function adds the adversarial example hyper-params to a given list
     '''
-    mapper_file = os.path.join(mapper_location, 'mapper.csv')
+    mapper_file = os.path.join(mapper_location, 'Mapper.csv')
     lr = str(CWparams['learning_rate'])
     c = str(adv_coeff)
     reg_coeff = str(CWparams['regularization_coeff'])
@@ -84,7 +85,7 @@ def add_hp_to_csv(mapper_location, filename,  CWparams, hyperParams, adv_coeff):
 
     if not os.path.isfile(mapper_file):
         with open(mapper_file, 'a') as f:
-            f.write('lr,'+'c,'+'reg_coeff,'+'k,'+'cutoff,'+'lowband,'+'loss'+'\n')
+            f.write('Filename,'+'lr,'+'c,'+'reg_coeff,'+'k,'+'cutoff,'+'lowband,'+'loss'+'\n')
 
     # MIN_IT = "minimization_iterations"
 
