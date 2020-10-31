@@ -3,6 +3,7 @@ import numpy as np
 import pyvista as pv
 import torch
 from pyvista.plotting.theme import parse_color
+from vista.utils import concat_cell_qualifier, color_to_pyvista_color_params, busy_wait, torch2numpy
 
 # from geom.np.mesh.surface import face_barycenters
 # from geom.tool.synthesis import uniform_grid
@@ -11,6 +12,29 @@ from pyvista.plotting.theme import parse_color
 
 pv.set_plot_theme('document')  # Change global behaviour - TODO - move this
 
+# ---------------------------------------------------------------------------------------------------------------------#
+# ---------------------------------------------------------------------------------------------------------------------#
+#                                        some parameters for the animation
+# ---------------------------------------------------------------------------------------------------------------------#
+
+_DEF_PYVISTA_LIGHT_PARAMS = {'ambient': 0.0, 'diffuse': 1.0, 'specular': 0.0, 'specular_power': 100.0}
+_DEF_LIGHT_PARAMS = {'ambient': 0.3, 'diffuse': 0.6, 'specular': 1, 'specular_power': 20}
+
+"""
+                ambient/diffuse/specular strength/specular exponent/specular color
+'Shiny',        0.3,	  0.6,	       0.9,	            20,		        1.0
+'Dull',	        0.3,	  0.8,	       0.0,	            10,		        1.0
+'Metal',        0.3,	  0.3,	       1.0,	            25,		        0.5
+'VTK_Shadows'   0.7       0.7          0.51             30 
+"""
+
+_N_VERTICES_TO_POS = {  # TODO - find some better idea then this...
+    6890: ((0, 0, 5.5), (0, 0, 0), (0, 1.5, 0)),
+    3978: ((0.276, 0.192, -1.72), (0.023, -0.005, 0.003), (-0.245, -0.958, -0.146))
+}
+
+
+# ---------------------------------------------------------------------------------------------------------------------#
 
 # ---------------------------------------------------------------------------------------------------------------------#
 #                                           General Utility Functions
@@ -342,6 +366,92 @@ def add_mesh(p, v, f=None, n=None, strategy='spheres', grid_on=False, clr='light
     if eye_dome:
         p.enable_eye_dome_lighting()
     return p, pnt_cloud
+
+
+def add_mesh_animation(p, v, f=None, n=None, lines=None,  # Input
+             style='surface', smooth_shading=True, eye_dome=False, depth_peeling=False, lighting=None,  # Global arg
+             camera_pos=None,
+             color='w', normal_color='lightblue', edge_color='darkblue', line_color='darkblue', cmap='YlOrRd',  # was cmap rainbow
+             show_edges=False, clim=None,  # Color options
+             normal_scale=1, point_size=6, line_width=1,  # Scales
+             grid_on=False, opacity=1.0, title=None, as_a_single_mesh=False  # Misc
+             ):
+    # Style considerations:
+    assert style in ['surface', 'wireframe', 'points', 'spheres', 'sphered_wireframe', 'glyphed_spheres']
+    f = None if style in ['points', 'spheres', 'glyphed_spheres'] else f
+    if style in ['wireframe', 'sphered_wireframe', 'surface'] and f is None:
+        style = 'spheres'  # Default fallback if we forgot the faces
+    render_points_as_spheres = True if style == 'spheres' else False
+
+    # Handle input
+    v, f, n, lines = torch2numpy(v, f, n, lines)
+    light_params = _DEF_PYVISTA_LIGHT_PARAMS if lighting is None else _DEF_LIGHT_PARAMS
+    mesh = pv.PolyData(v) if f is None else pv.PolyData(v, concat_cell_qualifier(f))
+    if lines is not None:  # TODO - support general lines, and not just vertex indices. Rename "lines"
+        if as_a_single_mesh:  # Animate skeleton support
+            style = 'surface'  # Pyvista bug - lines only plot with style == surface
+            render_points_as_spheres = True
+            mesh.lines = concat_cell_qualifier(lines)
+        else:
+            add_lines(p, v, lines=lines, line_width=line_width, line_color=line_color, cmap=cmap, opacity=opacity,
+                      lighting=lighting, **light_params)
+
+    if not as_a_single_mesh and style in ['glyphed_spheres', 'sphered_wireframe']:
+        add_spheres(p, v, radius=point_size / 1000, color=color, cmap=cmap, smooth_shading=smooth_shading,
+                    lighting=lighting, opacity=opacity)
+
+    # Translation of styles
+    if style == 'sphered_wireframe':
+        style = 'wireframe'
+    elif style == 'spheres':
+        style = 'points'
+
+    if style != 'glyphed_spheres':
+        color_params = color_to_pyvista_color_params(color)
+        # p.add_mesh(mesh, style=style, smooth_shading=smooth_shading, cmap=cmap, show_edges=show_edges,
+        #            point_size=point_size, render_points_as_spheres=render_points_as_spheres, edge_color=edge_color,
+        #            opacity=opacity, lighting=lighting, clim=clim, line_width=line_width, render_lines_as_tubes=True,
+        #            **light_params, **color_params)
+        p.add_mesh(mesh, style=style, smooth_shading=smooth_shading, cmap=cmap, show_edges=show_edges,
+                   point_size=point_size, render_points_as_spheres=render_points_as_spheres, edge_color=edge_color,
+                   opacity=opacity, lighting=lighting, clim=clim, line_width=line_width, render_lines_as_tubes=True,
+                   **light_params, scalars=np.zeros(v[:, 0].shape))
+
+    if n is not None and not as_a_single_mesh:
+        add_vectorfield(p, v, f, n, color=normal_color, scale=normal_scale)
+
+    if camera_pos is None:
+        camera_pos = _N_VERTICES_TO_POS.get(v.shape[0], None)
+    if camera_pos is not None:
+        p.camera_position = camera_pos
+
+    if title:
+        p.add_text(title, font_size=15, position='upper_edge')
+    # if legend:
+    #     p.add_legend(labels=[(title, 'w')], size=[0.25, 0.25 / 2])  # TODO - enable legend
+    if grid_on:
+        p.show_bounds(**{'grid': 'back', 'location': 'all', 'ticks': 'both'})
+    if eye_dome:
+        p.enable_eye_dome_lighting()
+    if depth_peeling:
+        p.enable_depth_peeling()
+
+    # TODO - enable texture:
+    # tex = pv.read_texture(texture)
+    # self.pv_mesh.texture_map_to_plane(inplace=True)
+    # plotter.add_mesh(self.pv_mesh, texture=tex)
+
+    return p
+
+
+def add_lines(p, v, lines, line_width=1, line_color='darkblue', **plt_args):  # for the animation
+    mesh = pv.PolyData(v)
+    lines = concat_cell_qualifier(lines)
+    mesh.lines = lines
+    tubes = mesh.tube(radius=line_width / 1000)  # Override current mesh
+    color_params = color_to_pyvista_color_params(line_color, 80)
+    p.add_mesh(tubes, smooth_shading=True, **color_params, **plt_args)
+    return p
 
 
 # ---------------------------------------------------------------------------------------------------------------------#

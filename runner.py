@@ -13,7 +13,7 @@ import torch.nn.functional as func
 import random
 
 # variable definitions
-REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath('__file__')),""))  # need ".." in linux
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath('__file__')),".."))  # need ".." in linux
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 # DEVICE = torch.device("cpu")
 SRC_DIR = os.path.join(REPO_ROOT,"src")
@@ -26,9 +26,11 @@ from utils.ios import write_off
 import vista.adv_plotter
 from vista.adv_plotter import show_perturbation, show_all_perturbations
 import adversarial.output_handler as op
+import vista.animation
+from vista.animation import animate, multianimate
+
 
 import models
-# import train
 import ntrain
 import dataset
 import utils
@@ -60,8 +62,8 @@ def load_datasets(train_batch=8,test_batch=20):
                                                shuffle=False,
                                                num_workers=10)
     # load data in different format for Adversarial code
-    traindata = dataset.FaustDataset(FAUST, device=DEVICE, train=True, test=False, transform_data=False)
-    testdata = dataset.FaustDataset(FAUST, device=DEVICE, train=False, test=True, transform_data=False)
+    traindata = dataset.FaustDataset(FAUST, device=DEVICE, train=True, test=False, transform_data=True)
+    testdata = dataset.FaustDataset(FAUST, device=DEVICE, train=False, test=True, transform_data=True)
 
     return trainLoader,testLoader,traindata,testdata
 
@@ -79,7 +81,7 @@ def show_model_accuracy(PARAMS_FILE,model):
 
 
 
-def find_perturbed_shape(to_class, testdata, model, params, max_dim=None, **hyperParams):
+def find_perturbed_shape(to_class, testdata, model, params, max_dim=None, animate=False, **hyperParams):
     '''
     to_class = 'rand'/'all' choose how many output shapes to find
     model = attacked classification torch model
@@ -113,8 +115,8 @@ def find_perturbed_shape(to_class, testdata, model, params, max_dim=None, **hype
         nclasses = max_dim
 
     example_list = []
-    for gt_class in np.arange(5, nclasses, 1):
-        for adv_target in np.arange(5, nclasses, 1):
+    for gt_class in np.arange(0, nclasses, 1):
+        for adv_target in np.arange(0, nclasses, 1):
             # search for adversarial example
             if nclasses == 1:
                 mesh = testdata[i]
@@ -129,13 +131,14 @@ def find_perturbed_shape(to_class, testdata, model, params, max_dim=None, **hype
                 lowband_perturbation=hyperParams['lowband_perturbation'],
                 adversarial_loss=hyperParams['adversarial_loss'],
                 similarity_loss=hyperParams['similarity_loss'],
+                animate=animate,
                 **params)
             example_list.append(adex)
     return example_list
 
 
 if __name__ == "__main__":
-    model = PointNetCls(k=10, feature_transform=False)
+    model = PointNetCls(k=10, feature_transform=False, global_transform=False)
     model = model.to(DEVICE)
     # print(model)
     trainLoader,testLoader, traindata, testdata = load_datasets(train_batch=8, test_batch=20)
@@ -175,37 +178,50 @@ if __name__ == "__main__":
     # ------------------------------------------------------------------------
     CWparams = {
         CWBuilder.USETQDM: True,
-        CWBuilder.MIN_IT: 500,
+        CWBuilder.MIN_IT: 100, #500,
         CWBuilder.LEARN_RATE: 1e-4,
-        CWBuilder.ADV_COEFF: 1,
-        CWBuilder.REG_COEFF: 50,
-        CWBuilder.K_nn: 140,# 140
-        CWBuilder.NN_CUTOFF: 20, # 40
+        CWBuilder.ADV_COEFF: 1, # 1 is good for results, ~3 for animation
+        CWBuilder.REG_COEFF: 0, # 15
+        CWBuilder.K_nn: 30,# 140
+        CWBuilder.NN_CUTOFF: 7, # 40
         LowbandPerturbation.EIGS_NUMBER: 40} # 10 is good
     hyperParams = {
-            'search_iterations': 5,
+            'search_iterations': 1,
             'lowband_perturbation' : True,
             'adversarial_loss' : "carlini_wagner",
             'similarity_loss' : "local_euclidean"}
-    generate_examples = 1 # how many potential random examples to create in output folder
+    generate_examples = 1  # how many potential random examples to create in output folder
+    compute_animation = False
+    save_flag = False
     # ------------------------------------------------------------------------
 
     now = datetime.now()
     d = now.strftime("%b-%d-%Y_%H-%M-%S")
     for example in np.arange(0, generate_examples, 1):
+
         print('------- example number '+str(example)+' --------')
-        example_list = find_perturbed_shape('all', testdata, model, CWparams,
-                                            **hyperParams, max_dim=10)
-        op.save_results(example_list, CWparams=CWparams, hyperParams=hyperParams
-                        , folder_name=d, file_name=str(example))
+        example_list = find_perturbed_shape('rand', testdata, model, CWparams, animate=compute_animation,
+                                            **hyperParams, max_dim=1)
+        if save_flag:
+            op.save_results(example_list, CWparams=CWparams, hyperParams=hyperParams
+                            , folder_name=d, file_name=str(example))
 
 
-    if len(example_list) == 1:
-        # show the original shape, the perturbed figure and both of them overlapped
-        show_perturbation(example_list)
+
+    if compute_animation:
+        # vertices_list = []
+        # for example in example_list:  # TODO: change example_list to examples from the training (with one C?)
+        #     vertices_list.append(example.perturbed_pos)
+        # animate(vertices_list, gif_name='gif0.gif')
+        animate(example_list[0].animation_vertices, f=example_list[0].animation_faces[0], gif_name='gif1.gif')
+
     else:
-        # show only the perturbed shape
-        show_all_perturbations(example_list)
+        if len(example_list) == 1:
+            # show the original shape, the perturbed figure and both of them overlapped
+            show_perturbation(example_list)
+        else:
+            # show only the perturbed shape
+            show_all_perturbations(example_list)
 
 
 

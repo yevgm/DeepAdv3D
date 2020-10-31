@@ -51,6 +51,7 @@ def train(train_data,
 				optimizer.zero_grad()
 				classifier = classifier.train()
 				pred, trans, trans_feat = classifier(points)
+				pred = F.log_softmax(pred, dim=1)
 				loss = F.nll_loss(pred, target)
 
 				loss_values.append(loss.item())

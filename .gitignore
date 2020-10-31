@@ -11,3 +11,4 @@ coma/**
 .idea/**
 .ipynb_checkpoints/**
 outputFolder/**
+model_data/**
