@@ -13,7 +13,7 @@ import torch.nn.functional as func
 import random
 
 # variable definitions
-REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath('__file__')),".."))  # need ".." in linux
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath('__file__')),""))  # need ".." in linux
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 # DEVICE = torch.device("cpu")
 SRC_DIR = os.path.join(REPO_ROOT,"src")
@@ -26,6 +26,9 @@ from utils.ios import write_off
 import vista.adv_plotter
 from vista.adv_plotter import show_perturbation, show_all_perturbations
 import adversarial.output_handler as op
+import vista.animation
+from vista.animation import animate, multianimate
+
 
 import models
 # import train
@@ -175,36 +178,44 @@ if __name__ == "__main__":
     # ------------------------------------------------------------------------
     CWparams = {
         CWBuilder.USETQDM: True,
-        CWBuilder.MIN_IT: 200,
+        CWBuilder.MIN_IT: 50,  # 200 is good
         CWBuilder.LEARN_RATE: 1e-4,
         CWBuilder.ADV_COEFF: 1,
         CWBuilder.REG_COEFF: 15,
-        CWBuilder.K_nn: 140,
-        CWBuilder.NN_CUTOFF: 40,
-        LowbandPerturbation.EIGS_NUMBER: 10} # 10 is good
+        CWBuilder.K_nn: 10,  # 140 is good
+        CWBuilder.NN_CUTOFF: 3,  # 40 is good
+        LowbandPerturbation.EIGS_NUMBER: 10}  # 10 is good
     hyperParams = {
             'search_iterations': 1,
             'lowband_perturbation' : True,
             'adversarial_loss' : "carlini_wagner",
             'similarity_loss' : "local_euclidean"}
-    generate_examples = 2 # how many potential random examples to create in output folder
+    generate_examples = 1  # how many potential random examples to create in output folder
     # ------------------------------------------------------------------------
 
     now = datetime.now()
     d = now.strftime("_%b-%d-%Y_%H-%M-%S")
     for example in np.arange(0, generate_examples, 1):
         print('------- example number '+str(example)+' --------')
-        example_list = find_perturbed_shape('rand', testdata, model, CWparams,
+        example_list = find_perturbed_shape('all', testdata, model, CWparams,
                                             **hyperParams, max_dim=2)
         op.save_results(example_list, batch_time=d)
 
+    show_animation = True
 
-    if len(example_list) == 1:
-        # show the original shape, the perturbed figure and both of them overlapped
-        show_perturbation(example_list)
+    if show_animation:
+        vertices_list = []
+        for example in example_list:  # TODO: change example_list to examples from the training (with one C?)
+            vertices_list.append(example.perturbed_pos)
+        animate(vertices_list, gif_name='gif0.gif')
+
     else:
-        # show only the perturbed shape
-        show_all_perturbations(example_list)
+        if len(example_list) == 1:
+            # show the original shape, the perturbed figure and both of them overlapped
+            show_perturbation(example_list)
+        else:
+            # show only the perturbed shape
+            show_all_perturbations(example_list)
 
 
 
