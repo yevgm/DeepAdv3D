@@ -119,12 +119,14 @@ class CWAdversarialExample(AdversarialExample):
         self.regularization_loss = lambda: self._zero
         self._zero = torch.tensor(0, dtype=self.dtype_float, device=self.device)
         self.true_y = true_y
+        self.animation_vertices = []
+        self.animation_faces = []
 
     @property
     def perturbed_pos(self):
         return self.perturbation.perturb_positions()
 
-    def compute(self, usetqdm: str = None, patience=3):
+    def compute(self, usetqdm: str = None, patience=3, animate=False):
         # reset variables
         self.perturbation.reset()
         self.logger.reset()
@@ -155,6 +157,11 @@ class CWAdversarialExample(AdversarialExample):
             regularization_loss = self.regularization_coeff * self.regularization_loss()
             loss = adversarial_loss + similarity_loss + regularization_loss
             self.logger.log()  # log results
+
+            # add the perturbed pos to the animation list
+            if animate:
+                self.animation_vertices.append(self.perturbed_pos)
+                self.animation_faces.append(self.faces)
 
             # cutoff procedure to improve performance
             is_successful = adversarial_loss <= 0
@@ -190,9 +197,10 @@ class CWBuilder(Builder):
     K_nn = "k_nearest_neighbors"
     NN_CUTOFF = "knn_cutoff_parameter"
 
-    def __init__(self, search_iterations=1):
+    def __init__(self, search_iterations=1, animate=False):
         super().__init__()
         self.search_iterations = search_iterations
+        self.animate = animate
         self._perturbation_factory = LowbandPerturbation
         self._adversarial_loss_factory = AdversarialLoss
         self._similarity_loss_factory = L2Similarity
@@ -254,7 +262,7 @@ class CWBuilder(Builder):
             adex.similarity_loss = self._similarity_loss_factory(adex, K=self.K_nn, cutoff=self.cutoff)
             adex.regularization_loss = self._regularizer_factory(adex)
             adex.logger = self._logger_factory(adex)
-            adex.compute(usetqdm=usetqdm)
+            adex.compute(usetqdm=usetqdm, animate=self.animate)
 
             # get perturbation
             r = adex.perturbation.r
@@ -579,8 +587,9 @@ def generate_adversarial_example(
         lowband_perturbation=True,
         adversarial_loss="carlini_wagner",
         similarity_loss="local_euclidean",
+        animate=False,
         regularization="none", **args) -> CWAdversarialExample:
-    builder = CWBuilder(search_iterations).set_mesh(mesh.pos, mesh.edge_index.t(), mesh.face.t(), mesh.y)
+    builder = CWBuilder(search_iterations, animate).set_mesh(mesh.pos, mesh.edge_index.t(), mesh.face.t(), mesh.y)
     builder.set_classifier(classifier).set_target(target)
 
     # set type of perturbation

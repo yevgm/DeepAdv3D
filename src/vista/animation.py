@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import numpy as np
+import torch
 
 # from numeric.np.transforms import axangle2aff
 # from geom.tool.io.aggregators import meshes_from_dir, multi_meshes_from_dir
@@ -49,12 +50,16 @@ def animate_by_path(dp, gif_name=None, pause=0.05, callback_func=None, **plt_arg
     animate(vs, f, gif_name=gif_name, pause=pause, callback_func=callback_func, **plt_args)
 
 
-def animate(vs, f=None, gif_name=None,first_frame_index=0, pause=0.05, callback_func=None, color='w', **plt_args):
+def animate(vs, f=None, gif_name=None, first_frame_index=0, pause=0, callback_func=None, color='w', **plt_args):  # was 0.05
     p = plotter()
-    add_mesh_animation(p, vs[first_frame_index], f, color=color,as_a_single_mesh=True, **plt_args)
+    first_example = vs[first_frame_index]
+    final_colors = (vs[-1].cpu().detach() - first_example.cpu().detach()).norm(p=2, dim=-1)
+    clim = [0, torch.max(final_colors)]
+    add_mesh_animation(p, vs[first_frame_index], f, color=color, clim=clim, as_a_single_mesh=True, **plt_args)
     # Plot first frame. Normals are not supported
     print('Orient the view, then press "q" to start animation')
     p.show(auto_close=False, full_screen=True)
+
 
     # Open a gif
     if gif_name is not None:
@@ -64,6 +69,8 @@ def animate(vs, f=None, gif_name=None,first_frame_index=0, pause=0.05, callback_
         if callback_func is not None:
             v = callback_func(p, v, i, len(vs))
         p.update_coordinates(torch2numpy(v), render=False)  # added torch2numpy on v
+        new_color = (v.cpu().detach() - first_example.cpu().detach()).norm(p=2, dim=-1)
+        p.update_scalars(new_color, render=False)
         # p.reset_camera_clipping_range()
         if pause > 0:
             busy_wait(pause)  # Sleeps crashes the program

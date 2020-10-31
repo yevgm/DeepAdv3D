@@ -82,7 +82,7 @@ def show_model_accuracy(PARAMS_FILE,model):
 
 
 
-def find_perturbed_shape(to_class, testdata, model, params, max_dim=None, **hyperParams):
+def find_perturbed_shape(to_class, testdata, model, params, max_dim=None, animate=False, **hyperParams):
     '''
     to_class = 'rand'/'all' choose how many output shapes to find
     model = attacked classification torch model
@@ -132,6 +132,7 @@ def find_perturbed_shape(to_class, testdata, model, params, max_dim=None, **hype
                 lowband_perturbation=hyperParams['lowband_perturbation'],
                 adversarial_loss=hyperParams['adversarial_loss'],
                 similarity_loss=hyperParams['similarity_loss'],
+                animate=animate,
                 **params)
             example_list.append(adex)
     return example_list
@@ -180,7 +181,7 @@ if __name__ == "__main__":
         CWBuilder.USETQDM: True,
         CWBuilder.MIN_IT: 50,  # 200 is good
         CWBuilder.LEARN_RATE: 1e-4,
-        CWBuilder.ADV_COEFF: 1,
+        CWBuilder.ADV_COEFF: 5,  # 1 is good for results, ~3 for animation
         CWBuilder.REG_COEFF: 15,
         CWBuilder.K_nn: 10,  # 140 is good
         CWBuilder.NN_CUTOFF: 3,  # 40 is good
@@ -193,21 +194,23 @@ if __name__ == "__main__":
     generate_examples = 1  # how many potential random examples to create in output folder
     # ------------------------------------------------------------------------
 
+    compute_animation = True
+
     now = datetime.now()
     d = now.strftime("_%b-%d-%Y_%H-%M-%S")
     for example in np.arange(0, generate_examples, 1):
         print('------- example number '+str(example)+' --------')
-        example_list = find_perturbed_shape('all', testdata, model, CWparams,
-                                            **hyperParams, max_dim=2)
+        example_list = find_perturbed_shape('rand', testdata, model, CWparams, animate=compute_animation,
+                                            **hyperParams, max_dim=1)
         op.save_results(example_list, batch_time=d)
 
-    show_animation = True
 
-    if show_animation:
-        vertices_list = []
-        for example in example_list:  # TODO: change example_list to examples from the training (with one C?)
-            vertices_list.append(example.perturbed_pos)
-        animate(vertices_list, gif_name='gif0.gif')
+    if compute_animation:
+        # vertices_list = []
+        # for example in example_list:  # TODO: change example_list to examples from the training (with one C?)
+        #     vertices_list.append(example.perturbed_pos)
+        # animate(vertices_list, gif_name='gif0.gif')
+        animate(example_list[0].animation_vertices, f=example_list[0].animation_faces[0], gif_name='gif5.gif')
 
     else:
         if len(example_list) == 1:

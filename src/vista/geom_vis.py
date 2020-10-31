@@ -372,7 +372,7 @@ def add_mesh(p, v, f=None, n=None, strategy='spheres', grid_on=False, clr='light
 def add_mesh_animation(p, v, f=None, n=None, lines=None,  # Input
              style='surface', smooth_shading=True, eye_dome=False, depth_peeling=False, lighting=None,  # Global arg
              camera_pos=None,
-             color='w', normal_color='lightblue', edge_color='darkblue', line_color='darkblue', cmap='rainbow',
+             color='w', normal_color='lightblue', edge_color='darkblue', line_color='darkblue', cmap='YlOrRd',  # was cmap rainbow
              show_edges=False, clim=None,  # Color options
              normal_scale=1, point_size=6, line_width=1,  # Scales
              grid_on=False, opacity=1.0, title=None, as_a_single_mesh=False  # Misc
@@ -409,10 +409,14 @@ def add_mesh_animation(p, v, f=None, n=None, lines=None,  # Input
 
     if style != 'glyphed_spheres':
         color_params = color_to_pyvista_color_params(color)
+        # p.add_mesh(mesh, style=style, smooth_shading=smooth_shading, cmap=cmap, show_edges=show_edges,
+        #            point_size=point_size, render_points_as_spheres=render_points_as_spheres, edge_color=edge_color,
+        #            opacity=opacity, lighting=lighting, clim=clim, line_width=line_width, render_lines_as_tubes=True,
+        #            **light_params, **color_params)
         p.add_mesh(mesh, style=style, smooth_shading=smooth_shading, cmap=cmap, show_edges=show_edges,
                    point_size=point_size, render_points_as_spheres=render_points_as_spheres, edge_color=edge_color,
                    opacity=opacity, lighting=lighting, clim=clim, line_width=line_width, render_lines_as_tubes=True,
-                   **light_params, **color_params)
+                   **light_params, scalars=np.zeros(v[:, 0].shape))
 
     if n is not None and not as_a_single_mesh:
         add_vectorfield(p, v, f, n, color=normal_color, scale=normal_scale)
