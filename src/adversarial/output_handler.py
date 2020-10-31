@@ -59,9 +59,10 @@ def save_results(example_list:list, CWparams=None, hyperParams=None,
             add_hp_to_csv(rand_example_path, file_str, CWparams, hyperParams,
                           adv_coeff)
 
-    elif (len(example_list) > 1) & (not os.path.isdir(group_example_path)):
-        os.mkdir(group_example_path)
-    elif len(example_list) > 1:
+    elif (len(example_list) > 1):
+        if (not os.path.isdir(group_example_path)):
+            os.mkdir(group_example_path)
+
         now = datetime.now()
         d = now.strftime("_%b-%d-%Y_%H-%M-%S")
         file_str = str(len(example_list)) + '_shapes' + d

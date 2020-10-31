@@ -113,11 +113,11 @@ def find_perturbed_shape(to_class, testdata, model, params, max_dim=None, **hype
         nclasses = max_dim
 
     example_list = []
-    for gt_class in np.arange(0, nclasses, 1):
-        for adv_target in np.arange(0, nclasses, 1):
+    for gt_class in np.arange(5, nclasses, 1):
+        for adv_target in np.arange(5, nclasses, 1):
             # search for adversarial example
             if nclasses == 1:
-                mesh = testdata[ground]
+                mesh = testdata[i]
                 adv_target = target
             else:
                 mesh = testdata[int(gt_class)]
@@ -178,7 +178,7 @@ if __name__ == "__main__":
         CWBuilder.MIN_IT: 500,
         CWBuilder.LEARN_RATE: 1e-4,
         CWBuilder.ADV_COEFF: 1,
-        CWBuilder.REG_COEFF: 15,
+        CWBuilder.REG_COEFF: 50,
         CWBuilder.K_nn: 140,# 140
         CWBuilder.NN_CUTOFF: 20, # 40
         LowbandPerturbation.EIGS_NUMBER: 40} # 10 is good
@@ -187,15 +187,15 @@ if __name__ == "__main__":
             'lowband_perturbation' : True,
             'adversarial_loss' : "carlini_wagner",
             'similarity_loss' : "local_euclidean"}
-    generate_examples = 20 # how many potential random examples to create in output folder
+    generate_examples = 1 # how many potential random examples to create in output folder
     # ------------------------------------------------------------------------
 
     now = datetime.now()
     d = now.strftime("%b-%d-%Y_%H-%M-%S")
     for example in np.arange(0, generate_examples, 1):
         print('------- example number '+str(example)+' --------')
-        example_list = find_perturbed_shape('rand', testdata, model, CWparams,
-                                            **hyperParams, max_dim=2)
+        example_list = find_perturbed_shape('all', testdata, model, CWparams,
+                                            **hyperParams, max_dim=10)
         op.save_results(example_list, CWparams=CWparams, hyperParams=hyperParams
                         , folder_name=d, file_name=str(example))
 

@@ -74,7 +74,7 @@ def show_all_perturbations(example_list, screenshot=False):
         perturbed = adex.perturbed_pos.cpu()
         pos = adex.pos.cpu()
         color = (pos - perturbed).norm(p=2, dim=-1)
-        original_class = adex.y.item()
+        original_class = adex.true_y.item()
         classified_as = adex.logits.argmax().item()
         perturbed_class = adex.perturbed_logits.argmax().item()
         target = adex.target.item()

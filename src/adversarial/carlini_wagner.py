@@ -172,9 +172,7 @@ class CWAdversarialExample(AdversarialExample):
                 self.perturbation.reset()  # NOTE required to clean cache
                 self.perturbation.r.data = last_r
                 break  # cutoff policy used to speed-up the tests
-            if (self.true_y == self.target):
-                print('Given mesh class is equal to the target, continuing..')
-                break
+
             # backpropagate
             loss.backward()
             optimizer.step()
@@ -237,6 +235,9 @@ class CWBuilder(Builder):
         exp_search = True  # flag used to detected whether it is the
         # first exponential search phase, or the binary search phase
 
+        target = self.adex_data['target']
+        true_y = self.adex_data['true_y']
+
         # start search
         for i in range(self.search_iterations):
             midvalue = (range_min + range_max) / 2
@@ -252,6 +253,11 @@ class CWBuilder(Builder):
 
             adex.adversarial_loss = self._adversarial_loss_factory(adex)
             adex.perturbation = self._perturbation_factory(adex)
+
+            if (target == true_y):
+                print('Given mesh class is equal to the target, continuing..')
+                return adex
+
             adex.similarity_loss = self._similarity_loss_factory(adex, K=self.K_nn, cutoff=self.cutoff)
             adex.regularization_loss = self._regularizer_factory(adex)
             adex.logger = self._logger_factory(adex)
