@@ -18,7 +18,7 @@ DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cp
 # DEVICE = torch.device("cpu")
 SRC_DIR = os.path.join(REPO_ROOT,"src")
 FAUST = os.path.join(REPO_ROOT,"datasets/faust")
-PARAMS_FILE = os.path.join(REPO_ROOT, "model_data/FAUST10_pointnet_v2.pt")
+PARAMS_FILE = os.path.join(REPO_ROOT, "model_data/FAUST10_pointnet_rot.pt")
 
 # repository modules
 sys.path.insert(0, SRC_DIR)
@@ -42,11 +42,12 @@ import adversarial.carlini_wagner as cw
 from adversarial.carlini_wagner import CWBuilder, LowbandPerturbation
 
 
-def load_datasets(train_batch=8,test_batch=20):
+def load_datasets(train_batch=8, test_batch=20):
     train_dataset = FaustDataset(
         root=os.path.join(FAUST, r'raw'),
         classification=True,
-        split='train')
+        split='train',
+        data_augmentation=True)
 
     test_dataset = FaustDataset(
         root=os.path.join(FAUST, r'raw'),
@@ -136,30 +137,30 @@ if __name__ == "__main__":
     trainLoader, testLoader, traindata, testdata = load_datasets(train_batch=batchsize, test_batch=20)
 
     # train network
-    # loss_values, test_mean_loss, test_accuracy = ntrain.train(
-    #                                                         train_data=trainLoader,
-    #                                                         test_data=testLoader,
-    #                                                         classifier=model,
-    #                                                         batchSize=batchsize,
-    #                                                         parameters_file=PARAMS_FILE,
-    #                                                         epoch_number=50,
-    #                                                         learning_rate=4e-3,
-    #                                                         train=True)
+    loss_values, test_mean_loss, test_accuracy = ntrain.train(
+                                                            train_data=trainLoader,
+                                                            test_data=testLoader,
+                                                            classifier=model,
+                                                            batchSize=batchsize,
+                                                            parameters_file=PARAMS_FILE,
+                                                            epoch_number=50,
+                                                            learning_rate=4e-3,
+                                                            train=True)
     # # temp train visualizer - in the future : add tensorboard?
-    # print('test mean loss:',test_mean_loss,' test_accuracy:',test_accuracy)
-    # loss_values = np.array(loss_values)
-    # sliced_loss = loss_values[0::5]#sliced
-    #
-    # fig, axs = plt.subplots(2)
-    # fig.suptitle('losses')
-    # axs[0].plot(np.arange(1,len(sliced_loss)+1,1), sliced_loss)
-    # axs[1].plot(np.arange(1,len(loss_values)+1,1), loss_values)
-    #
-    # axs[0].set(xlabel='5*batches index', ylabel='loss')
-    # axs[0].grid()
-    # axs[1].set(xlabel='batches index', ylabel='loss')
-    # axs[1].grid()
-    # plt.show()
+    print('test mean loss:',test_mean_loss,' test_accuracy:',test_accuracy)
+    loss_values = np.array(loss_values)
+    sliced_loss = loss_values[0::5]#sliced
+
+    fig, axs = plt.subplots(2)
+    fig.suptitle('losses')
+    axs[0].plot(np.arange(1,len(sliced_loss)+1,1), sliced_loss)
+    axs[1].plot(np.arange(1,len(loss_values)+1,1), loss_values)
+
+    axs[0].set(xlabel='5*batches index', ylabel='loss')
+    axs[0].grid()
+    axs[1].set(xlabel='batches index', ylabel='loss')
+    axs[1].grid()
+    plt.show()
     #
     # show_model_accuracy(PARAMS_FILE, model)
     model.load_state_dict(torch.load(PARAMS_FILE, map_location=DEVICE))
