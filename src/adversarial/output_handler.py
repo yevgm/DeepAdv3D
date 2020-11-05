@@ -6,7 +6,7 @@ import vista.adv_plotter
 from vista.adv_plotter import show_perturbation, show_all_perturbations
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath('__file__')),".."))
 
-def save_results(example_list:list, CWparams=None, hyperParams=None,
+def save_results(example_list:list, testdata, CWparams=None, hyperParams=None,
                  folder_name=None, file_name=None):
     '''
     If saving one figure at a time, you mut pass a unique folder ID -
@@ -52,7 +52,7 @@ def save_results(example_list:list, CWparams=None, hyperParams=None,
             # save .obj
             write_off(file_path, v, f)
             # save .png
-            p = show_perturbation(example_list, screenshot=True)
+            p = show_perturbation(example_list, testdata, screenshot=True)
             p.link_views() # not sure if it is needed
             p.show(screenshot=file_path+'.png', full_screen=True)
             # concatenate hyper params to .csv

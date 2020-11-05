@@ -72,6 +72,7 @@ def train(train_data,
 						points, target = points.cuda(), target.cuda()
 					classifier = classifier.eval()
 					pred, _, _ = classifier(points)
+					pred = F.log_softmax(pred, dim=1)
 					loss = F.nll_loss(pred, target)
 					pred_choice = pred.data.max(1)[1]
 					correct = pred_choice.eq(target.data).cpu().sum()
@@ -91,9 +92,11 @@ def train(train_data,
 			points, target = points.cuda(), target.cuda()
 		classifier = classifier.eval()
 		pred, _, _ = classifier(points)
+		pred = F.log_softmax(pred, dim=1)
+		loss = F.nll_loss(pred, target)
+
 		pred_choice = pred.data.max(1)[1]
 		correct = pred_choice.eq(target.data).cpu().sum()
-		loss = F.nll_loss(pred, target)
 		test_loss_values.append(loss.item())
 		total_correct += correct.item()
 		total_testset += points.size()[0]

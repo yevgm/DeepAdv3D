@@ -128,7 +128,7 @@ def plot_mesh_montage(vb, fb=None, nb=None, strategy='mesh', labelb=None, grid_o
         slabel = slabelb if slabelb is None else slabelb[i]
 
         # if it's ground truth don't show colorbar
-        if slabel == 'GT':
+        if (slabel == 'GT') | (slabel == 'Target'):
             cbar = False
         else:
             cbar = bar
@@ -161,7 +161,7 @@ def plot_mesh_montage(vb, fb=None, nb=None, strategy='mesh', labelb=None, grid_o
                 labelC = label2C
 
             _, m = add_mesh(p, v=verts, f=faces, n=n, strategy=strategy, title=label, grid_on=grid_on,
-                            normal_scale=normal_scale, camera_pos=camera_pos, cmap=cmap,
+                            normal_scale=normal_scale, camera_pos=camera_pos, cmap=cmap, clim=[0, 0.2],
                             clr=colors, normal_clr=normal_clr, smooth_shade_on=smooth_shade_on, show_edges=show_edges,
                             lighting=lighting, opacity=Opacity, bar=cbar, slabel=slabel, label_color=labelC)
 
@@ -265,7 +265,7 @@ def add_vectorfield(p, v, f, vf, clr='lightblue', normal_scale=1, colormap='rain
 def add_mesh(p, v, f=None, n=None, strategy='spheres', grid_on=False, clr='lightcoral',
              normal_clr='lightblue', title=None, smooth_shade_on=True, show_edges=False, cmap='rainbow',
              normal_scale=1, camera_pos=((0, 0, 5.5), (0, 0, 0), (0, 1.5, 0)), lines=None, opacity=1.0,
-             point_size=None, lighting=None, eye_dome=False, bar=True, slabel='', label_color=None):
+             point_size=None, lighting=None, eye_dome=False, bar=True, slabel='', label_color=None, clim=None):
     # TODO - Clean this shit function up
     # Align arrays:
     cpu = torch.device("cpu")
@@ -339,7 +339,7 @@ def add_mesh(p, v, f=None, n=None, strategy='spheres', grid_on=False, clr='light
                show_edges=show_edges,  # For full mesh visuals - ignored on point cloud plots
                render_points_as_spheres=spheres_on, point_size=point_size,
                rgb=rgb, opacity=opacity, lighting=lighting, scalar_bar_args=sargs,
-               stitle=slabel, show_scalar_bar=bar,
+               stitle=slabel, show_scalar_bar=bar, clim=clim,
                **d_light)  # For sphere visuals - ignored on full mesh
 
     # ambient/diffuse/specular strength, specular exponent, and specular color

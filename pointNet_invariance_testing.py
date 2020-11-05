@@ -56,11 +56,11 @@ def load_datasets(train_batch=8,test_batch=20):
     trainLoader = torch.utils.data.DataLoader(train_dataset,
                                                batch_size=train_batch,
                                                shuffle=True,
-                                               num_workers=10)
+                                               num_workers=4)
     testLoader = torch.utils.data.DataLoader(test_dataset,
                                                batch_size=test_batch,
                                                shuffle=False,
-                                               num_workers=10)
+                                               num_workers=4)
     # load data in different format for Adversarial code
     traindata = dataset.FaustDataset(FAUST, device=DEVICE, train=True, test=False, transform_data=True)
     testdata = dataset.FaustDataset(FAUST, device=DEVICE, train=False, test=True, transform_data=True)
@@ -86,7 +86,7 @@ def random_uniform_rotation(dim=3):
     return H
 
 def show_model_accuracy(PARAMS_FILE, model):
-    loss_values, test_mean_loss, test_accuracy = nTrain.train(
+    loss_values, test_mean_loss, test_accuracy = ntrain.train(
         train_data=trainLoader,
         test_data=testLoader,
         classifier=model,
