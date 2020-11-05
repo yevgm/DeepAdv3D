@@ -18,7 +18,7 @@ DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cp
 # DEVICE = torch.device("cpu")
 SRC_DIR = os.path.join(REPO_ROOT,"src")
 FAUST = os.path.join(REPO_ROOT,"datasets/faust")
-PARAMS_FILE = os.path.join(REPO_ROOT, "model_data/FAUST10_pointnet.pt")
+PARAMS_FILE = os.path.join(REPO_ROOT, "model_data/FAUST10_pointnet_v2.pt")
 
 # repository modules
 sys.path.insert(0, SRC_DIR)
@@ -121,8 +121,10 @@ def find_perturbed_shape(to_class, testdata, model, params, max_dim=None, animat
             if nclasses == 1:
                 mesh = testdata[i]
                 adv_target = target
+                testidx = i
             else:
                 mesh = testdata[int(gt_class)]
+                testidx = int(gt_class)
 
             # perturb target toward adv_target
             adex = cw.generate_adversarial_example(
@@ -133,6 +135,7 @@ def find_perturbed_shape(to_class, testdata, model, params, max_dim=None, animat
                 similarity_loss=hyperParams['similarity_loss'],
                 animate=animate,
                 **params)
+            adex.target_testidx = int(testidx)
             example_list.append(adex)
     return example_list
 
@@ -178,12 +181,12 @@ if __name__ == "__main__":
     # ------------------------------------------------------------------------
     CWparams = {
         CWBuilder.USETQDM: True,
-        CWBuilder.MIN_IT: 100, #500,
+        CWBuilder.MIN_IT: 200, #500,
         CWBuilder.LEARN_RATE: 1e-4,
         CWBuilder.ADV_COEFF: 1, # 1 is good for results, ~3 for animation
         CWBuilder.REG_COEFF: 0, # 15
-        CWBuilder.K_nn: 30,# 140
-        CWBuilder.NN_CUTOFF: 7, # 40
+        CWBuilder.K_nn: 140,# 140
+        CWBuilder.NN_CUTOFF: 30, # 40
         LowbandPerturbation.EIGS_NUMBER: 40} # 10 is good
     hyperParams = {
             'search_iterations': 1,
@@ -218,7 +221,7 @@ if __name__ == "__main__":
     else:
         if len(example_list) == 1:
             # show the original shape, the perturbed figure and both of them overlapped
-            show_perturbation(example_list)
+            show_perturbation(example_list, testdata)
         else:
             # show only the perturbed shape
             show_all_perturbations(example_list)
