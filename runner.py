@@ -143,6 +143,7 @@ def find_perturbed_shape(to_class, testdata, model, params, max_dim=None, animat
                 similarity_loss=hyperParams['similarity_loss'],
                 animate=animate,
                 **params)
+            adex.target_testidx = int(testidx)
             example_list.append(adex)
             adex.target_testidx = int(testidx)
     return example_list

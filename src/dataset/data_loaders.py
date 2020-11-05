@@ -238,21 +238,20 @@ class FaustDataset(data.Dataset):
         else:
             rgb = None
         f = np.stack(plydata['face']['vertex_indices'])
-        f = torch.from_numpy(f.astype(np.float32))
+        f = torch.from_numpy(f.astype(np.int))
         self.f = f
         self.rgb = rgb
 
         # # center and scale
         v = v - np.expand_dims(np.mean(v, axis=0), 0)  # center
-
         # dist = np.max(np.sqrt(np.sum(v ** 2, axis=1)), 0)
         # v = v / dist  # scale
 
-        # if self.data_augmentation:
-        #     theta = np.random.uniform(0, np.pi * 2)
-        #     rotation_matrix = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
-        #     point_set[:, [0, 2]] = point_set[:, [0, 2]].dot(rotation_matrix)  # random rotation
-        #     point_set += np.random.normal(0, 0.02, size=point_set.shape)  # random jitter
+        if self.data_augmentation:
+            theta = np.random.uniform(0, np.pi * 2)
+            rotation_matrix = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
+            v[:, [0, 2]] = v[:, [0, 2]].dot(rotation_matrix)  # random rotation
+            v += np.random.normal(0, 0.1, size=(1, 3))  # random translation
 
         v = torch.from_numpy(v.astype(np.float32))
         cls = torch.from_numpy(np.array([index % 10]).astype(np.int64))

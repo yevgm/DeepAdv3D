@@ -134,8 +134,6 @@ def plot_mesh_montage(vb, fb=None, nb=None, strategy='mesh', labelb=None, grid_o
             cbar = bar
 
         p.subplot(r[i], c[i])
-        # if r[i] == c[i]:
-        #     p.add_background_image('back.png', as_global=False, auto_resize=True)
 
         if isinstance(clr, list):
             loop_len = len(clr)
