@@ -133,7 +133,7 @@ if __name__ == "__main__":
     model = PointNetCls(k=10, feature_transform=False, global_transform=False)
     model = model.to(DEVICE)
     # print(model)
-    batchsize = 8
+    batchsize = 16
     trainLoader, testLoader, traindata, testdata = load_datasets(train_batch=batchsize, test_batch=20)
 
     # train network
@@ -173,21 +173,21 @@ if __name__ == "__main__":
         R = torch.Tensor(random_uniform_rotation()).to(DEVICE)
 
         # v_orig = trainLoader.dataset[i][0]
-        v = trainLoader.dataset[i][0]
+        v = trainLoader.dataset[i][0].to(DEVICE)
         faces = trainLoader.dataset.f
         true_y = trainLoader.dataset[i][1]
         Z, _, _ = model(v)
         f = torch.nn.functional.log_softmax(Z, dim=1)
         pred_y = f.argmax()
 
-        v_rot = torch.mm(v, R)
-        # v_rot = np.abs(np.random.normal()) * v
-        # v_rot = v + np.random.normal(0, 0.5,size=(1, 3)).astype('f')
-        # theta = np.random.uniform(0, np.pi * 2)
-        # rotation_matrix = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
-        # v = v.numpy()
-        # v[:, [0, 2]] = v[:, [0, 2]].dot(rotation_matrix)  # random rotation
-        # v = torch.from_numpy(v)
+        # v_rot = torch.mm(v, R)
+        v_rot = np.abs(np.random.normal()) * v
+        v_rot = v + np.random.normal(0, 0.5,size=(1, 3)).astype('f')
+        theta = np.random.uniform(0, np.pi * 2)
+        rotation_matrix = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
+        v = v.numpy()
+        v[:, [0, 2]] = v[:, [0, 2]].dot(rotation_matrix)  # random rotation
+        v = torch.from_numpy(v).to(DEVICE)
         Z_rot, _, _ = model(v_rot)
         f_rot = torch.nn.functional.log_softmax(Z_rot, dim=1)
         pred_y_rot = f_rot.argmax()
