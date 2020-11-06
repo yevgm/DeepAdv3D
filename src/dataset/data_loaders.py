@@ -9,6 +9,9 @@ from tqdm import tqdm
 import json
 from plyfile import PlyData, PlyElement
 
+# ----------------------------------------------------------------------------------------------------------------------#
+#                                                   Functions
+# ----------------------------------------------------------------------------------------------------------------------#
 def get_segmentation_classes(root):
     catfile = os.path.join(root, 'synsetoffset2category.txt')
     cat = {}
@@ -260,25 +263,7 @@ class FaustDataset(data.Dataset):
     def __len__(self):
         return len(self.fns)
 
-# if __name__ == '__main__':
-#     dataset = sys.argv[1]
-#     datapath = sys.argv[2]
-#
-#     if dataset == 'shapenet':
-#         d = ShapeNetDataset(root = datapath, class_choice = ['Chair'])
-#         print(len(d))
-#         ps, seg = d[0]
-#         print(ps.size(), ps.type(), seg.size(),seg.type())
-#
-#         d = ShapeNetDataset(root = datapath, classification = True)
-#         print(len(d))
-#         ps, cls = d[0]
-#         print(ps.size(), ps.type(), cls.size(),cls.type())
-#         # get_segmentation_classes(datapath)
-#
-#     if dataset == 'modelnet':
-#         gen_modelnet_id(datapath)
-#         d = ModelNetDataset(root=datapath)
-#         print(len(d))
-#         print(d[0])
+
+if __name__ == '__main__':
+    pass
 

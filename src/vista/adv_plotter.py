@@ -17,6 +17,10 @@ labels = [
     'Hands Up'
 ]
 
+# ----------------------------------------------------------------------------------------------------------------------#
+#                                                   Functions
+# ----------------------------------------------------------------------------------------------------------------------#
+
 def show_perturbation(example_list, testdata, screenshot=False):
     adex = example_list[0] # unpack from list
 
@@ -36,10 +40,6 @@ def show_perturbation(example_list, testdata, screenshot=False):
     plt.show()
     color = (pos - perturbed).norm(p=2, dim=-1)
 
-    # Plot one mesh:
-    # plot_mesh(perturbed, f=adex.faces, clr=color, label='Perturbed',
-    #           slabel='L2 perturbation difference', lighting=1, clr_map='rainbow')
-
     # Plot Four meshes using lists:
     original_class = adex.y.item()
     classified_as = adex.logits.argmax().item()
@@ -51,7 +51,6 @@ def show_perturbation(example_list, testdata, screenshot=False):
     sex = 10 * (int(adex.target_testidx) >= 10)
     original_perturbed_pos = testdata[int(target+sex)].pos.cpu()
     original_perturbed_faces = testdata[int(target+sex)].face.T
-
 
     vlist = [pos, perturbed, original_perturbed_pos, [pos, perturbed]]
     flist = [adex.faces, adex.faces, original_perturbed_faces, [adex.faces, adex.faces]]
