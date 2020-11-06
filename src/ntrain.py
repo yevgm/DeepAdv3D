@@ -31,7 +31,7 @@ def train(train_data,
 	loss_values = []
 
 	optimizer = optim.Adam(classifier.parameters(), lr=learning_rate, betas=(0.9, 0.999))
-	scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.5)
+	scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.5)
 	if torch.cuda.is_available():
 	    classifier.cuda()
 
@@ -42,9 +42,9 @@ def train(train_data,
 		for epoch in range(epoch_number):
 			scheduler.step()
 			for i, data in enumerate(train_data, 0):
-
 				points, target = data
 				target = target[:, 0]
+				cur_batch_len = len(points)
 				points = points.transpose(2, 1)
 				if torch.cuda.is_available():
 					points, target = points.cuda(), target.cuda()
@@ -61,22 +61,22 @@ def train(train_data,
 				optimizer.step()
 				pred_choice = pred.data.max(1)[1]
 				correct = pred_choice.eq(target.data).cpu().sum()
-				print('[%d: %d/%d] train loss: %f accuracy: %f' % (epoch, i, num_batch, loss.item(), correct.item() / float(batchSize)))
+				print('[%d: %d/%d] train loss: %f accuracy: %f' % (epoch, i, num_batch, loss.item(), correct.item() / float(cur_batch_len)))
 
-				if i % 10 == 0:
-					j, data = next(enumerate(test_data, 0))
-					points, target = data
-					target = target[:, 0]
-					points = points.transpose(2, 1)
-					if torch.cuda.is_available():
-						points, target = points.cuda(), target.cuda()
-					classifier = classifier.eval()
-					pred, _, _ = classifier(points)
-					pred = F.log_softmax(pred, dim=1)
-					loss = F.nll_loss(pred, target)
-					pred_choice = pred.data.max(1)[1]
-					correct = pred_choice.eq(target.data).cpu().sum()
-					print('[%d: %d/%d] %s loss: %f accuracy: %f' % (epoch, i, num_batch, blue('test'), loss.item(), correct.item()/float(test_data.batch_size)))
+				# if i % 3 == 0:
+				# 	j, data = next(enumerate(test_data, 0))
+				# 	points, target = data
+				# 	target = target[:, 0]
+				# 	points = points.transpose(2, 1)
+				# 	if torch.cuda.is_available():
+				# 		points, target = points.cuda(), target.cuda()
+				# 	classifier = classifier.eval()
+				# 	pred, _, _ = classifier(points)
+				# 	pred = F.log_softmax(pred, dim=1)
+				# 	loss = F.nll_loss(pred, target)
+				# 	pred_choice = pred.data.max(1)[1]
+				# 	correct = pred_choice.eq(target.data).cpu().sum()
+				# 	print('[%d: %d/%d] %s loss: %f accuracy: %f' % (epoch, i, num_batch, blue('test'), loss.item(), correct.item()/float(test_data.batch_size)))
 
 		torch.save(classifier.state_dict(), parameters_file)
 

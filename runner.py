@@ -202,7 +202,7 @@ if __name__ == "__main__":
             'lowband_perturbation' : True,
             'adversarial_loss' : "carlini_wagner",
             'similarity_loss' : "local_euclidean"}
-    generate_examples = 1  # how many potential random examples to create in output folder
+    generate_examples = 5  # how many potential random examples to create in output folder
     compute_animation = False
     save_flag = True
     # ------------------------------------------------------------------------
@@ -212,8 +212,8 @@ if __name__ == "__main__":
     for example in np.arange(0, generate_examples, 1):
 
         print('------- example number '+str(example)+' --------')
-        example_list = find_perturbed_shape('all', testdata, model, CWparams, animate=compute_animation,
-                                            **hyperParams, max_dim=5)
+        example_list = find_perturbed_shape('rand', testdata, model, CWparams, animate=compute_animation,
+                                            **hyperParams, max_dim=1)
         if save_flag:
             op.save_results(example_list, testdata, CWparams=CWparams, hyperParams=hyperParams
                             , folder_name=d, file_name=str(example))
