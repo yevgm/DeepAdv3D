@@ -81,7 +81,7 @@ class STNkd(nn.Module):
         return x
 
 class PointNetfeat(nn.Module):
-    def __init__(self, global_feat = True, feature_transform = False):
+    def __init__(self, global_feat=True, feature_transform=False, global_transform=False):
         super(PointNetfeat, self).__init__()
         self.stn = STN3d()
         self.conv1 = torch.nn.Conv1d(3, 64, 1)
@@ -92,6 +92,7 @@ class PointNetfeat(nn.Module):
         self.bn3 = nn.BatchNorm1d(1024)
         self.global_feat = global_feat
         self.feature_transform = feature_transform
+        self.global_transform = global_transform
         if self.feature_transform:
             self.fstn = STNkd(k=64)
 
@@ -100,10 +101,13 @@ class PointNetfeat(nn.Module):
             x = torch.unsqueeze(x.T, 0) ## fix for geometric data loader
 
         n_pts = x.size()[2]
-        trans = self.stn(x)
-        x = x.transpose(2, 1)
-        x = torch.bmm(x, trans)
-        x = x.transpose(2, 1)
+        if self.global_transform:
+            trans = self.stn(x)
+            x = x.transpose(2, 1)
+            x = torch.bmm(x, trans)
+            x = x.transpose(2, 1)
+        else:
+            trans = None
         x = F.relu(self.bn1(self.conv1(x)))
 
         if self.feature_transform:
@@ -155,11 +159,11 @@ class PointNetDenseCls(nn.Module):
 
 class PointNetCls(nn.Module):
 
-    def __init__(self, k=16, feature_transform=True):
+    def __init__(self, k=16, feature_transform=True,  global_transform=False):
         super(PointNetCls, self).__init__()
         self.classes = k
         self.feature_transform = feature_transform
-        self.feat = PointNetfeat(global_feat=True, feature_transform=feature_transform)
+        self.feat = PointNetfeat(global_transform=global_transform, feature_transform=feature_transform)
         self.fc1 = nn.Linear(1024, 512)
         self.bn1 = nn.BatchNorm1d(512)
         self.relu = nn.ReLU()
@@ -174,7 +178,7 @@ class PointNetCls(nn.Module):
         x = F.relu(self.bn1(self.fc1(x)))
         x = F.relu(self.bn2(self.dropout(self.fc2(x))))
         x = self.fc3(x)
-        return F.log_softmax(x, dim=1), trans, trans_feat
+        return x, trans, trans_feat
 
 def feature_transform_regularizer(trans):
     d = trans.size()[1]
