@@ -159,7 +159,7 @@ def plot_mesh_montage(vb, fb=None, nb=None, strategy='mesh', labelb=None, grid_o
                 labelC = label2C
 
             _, m = add_mesh(p, v=verts, f=faces, n=n, strategy=strategy, title=label, grid_on=grid_on,
-                            normal_scale=normal_scale, camera_pos=camera_pos, cmap=cmap, clim=[0, 0.35],
+                            normal_scale=normal_scale, camera_pos=camera_pos, cmap=cmap, clim=[0, 0.2],
                             clr=colors, normal_clr=normal_clr, smooth_shade_on=smooth_shade_on, show_edges=show_edges,
                             lighting=lighting, opacity=Opacity, bar=cbar, slabel=slabel, label_color=labelC)
 

@@ -13,7 +13,7 @@ import torch.nn.functional as func
 import random
 
 # variable definitions
-REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath('__file__')),".."))  # need ".." in linux
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath('__file__')),""))  # need ".." in linux
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 # DEVICE = torch.device("cpu")
 SRC_DIR = os.path.join(REPO_ROOT,"src")
@@ -94,8 +94,15 @@ def find_perturbed_shape(to_class, testdata, model, params, max_dim=None, animat
         CWBuilder.REG_COEFF: 15,
         LowbandPerturbation.EIGS_NUMBER: 40}
     '''
-
-    if isinstance(to_class, str) & (to_class == 'rand'):
+    example_list = []
+    if isinstance(to_class, int):
+        while True:
+            i=to_class
+            target = random.randint(0, testdata.num_classes - 1)
+            ground = testdata[i].y.item()
+            if ground != target: break
+        nclasses = 1
+    elif isinstance(to_class, str) & (to_class == 'rand'):
         # choose random target
         while True:
             i = random.randint(0, len(testdata) - 1)
@@ -103,6 +110,7 @@ def find_perturbed_shape(to_class, testdata, model, params, max_dim=None, animat
             ground = testdata[i].y.item()
             if ground != target: break
         nclasses = 1
+
     elif isinstance(to_class, str) & (to_class == 'all'):
         # class_arr = np.arange(0, testdata.num_classes, 1)
         # iterations = class_arr.tolist() * 10
@@ -114,7 +122,7 @@ def find_perturbed_shape(to_class, testdata, model, params, max_dim=None, animat
     if (max_dim is not None) & (to_class == 'all'):
         nclasses = max_dim
 
-    example_list = []
+
     for gt_class in np.arange(0, nclasses, 1):
         for adv_target in np.arange(0, nclasses, 1):
             # search for adversarial example
@@ -137,6 +145,7 @@ def find_perturbed_shape(to_class, testdata, model, params, max_dim=None, animat
                 **params)
             adex.target_testidx = int(testidx)
             example_list.append(adex)
+            adex.target_testidx = int(testidx)
     return example_list
 
 
@@ -181,21 +190,21 @@ if __name__ == "__main__":
     # ------------------------------------------------------------------------
     CWparams = {
         CWBuilder.USETQDM: True,
-        CWBuilder.MIN_IT: 200, #500,
+        CWBuilder.MIN_IT: 500, #500,
         CWBuilder.LEARN_RATE: 1e-4,
         CWBuilder.ADV_COEFF: 1, # 1 is good for results, ~3 for animation
-        CWBuilder.REG_COEFF: 0, # 15
+        CWBuilder.REG_COEFF: 15, # 15
         CWBuilder.K_nn: 140,# 140
         CWBuilder.NN_CUTOFF: 30, # 40
         LowbandPerturbation.EIGS_NUMBER: 40} # 10 is good
     hyperParams = {
-            'search_iterations': 1,
+            'search_iterations': 5,
             'lowband_perturbation' : True,
             'adversarial_loss' : "carlini_wagner",
             'similarity_loss' : "local_euclidean"}
-    generate_examples = 1  # how many potential random examples to create in output folder
+    generate_examples = 5  # how many potential random examples to create in output folder
     compute_animation = False
-    save_flag = False
+    save_flag = True
     # ------------------------------------------------------------------------
 
     now = datetime.now()
@@ -206,7 +215,7 @@ if __name__ == "__main__":
         example_list = find_perturbed_shape('rand', testdata, model, CWparams, animate=compute_animation,
                                             **hyperParams, max_dim=1)
         if save_flag:
-            op.save_results(example_list, CWparams=CWparams, hyperParams=hyperParams
+            op.save_results(example_list, testdata, CWparams=CWparams, hyperParams=hyperParams
                             , folder_name=d, file_name=str(example))
 
 

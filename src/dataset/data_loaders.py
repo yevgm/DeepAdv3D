@@ -238,8 +238,7 @@ class FaustDataset(data.Dataset):
         else:
             rgb = None
         f = np.stack(plydata['face']['vertex_indices'])
-        f = torch.from_numpy(f.astype(np.int))
-        self.f = f
+        self.f = torch.from_numpy(f.astype(np.int))
         self.rgb = rgb
 
         # # center and scale
