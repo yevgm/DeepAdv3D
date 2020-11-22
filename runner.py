@@ -179,9 +179,9 @@ if __name__ == "__main__":
     # ------------------------------------------------------------------------
     CWparams = {
         CWBuilder.USETQDM: True,
-        CWBuilder.MIN_IT: 50,  # 200 is good
+        CWBuilder.MIN_IT: 30,  # 200 is good
         CWBuilder.LEARN_RATE: 1e-4,
-        CWBuilder.ADV_COEFF: 5,  # 1 is good for results, ~3 for animation
+        CWBuilder.ADV_COEFF: 3,  # 1 is good for results, ~3 for animation
         CWBuilder.REG_COEFF: 15,
         CWBuilder.K_nn: 10,  # 140 is good
         CWBuilder.NN_CUTOFF: 3,  # 40 is good
@@ -207,10 +207,10 @@ if __name__ == "__main__":
 
     if compute_animation:
         # vertices_list = []
-        # for example in example_list:  # TODO: change example_list to examples from the training (with one C?)
+        # for example in example_list:
         #     vertices_list.append(example.perturbed_pos)
         # animate(vertices_list, gif_name='gif0.gif')
-        animate(example_list[0].animation_vertices, f=example_list[0].animation_faces[0], gif_name='gif5.gif')
+        animate(example_list[0].animation_vertices, f=example_list[0].animation_faces[0], gif_name='gif10.gif')
 
     else:
         if len(example_list) == 1:

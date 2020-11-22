@@ -58,7 +58,7 @@ def show_perturbation(example_list, screenshot=False):
                             labelb=[labels[original_class], 'Perturbed to\n'+labels[target], 'Both'],
                             slabelb=[ 'GT', 'L2 difference', 'L2 difference'],
                             success=[class_success_l, success_l, None],
-                            opacity=Opacitylist, cmap='YlOrRd', screenshot=screenshot)
+                            opacity=Opacitylist, cmap='OrRd', screenshot=screenshot)
     return p
 
 def show_all_perturbations(example_list, screenshot=False):
