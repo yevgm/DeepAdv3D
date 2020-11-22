@@ -13,7 +13,7 @@ import torch.nn.functional as func
 import random
 
 # variable definitions
-REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath('__file__')),""))  # need ".." in linux
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath('__file__')),".."))  # need ".." in linux
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 SRC_DIR = os.path.join(REPO_ROOT,"src")
 FAUST = os.path.join(REPO_ROOT,"datasets/faust")
