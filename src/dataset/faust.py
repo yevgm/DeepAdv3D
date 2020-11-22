@@ -23,8 +23,8 @@ class FaustDataset(torch_geometric.data.InMemoryDataset):
         if transform_data:
             # rotate and move
             transform = transforms.Compose([
-                Move(mean=[0,0,0], std=[0.05,0.05,0.05]), 
-                Rotate(dims=[0,1,2]),
+                Move(mean=[0,0,0], std=0),#std=[0.05,0.05,0.05]), # std=0),
+                #Rotate(dims=[0,1,2]),
                 ToDevice(device)])
         else:
             transform = ToDevice(device)

@@ -9,6 +9,9 @@ from tqdm import tqdm
 import json
 from plyfile import PlyData, PlyElement
 
+# ----------------------------------------------------------------------------------------------------------------------#
+#                                                   Functions
+# ----------------------------------------------------------------------------------------------------------------------#
 def get_segmentation_classes(root):
     catfile = os.path.join(root, 'synsetoffset2category.txt')
     cat = {}
@@ -238,21 +241,19 @@ class FaustDataset(data.Dataset):
         else:
             rgb = None
         f = np.stack(plydata['face']['vertex_indices'])
-        f = torch.from_numpy(f.astype(np.float32))
-        self.f = f
+        self.f = torch.from_numpy(f.astype(np.int))
         self.rgb = rgb
 
         # # center and scale
         v = v - np.expand_dims(np.mean(v, axis=0), 0)  # center
-
         # dist = np.max(np.sqrt(np.sum(v ** 2, axis=1)), 0)
         # v = v / dist  # scale
 
-        # if self.data_augmentation:
-        #     theta = np.random.uniform(0, np.pi * 2)
-        #     rotation_matrix = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
-        #     point_set[:, [0, 2]] = point_set[:, [0, 2]].dot(rotation_matrix)  # random rotation
-        #     point_set += np.random.normal(0, 0.02, size=point_set.shape)  # random jitter
+        if self.data_augmentation:
+            theta = np.random.uniform(0, np.pi * 2)
+            rotation_matrix = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
+            v[:, [0, 2]] = v[:, [0, 2]].dot(rotation_matrix)  # random rotation
+            v += np.random.normal(0, 0.1, size=(1, 3))  # random translation
 
         v = torch.from_numpy(v.astype(np.float32))
         cls = torch.from_numpy(np.array([index % 10]).astype(np.int64))
@@ -262,25 +263,7 @@ class FaustDataset(data.Dataset):
     def __len__(self):
         return len(self.fns)
 
-# if __name__ == '__main__':
-#     dataset = sys.argv[1]
-#     datapath = sys.argv[2]
-#
-#     if dataset == 'shapenet':
-#         d = ShapeNetDataset(root = datapath, class_choice = ['Chair'])
-#         print(len(d))
-#         ps, seg = d[0]
-#         print(ps.size(), ps.type(), seg.size(),seg.type())
-#
-#         d = ShapeNetDataset(root = datapath, classification = True)
-#         print(len(d))
-#         ps, cls = d[0]
-#         print(ps.size(), ps.type(), cls.size(),cls.type())
-#         # get_segmentation_classes(datapath)
-#
-#     if dataset == 'modelnet':
-#         gen_modelnet_id(datapath)
-#         d = ModelNetDataset(root=datapath)
-#         print(len(d))
-#         print(d[0])
+
+if __name__ == '__main__':
+    pass
 

@@ -17,7 +17,11 @@ labels = [
     'Hands Up'
 ]
 
-def show_perturbation(example_list, screenshot=False):
+# ----------------------------------------------------------------------------------------------------------------------#
+#                                                   Functions
+# ----------------------------------------------------------------------------------------------------------------------#
+
+def show_perturbation(example_list, testdata, screenshot=False):
     adex = example_list[0] # unpack from list
 
     perturbed = adex.perturbed_pos.cpu()
@@ -36,28 +40,27 @@ def show_perturbation(example_list, screenshot=False):
     plt.show()
     color = (pos - perturbed).norm(p=2, dim=-1)
 
-    # Plot one mesh:
-    # plot_mesh(perturbed, f=adex.faces, clr=color, label='Perturbed',
-    #           slabel='L2 perturbation difference', lighting=1, clr_map='rainbow')
-
-    # Plot three meshes using lists:
+    # Plot Four meshes using lists:
     original_class = adex.y.item()
     classified_as = adex.logits.argmax().item()
     perturbed_class = adex.perturbed_logits.argmax().item()
     target = adex.target.item()
     class_success_l = (classified_as == original_class)
     success_l = (perturbed_class == target) | (original_class == target)
+    # perutrbed shape data
+    sex = 10 * (int(adex.target_testidx) >= 10)
+    original_perturbed_pos = testdata[int(target+sex)].pos.cpu()
+    original_perturbed_faces = testdata[int(target+sex)].face.T
 
-    gt_const_mid = color.max().item() / 2
-    gt_const_min = color.min().item()
-    vlist = [pos, perturbed, [pos, perturbed]]
-    flist = [adex.faces, adex.faces, [adex.faces, adex.faces]]
-    clist = [torch.zeros_like(color)+gt_const_min, color, [torch.zeros_like(color)+gt_const_mid, color]]
-    Opacitylist = [1, 1, [0.35, 1]]
+    vlist = [pos, perturbed, original_perturbed_pos, [pos, perturbed]]
+    flist = [adex.faces, adex.faces, original_perturbed_faces, [adex.faces, adex.faces]]
+    clist = [torch.zeros_like(color), color, torch.zeros_like(color),
+             [torch.zeros_like(color), color]]
+    Opacitylist = [1, 1, 1, [0.35, 1]]
     p, _ = plot_mesh_montage(vlist, fb=flist, clrb=clist,
-                            labelb=[labels[original_class], 'Perturbed to\n'+labels[target], 'Both'],
-                            slabelb=[ 'GT', 'L2 difference', 'L2 difference'],
-                            success=[class_success_l, success_l, None],
+                            labelb=[labels[original_class], 'Perturbed to\n'+labels[target], labels[target], 'Both'],
+                            slabelb=[ 'GT', 'L2 difference', 'Target', 'L2 difference'],
+                            success=[class_success_l, success_l, None, None],
                             opacity=Opacitylist, cmap='OrRd', screenshot=screenshot)
     return p
 
@@ -74,7 +77,7 @@ def show_all_perturbations(example_list, screenshot=False):
         perturbed = adex.perturbed_pos.cpu()
         pos = adex.pos.cpu()
         color = (pos - perturbed).norm(p=2, dim=-1)
-        original_class = adex.y.item()
+        original_class = adex.true_y.item()
         classified_as = adex.logits.argmax().item()
         perturbed_class = adex.perturbed_logits.argmax().item()
         target = adex.target.item()
@@ -90,5 +93,5 @@ def show_all_perturbations(example_list, screenshot=False):
     # Plot all:
     p, _ = plot_mesh_montage(perturbed_l, fb=faces_l, clrb=color_l, labelb=target_l,
                      success=success_l, classifier_success=class_success_l,
-                      cmap='YlOrRd', screenshot=screenshot)
+                      cmap='OrRd', screenshot=screenshot)
     return p

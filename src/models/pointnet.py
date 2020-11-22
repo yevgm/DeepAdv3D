@@ -183,20 +183,5 @@ class SimpleTransformer(nn.Module):
         self.eye = self.eye.to(device)
 
 
-#====================================================================================
-'''
-class PointnetVarAutoencoder(torch.nn.Module):
-
-class Decoder(nn.Module):
-    def __init__(self):
-        nn.Module.__init__(self)
-        self.fc1 = nn.Sequential(nn.Linear(LATENT_SPACE, 1024), 
-                        nn.LeakyReLU(), 
-                        nn.Linear(1024, 2048),
-                        nn.LeakyReLU(), 
-                        nn.Linear(2048, NUM_POINTS*3))
-    
-    def forward(self, x):
-        x = self.fc1(x).view(x.shape[0],NUM_POINTS,-1)
-        xfc = x
-        return x'''
+if __name__ == '__main__':
+    pass

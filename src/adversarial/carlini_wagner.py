@@ -179,9 +179,7 @@ class CWAdversarialExample(AdversarialExample):
                 self.perturbation.reset()  # NOTE required to clean cache
                 self.perturbation.r.data = last_r
                 break  # cutoff policy used to speed-up the tests
-            if (self.true_y == self.target):
-                print('Given mesh class is equal to the target, continuing..')
-                break
+
             # backpropagate
             loss.backward()
             optimizer.step()
@@ -239,10 +237,14 @@ class CWBuilder(Builder):
 
         # exponential search variables
         start_adv_coeff = self.adex_data[CWBuilder.ADV_COEFF]
+        optimal_adversarial_coeff = start_adv_coeff
         range_min, range_max = 0, start_adv_coeff
         optimal_example = None
         exp_search = True  # flag used to detected whether it is the
         # first exponential search phase, or the binary search phase
+
+        target = self.adex_data['target']
+        true_y = self.adex_data['true_y']
 
         # start search
         for i in range(self.search_iterations):
@@ -259,6 +261,11 @@ class CWBuilder(Builder):
 
             adex.adversarial_loss = self._adversarial_loss_factory(adex)
             adex.perturbation = self._perturbation_factory(adex)
+
+            if (target == true_y):
+                print('Given mesh class is equal to the target, continuing..')
+                return adex
+
             adex.similarity_loss = self._similarity_loss_factory(adex, K=self.K_nn, cutoff=self.cutoff)
             adex.regularization_loss = self._regularizer_factory(adex)
             adex.logger = self._logger_factory(adex)
@@ -274,6 +281,7 @@ class CWBuilder(Builder):
             # update best estimation
             if adex.is_successful:
                 optimal_example = adex
+                optimal_adversarial_coeff = c
 
             # update loop variables
             if exp_search and not adex.is_successful:
@@ -285,12 +293,13 @@ class CWBuilder(Builder):
                 range_max = range_max if not adex.is_successful else midvalue
                 range_min = midvalue if not adex.is_successful else range_min
 
-        # reset the adversarial example to the original state
         self.adex_data[CWBuilder.ADV_COEFF] = start_adv_coeff
+
 
         # if unable to find a good c,r pair, return the best found solution
         is_successful = optimal_example is not None
         if not is_successful: optimal_example = adex
+        optimal_example.adversarial_coeff = optimal_adversarial_coeff
         return optimal_example
 
 
