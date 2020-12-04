@@ -144,7 +144,7 @@ if __name__ == "__main__":
     #                                                         classifier=model,
     #                                                         batchSize=batchsize,
     #                                                         parameters_file=PARAMS_FILE,
-    #                                                         epoch_number=75,
+    #                                                         epoch_number=20,
     #                                                         learning_rate=4e-3,
     #                                                         train=True)
     # # # temp train visualizer - in the future : add tensorboard?
@@ -182,19 +182,20 @@ if __name__ == "__main__":
         f = torch.nn.functional.log_softmax(Z, dim=1)
         pred_y = f.argmax()
 
+        v_rot = v
         # v_rot = torch.mm(v, R).to(DEVICE)
         # v_rot = np.abs(np.random.normal()) * v
-        v = v + torch.Tensor(np.random.normal(0, 0.5,size=(1, 3)).astype('f')).to(DEVICE)
+        v_rot = v_rot + torch.Tensor(np.random.normal(0, 0.01, size=(1, 3)).astype('f')).to(DEVICE)
         # theta = np.random.uniform(0, np.pi * 2)
         # rotation_matrix = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
         # v = v.cpu().numpy()
         # v[:, [0, 2]] = v[:, [0, 2]].dot(rotation_matrix)  # random rotation
         # v = torch.from_numpy(v).to(DEVICE)
-        Z_rot, _, _ = model(v)
+        Z_rot, _, _ = model(v_rot)
         f_rot = torch.nn.functional.log_softmax(Z_rot, dim=1)
         pred_y_rot = f_rot.argmax()
 
-        plot_mesh_montage([v, v_orig], [faces, faces])
+        plot_mesh_montage([v, v_rot], [faces, faces])
 
 
 

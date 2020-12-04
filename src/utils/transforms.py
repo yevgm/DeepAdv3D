@@ -1,6 +1,6 @@
 import math
 import random
-
+import numpy as np
 import torch
 import torch_geometric as tgeo
 from torch_geometric.data import Data
@@ -82,3 +82,22 @@ class ToDevice(object):
         mesh.edge_index = mesh.edge_index.to(self.argument)
         mesh.y = mesh.y.to(self.argument)
         return mesh
+
+
+def random_uniform_rotation(dim=3):
+    H = np.eye(dim)
+    D = np.ones((dim,))
+    for n in range(1, dim):
+        x = np.random.normal(size=(dim - n + 1,))
+        D[n - 1] = np.sign(x[0])
+        x[0] -= D[n - 1] * np.sqrt((x * x).sum())
+        # Householder transformation
+        Hx = (np.eye(dim - n + 1) - 2. * np.outer(x, x) / (x * x).sum())
+        mat = np.eye(dim)
+        mat[n - 1:, n - 1:] = Hx
+        H = np.dot(H, mat)
+        # Fix the last sign such that the determinant is 1
+    D[-1] = (-1) ** (1 - (dim % 2)) * D.prod()
+    # Equivalent to np.dot(np.diag(D), H) but faster, apparently
+    H = (D * H.T).T
+    return H

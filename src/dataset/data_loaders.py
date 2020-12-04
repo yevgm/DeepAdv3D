@@ -8,6 +8,7 @@ import sys
 from tqdm import tqdm 
 import json
 from plyfile import PlyData, PlyElement
+from utils.transforms import random_uniform_rotation
 
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   Functions
@@ -250,10 +251,15 @@ class FaustDataset(data.Dataset):
         # v = v / dist  # scale
 
         if self.data_augmentation:
-            theta = np.random.uniform(0, np.pi * 2)
-            rotation_matrix = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
-            v[:, [0, 2]] = v[:, [0, 2]].dot(rotation_matrix)  # random rotation
-            v += np.random.normal(0, 0.1, size=(1, 3))  # random translation
+            # theta = np.random.uniform(0, np.pi * 2)
+            # rotation_matrix = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
+            # v[:, [0, 2]] = v[:, [0, 2]].dot(rotation_matrix)  # random Z rotation
+
+            # random unitary rotation
+            r = random_uniform_rotation()
+            v = v @ r
+            # random translation
+            v += np.random.normal(0, 0.01, size=(1, 3))
 
         v = torch.from_numpy(v.astype(np.float32))
         cls = torch.from_numpy(np.array([index % 10]).astype(np.int64))
