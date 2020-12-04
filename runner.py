@@ -160,12 +160,12 @@ if __name__ == "__main__":
     # ------------------------------------------------------------------------
     CWparams = {
         CWBuilder.USETQDM: True,
-        CWBuilder.MIN_IT: 30,  # 200 is good
+        CWBuilder.MIN_IT: 200,  # 200 is good
         CWBuilder.LEARN_RATE: 1e-4,
-        CWBuilder.ADV_COEFF: 3,  # 1 is good for results, ~3 for animation
-        CWBuilder.REG_COEFF: 15,
+        CWBuilder.ADV_COEFF: 1,  # 1 is good for results, ~3 for animation
+        CWBuilder.REG_COEFF: 2,
         CWBuilder.K_nn: 10,  # 140 is good
-        CWBuilder.NN_CUTOFF: 3,  # 40 is good
+        CWBuilder.NN_CUTOFF: 40,  # 40 is good
         LowbandPerturbation.EIGS_NUMBER: 10}  # 10 is good, 40 in article
 
     hyperParams = {
@@ -173,11 +173,11 @@ if __name__ == "__main__":
             'lowband_perturbation' : True,
             'adversarial_loss' : "carlini_wagner",
             'similarity_loss' : "local_euclidean"}
-    generate_examples = 5  # how many potential random examples to create in output folder
+    generate_examples = 1  # how many potential random examples to create in output folder
     compute_animation = False
     save_flag = True
     mode = 'rand'
-    max_dim = 5 # matrix size
+    max_dim = 5  # matrix size
     # ------------------------------------------------------------------------
 
     now = datetime.now()
