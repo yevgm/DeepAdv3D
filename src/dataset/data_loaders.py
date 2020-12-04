@@ -259,7 +259,7 @@ class FaustDataset(data.Dataset):
             r = random_uniform_rotation()
             v = v @ r
             # random translation
-            v += np.random.normal(0, 0.1, size=(1, 3))
+            v += np.random.normal(0, 0.01, size=(1, 3))
 
         v = torch.from_numpy(v.astype(np.float32))
         cls = torch.from_numpy(np.array([index % 10]).astype(np.int64))

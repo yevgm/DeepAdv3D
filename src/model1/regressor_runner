@@ -1,0 +1,8 @@
+# This is the main script that runs out model1:
+
+# Using the central article's method in the neural setting
+# '(revolves around regressing for the optimal smooth deformation field parameters needed to optimally deform the target'
+# ' shape to achieve target/untargeted adverserial attack success)
+# Architecture: Simple PointNet (Without T-Nets, see implementation in the Shape Completion Repo)
+# + switch last layer to regression layer
+
