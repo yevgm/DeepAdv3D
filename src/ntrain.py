@@ -31,7 +31,7 @@ def train(train_data,
 	loss_values = []
 
 	optimizer = optim.Adam(classifier.parameters(), lr=learning_rate, betas=(0.9, 0.999))
-	# scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.5)
+	scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.5)
 	if torch.cuda.is_available():
 	    classifier.cuda()
 

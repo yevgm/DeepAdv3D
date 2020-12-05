@@ -278,30 +278,34 @@ class Regressor(nn.Module):
 
 
 if __name__ == '__main__':
-    sim_data = Variable(torch.rand(32,3,2500))
-    trans = STN3d()
-    out = trans(sim_data)
-    print('stn', out.size())
-    print('loss', feature_transform_regularizer(out))
-
-    sim_data_64d = Variable(torch.rand(32, 64, 2500))
-    trans = STNkd(k=64)
-    out = trans(sim_data_64d)
-    print('stn64d', out.size())
-    print('loss', feature_transform_regularizer(out))
-
-    pointfeat = PointNetfeat(global_feat=True)
-    out, _, _ = pointfeat(sim_data)
-    print('global feat', out.size())
-
-    pointfeat = PointNetfeat(global_feat=False)
-    out, _, _ = pointfeat(sim_data)
-    print('point feat', out.size())
-
-    cls = PointNetCls(k = 5)
+    sim_data = Variable(torch.rand(32, 3, 2500))
+    # trans = STN3d()
+    # out = trans(sim_data)
+    # print('stn', out.size())
+    # print('loss', feature_transform_regularizer(out))
+    #
+    # sim_data_64d = Variable(torch.rand(32, 64, 2500))
+    # trans = STNkd(k=64)
+    # out = trans(sim_data_64d)
+    # print('stn64d', out.size())
+    # print('loss', feature_transform_regularizer(out))
+    #
+    # pointfeat = PointNetfeat(global_feat=True)
+    # out, _, _ = pointfeat(sim_data)
+    # print('global feat', out.size())
+    #
+    # pointfeat = PointNetfeat(global_feat=False)
+    # out, _, _ = pointfeat(sim_data)
+    # print('point feat', out.size())
+    #
+    cls = PointNetCls(k = 10)
     out, _, _ = cls(sim_data)
     print('class', out.size())
+    #
+    # seg = PointNetDenseCls(k = 3)
+    # out, _, _ = seg(sim_data)
+    # print('seg', out.size())
 
-    seg = PointNetDenseCls(k = 3)
-    out, _, _ = seg(sim_data)
-    print('seg', out.size())
+    model = Regressor(out_dim = 20000)
+    out, _, _ = model(sim_data)
+    print('Regressor', out.size())

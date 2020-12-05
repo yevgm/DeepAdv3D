@@ -1,6 +1,7 @@
 import os
 import sys
 import torch
+import inspect
 
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   DEVICE
@@ -9,7 +10,7 @@ DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cp
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   PATH
 # ----------------------------------------------------------------------------------------------------------------------#
-REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath('__file__')), ".."))  # need ".." in linux
+REPO_ROOT = os.path.dirname(os.path.realpath(__file__))
 SRC_DIR = os.path.join(REPO_ROOT, "src")
 FAUST = os.path.join(REPO_ROOT, "datasets/faust")
 sys.path.insert(0, SRC_DIR)
@@ -17,3 +18,12 @@ sys.path.insert(0, SRC_DIR)
 #                                                   MODEL
 # ----------------------------------------------------------------------------------------------------------------------#
 PARAMS_FILE = os.path.join(REPO_ROOT, "model_data/FAUST10_pointnet_rot_b32.pt")
+# ----------------------------------------------------------------------------------------------------------------------#
+#                                                   TRAIN HYPERPARAMETERS
+# ----------------------------------------------------------------------------------------------------------------------#
+LR = 1e-3  # learning rate
+BATCH_SIZE = 64  # number of data examples in one batch
+N_EPOCH = 100  # number of train epochs
+SCH_STEP = 10  # scheduler step size
+
+
