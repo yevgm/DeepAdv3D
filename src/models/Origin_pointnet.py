@@ -254,27 +254,28 @@ class Decoder(nn.Module):
         self.fc3 = nn.Linear(8192, outDim)
 
     def forward(self, x):
-        x, trans, trans_feat = self.enc(x)  # x is 1024, trans is exit from TNET1, trans_Feat is exit from tnet2
         x = F.relu(self.bn1(self.fc1(x)))
         x = F.relu(self.bn2(self.dropout(self.fc2(x))))
         x = self.fc3(x)
-        return x, trans, trans_feat
+        return x
 
 
 class Regressor(nn.Module):
 
-    def __init__(self, outDim, firstDim=64, feature_transform=True,  global_transform=False):
+    def __init__(self, numExamples, numVertices, firstDim=64, feature_transform=True,  global_transform=False):
         super(Regressor, self).__init__()
-        self.outDim = outDim
+        self.numExamples = numExamples
+        self.numVertices = numVertices
+        self.outDim = 3*numVertices
         self.feature_transform = feature_transform
         self.enc = Encoder(firstDim, global_transform=global_transform, feature_transform=feature_transform)
-        self.dec = Decoder(outDim)
+        self.dec = Decoder(self.outDim)
 
     def forward(self, x):
-        x = self.enc.forward(x)
-        x, trans, trans_feat = self.dec.forward(x)
-        torch.reshape(x, (self.outDim, -1))
-        return x, trans, trans_feat
+        x, _, _ = self.enc(x)
+        x = self.dec(x)
+        x = x.view(self.numExamples, 3, self.numVertices)
+        return x
 
 
 if __name__ == '__main__':
@@ -298,7 +299,7 @@ if __name__ == '__main__':
     # out, _, _ = pointfeat(sim_data)
     # print('point feat', out.size())
     #
-    cls = PointNetCls(k = 10)
+    cls = PointNetCls(k=10)
     out, _, _ = cls(sim_data)
     print('class', out.size())
     #
@@ -306,6 +307,6 @@ if __name__ == '__main__':
     # out, _, _ = seg(sim_data)
     # print('seg', out.size())
 
-    model = Regressor(out_dim = 20000)
-    out, _, _ = model(sim_data)
+    model = Regressor(numVertices=2500, numExamples=32)
+    out = model(sim_data)
     print('Regressor', out.size())
