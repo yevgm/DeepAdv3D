@@ -261,17 +261,19 @@ class Decoder(nn.Module):
         return x, trans, trans_feat
 
 
-class ExampleGenerator(nn.Module):
+class Regressor(nn.Module):
 
     def __init__(self, outDim, firstDim=64, feature_transform=True,  global_transform=False):
-        super(ExampleGenerator, self).__init__()
+        super(Regressor, self).__init__()
+        self.outDim = outDim
         self.feature_transform = feature_transform
         self.enc = Encoder(firstDim, global_transform=global_transform, feature_transform=feature_transform)
         self.dec = Decoder(outDim)
 
     def forward(self, x):
-        x = self.enc(x)
-        x, trans, trans_feat = self.dec(x)
+        x = self.enc.forward(x)
+        x, trans, trans_feat = self.dec.forward(x)
+        torch.reshape(x, (self.outDim, -1))
         return x, trans, trans_feat
 
 
