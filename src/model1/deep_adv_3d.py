@@ -21,7 +21,7 @@ class Model1(nn.Module):
         # 2. original pointNet
         super(Model1, self).__init__()
         self.regressor = Regressor(outDim, feature_transform=False)  # do we need feature transform false?
-        self.classifier = PointNetCls()
+        self.classifier = classifier_model
 
     def forward(self, x):
         pass
