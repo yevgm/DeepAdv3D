@@ -138,15 +138,15 @@ if __name__ == "__main__":
     trainLoader,testLoader, traindata, testdata = load_datasets(train_batch=batchsize, test_batch=20)
 
     # train network
-    # loss_values, test_mean_loss, test_accuracy = ntrain.train(
-    #                                                         train_data=trainLoader,
-    #                                                         test_data=testLoader,
-    #                                                         classifier=model,
-    #                                                         batchSize=batchsize,
-    #                                                         parameters_file=PARAMS_FILE,
-    #                                                         epoch_number=20,
-    #                                                         learning_rate=4e-3,
-    #                                                         train=True)
+    loss_values, test_mean_loss, test_accuracy = ntrain.train(
+                                                            train_data=trainLoader,
+                                                            test_data=testLoader,
+                                                            classifier=model,
+                                                            batchSize=batchsize,
+                                                            parameters_file=PARAMS_FILE,
+                                                            epoch_number=20,
+                                                            learning_rate=4e-3,
+                                                            train=True)
     # # # temp train visualizer - in the future : add tensorboard?
     # print('test mean loss:',test_mean_loss,' test_accuracy:',test_accuracy)
     # loss_values = np.array(loss_values)
