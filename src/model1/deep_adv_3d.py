@@ -5,7 +5,7 @@ import torch.nn as nn
 from config import *
 
 # repository modules
-from models.Origin_pointnet import PointNetCls
+from models.Origin_pointnet import PointNetCls, Regressor
 
 
 # ----------------------------------------------------------------------------------------------------------------------#
@@ -14,16 +14,29 @@ from models.Origin_pointnet import PointNetCls
 
 class Model1:
 
-    def __init__(self, classifier_model: nn.Module):
+    def __init__(self, outDim, classifier_model: nn.Module):
         pass
         # Definition of:
         # 1. regressor
         # 2. original pointNet
-    def forward(self):
+        self.regressor = Regressor(outDim, feature_transform=False)  # do we need feature transform false?
+        self.classifier = PointNetCls()
+
+    def forward(self, x):
         pass
         # Model forward pass, return output from trained classifier AND from regressor
         # run the pass, and with no grad run classifier
         # TODO: ASSERT that gradient is correctly backpropagated !
+
+        v = self.regressor.forward(x)  # this is the perturbation
+
+        with torch.no_grad():
+            perturbed_pos = x + v
+            classification = self.classifier.forward(perturbed_pos)
+
+        return classification, v
+
+
 
 class trainer:
 
