@@ -195,8 +195,9 @@ class CWBuilder(Builder):
     K_nn = "k_nearest_neighbors"
     NN_CUTOFF = "knn_cutoff_parameter"
 
-    def __init__(self, search_iterations=1, animate=False):
+    def __init__(self, search_iterations=1, animate=False, net=False):
         super().__init__()
+        self.net = net
         self.search_iterations = search_iterations
         self.animate = animate
         self._perturbation_factory = LowbandPerturbation
@@ -245,6 +246,13 @@ class CWBuilder(Builder):
 
         target = self.adex_data['target']
         true_y = self.adex_data['true_y']
+
+        # building an example just for the net
+        if self.net:
+            adex = CWAdversarialExample(**self.adex_data)
+            adex.adversarial_loss = self._adversarial_loss_factory(adex)
+            adex.perturbation = self._perturbation_factory(adex)
+            return adex
 
         # start search
         for i in range(self.search_iterations):
@@ -597,7 +605,8 @@ def generate_adversarial_example(
         adversarial_loss="carlini_wagner",
         similarity_loss="local_euclidean",
         animate=False,
-        regularization="none", **args) -> CWAdversarialExample:
+        regularization="none",
+        net=False, **args) -> CWAdversarialExample:
     builder = CWBuilder(search_iterations, animate).set_mesh(mesh.pos, mesh.edge_index.t(), mesh.face.t(), mesh.y)
     builder.set_classifier(classifier).set_target(target)
 
@@ -635,4 +644,4 @@ def generate_adversarial_example(
         else:
             raise ValueError("Invalid regularization term!")
 
-    return builder.build(**args)
+    return builder.build(**args)  # if we only generate an example for the net, it just returns the adex

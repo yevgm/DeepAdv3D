@@ -43,6 +43,7 @@ from adversarial.carlini_wagner import CWBuilder, LowbandPerturbation
 
 
 def load_datasets(train_batch=8, test_batch=20):
+    # here we use FaustDataset class that inherits from torch.utils.data.Dataloader. it's a map-style dataset.
     train_dataset = FaustDataset(
         root=os.path.join(FAUST, r'raw'),
         classification=True,
@@ -64,6 +65,7 @@ def load_datasets(train_batch=8, test_batch=20):
                                                shuffle=False,
                                                num_workers=4)
     # load data in different format for Adversarial code
+    # it uses carlini's FaustDataset class that inherits from torch_geometric.data.InMemoryDataset
     traindata = dataset.FaustDataset(FAUST, device=DEVICE, train=True, test=False, transform_data=True)
     testdata = dataset.FaustDataset(FAUST, device=DEVICE, train=False, test=True, transform_data=True)
 

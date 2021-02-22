@@ -108,7 +108,7 @@ class PointNetfeat(nn.Module):
             x = x.transpose(2, 1)
         else:
             trans = None
-        x = F.relu(self.bn1(self.conv1(x))) # the first MLP layer (mlp64,64 shared)
+        x = F.relu(self.bn1(self.conv1(x)))  # the first MLP layer (mlp64,64 shared)
 
         if self.feature_transform:
             trans_feat = self.fstn(x)
@@ -244,14 +244,14 @@ class Decoder(nn.Module):
     def __init__(self, outDim, feature_transform=True,  global_transform=False):
         super(Decoder, self).__init__()
 
-        self.fc1 = nn.Linear(1024, 2048)
-        self.bn1 = nn.BatchNorm1d(2048)
+        self.fc1 = nn.Linear(1024, 2048)  # 1024, 2048
+        self.bn1 = nn.BatchNorm1d(2048)  # 2048
         self.relu = nn.ReLU()
-        self.fc2 = nn.Linear(2048, 8192)
+        self.fc2 = nn.Linear(2048, 8192)  # 2048, 8192
         self.dropout = nn.Dropout(p=0.3)
-        self.bn2 = nn.BatchNorm1d(8192)
+        self.bn2 = nn.BatchNorm1d(8192)  # 8192
         self.relu = nn.ReLU()
-        self.fc3 = nn.Linear(8192, outDim)
+        self.fc3 = nn.Linear(8192, outDim)  # 8192, outDim
 
     def forward(self, x):
         x = F.relu(self.bn1(self.fc1(x)))
@@ -306,6 +306,6 @@ if __name__ == '__main__':
     # out, _, _ = seg(sim_data)
     # print('seg', out.size())
 
-    model = Regressor(numVertices=2500, numExamples=32)
+    model = Regressor(numVertices=2500)
     out = model(sim_data)
     print('Regressor', out.size())

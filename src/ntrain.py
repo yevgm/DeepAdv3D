@@ -33,11 +33,11 @@ def train(train_data,
 	optimizer = optim.Adam(classifier.parameters(), lr=learning_rate, betas=(0.9, 0.999))
 	scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.5)
 	if torch.cuda.is_available():
-	    classifier.cuda()
+		classifier.cuda()
 
 	num_batch = int(len(train_data.dataset) / batchSize)
 
-	if train==True:
+	if train:
 
 		for epoch in range(epoch_number):
 			# scheduler.step()
@@ -49,7 +49,7 @@ def train(train_data,
 				if torch.cuda.is_available():
 					points, target = points.cuda(), target.cuda()
 				optimizer.zero_grad()
-				classifier = classifier.train()
+				classifier = classifier.train()  # changes some of the classifier's layers, like batchnorm
 				pred, trans, trans_feat = classifier(points)
 				pred = F.log_softmax(pred, dim=1)
 				loss = F.nll_loss(pred, target)
@@ -57,6 +57,7 @@ def train(train_data,
 				loss_values.append(loss.item())
 				# if opt.feature_transform:
 				#     loss += feature_transform_regularizer(trans_feat) * 0.001
+
 				loss.backward()
 				optimizer.step()
 				pred_choice = pred.data.max(1)[1]
