@@ -247,11 +247,11 @@ class Decoder(nn.Module):
         self.fc1 = nn.Linear(1024, 2048)  # 1024, 2048
         self.bn1 = nn.BatchNorm1d(2048)  # 2048
         self.relu = nn.ReLU()
-        self.fc2 = nn.Linear(2048, 8192)  # 2048, 8192
+        self.fc2 = nn.Linear(2048, 4096)  # 2048, 8192
         self.dropout = nn.Dropout(p=0.3)
         self.bn2 = nn.BatchNorm1d(8192)  # 8192
         self.relu = nn.ReLU()
-        self.fc3 = nn.Linear(8192, outDim)  # 8192, outDim
+        self.fc3 = nn.Linear(4096, outDim)  # 8192, outDim , 6890 is for faust
 
     def forward(self, x):
         x = F.relu(self.bn1(self.fc1(x)))
@@ -278,7 +278,7 @@ class Regressor(nn.Module):
 
 
 if __name__ == '__main__':
-    sim_data = Variable(torch.rand(32, 3, 2500))
+    sim_data = Variable(torch.rand(32, 3, 6890))
     # trans = STN3d()
     # out = trans(sim_data)
     # print('stn', out.size())
@@ -306,6 +306,6 @@ if __name__ == '__main__':
     # out, _, _ = seg(sim_data)
     # print('seg', out.size())
 
-    model = Regressor(numVertices=2500)
+    model = Regressor(numVertices=6890)
     out = model(sim_data)
     print('Regressor', out.size())

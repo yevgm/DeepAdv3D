@@ -15,7 +15,8 @@ import adversarial.carlini_wagner as cw
 #                                                   Classes Definition
 # ----------------------------------------------------------------------------------------------------------------------#
 
-# Model 1 with classifier inside. Commenented out since I'm trying to shove the classifier inside the loss function now
+# Model 1 with classifier inside. Commenented out since I'm trying to shove the classifier inside the loss function,
+# instead of combining them
 # class Model1(nn.Module):
 #
 #     def __init__(self, outDim, classifier_model: nn.Module):
@@ -61,7 +62,7 @@ class trainer:
         self.save_weights_dir = PARAMS_FILE
 
     def train(self):
-        optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr, betas=(0.9, 0.999))  # TODO: change from model.parameters() to per-parameter options?
+        optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr, betas=(0.9, 0.999))
         scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=self.scheduler_step, gamma=0.5)
 
         self.model.to(DEVICE)
@@ -78,18 +79,19 @@ class trainer:
                 points.to(DEVICE)
                 target.to(DEVICE)
 
-                adex = cw.generate_adversarial_example(mesh=data, classifier=self.classifier,
-                                                       target=target, lowband_perturbation=False)
-
-
+                # adex = cw.generate_adversarial_example(mesh=data, classifier=self.classifier,
+                #                                        target=target, lowband_perturbation=False)
 
                 optimizer.zero_grad()
-                self.model = self.model.train()  # TODO: overload this to only apply to certain parts of the model? (exclude the classifier)
-                classfication, v = self.model(points)
+                self.model = self.model.train()
+                perturbed_ex = self.model(points)
 
-                pred = F.log_softmax(classfication, dim=1)
+                with torch.no_grad:
+                    logits = self.classifier(perturbed_ex)
+                    pred = F.log_softmax(logits, dim=1)  # CW page 5: we don't use this (this if F), we need Z
+
                 # loss = F.nll_loss(pred, target)
-                loss = self.lossFunction(points, v, pred, target)  # TODO: create lossFunction in regressor_trainer.py
+                loss = self.lossFunction(points, perturbed_ex, logits, target)  # TODO: create lossFunction in regressor_trainer.py
 
                 self.loss_values.append(loss.item())
 
@@ -104,8 +106,8 @@ class trainer:
         return self.loss_values
 
     def evaluate(self):
-        # TODO: rewrite this. Do we need to evaluate here only the misclassification or include the similarity too?
-        total_correct = 0
+        # the evaluation is based purely on the misclassifications amount on the test set
+        total_misclassified = 0
         total_testset = 0
         total_loss = 0
         test_loss_values = []
@@ -116,16 +118,18 @@ class trainer:
             if torch.cuda.is_available():
                 points, target = points.cuda(), target.cuda()
             self.model = self.model.eval()
-            classfication, v = self.model(points)
-            pred = F.log_softmax(classfication, dim=1)
-            loss = F.nll_loss(pred, target)
+            perturbed_ex = self.model(points)
+
+            logits = self.classifier(perturbed_ex)
+            pred = F.log_softmax(logits, dim=1)  # CW page 5: we don't use this (this if F), we need Z
+            classifier_loss = F.nll_loss(pred, target)
 
             pred_choice = pred.data.max(1)[1]
             correct = pred_choice.eq(target.data).cpu().sum()
-            test_loss_values.append(loss.item())
-            total_correct += correct.item()
+            test_loss_values.append(classifier_loss.item())
+            total_misclassified += 1 if correct.item() is 0 else total_misclassified  # not sure it works like that
             total_testset += points.size()[0]
-        test_accuracy = total_correct / len(self.test_data.dataset)
+        test_accuracy = total_misclassified / len(self.test_data.dataset)
         test_mean_loss = sum(test_loss_values) / len(test_loss_values)
 
         return test_mean_loss, test_accuracy
@@ -142,7 +146,7 @@ class LossFunction(object):
 
 
 class AdversarialLoss(LossFunction):
-    def __init__(self, adv_example, perturbed_logits, k: float = 0):
+    def __init__(self, adv_example: torch.Tensor, perturbed_logits, k: float = 0):
         super().__init__(adv_example)
         self.k = torch.tensor([k], device=adv_example.device, dtype=adv_example.dtype_float)
         self.perturbed_logits = perturbed_logits
@@ -155,6 +159,22 @@ class AdversarialLoss(LossFunction):
         Z = Z[-1]
         Ztarget, Zmax = Z[self.adv_example.target], Z[argmax]
         return torch.max(Zmax - Ztarget, -self.k)
+
+
+class L2Similarity(LossFunction):
+    def __init__(self, original_pos: torch.Tensor, perturbed_pos: torch.Tensor):
+        super().__init__(original_pos)
+        self.original_pos = original_pos
+        self.perturbed_pos = perturbed_pos
+
+    def __call__(self) -> torch.Tensor:
+        diff = self.perturbed_pos - self.original_pos
+        area_indices, area_values = self.adv_example.area
+        weight_diff = diff * torch.sqrt(
+            area_values.view(-1, 1))  # (sqrt(ai)*(xi-perturbed(xi)) )^2  = ai*(x-perturbed(xi))^2
+        L2 = weight_diff.norm(
+            p="fro")  # this reformulation uses the sub-gradient (hance ensuring a valid behaviour at zero)
+        return L2
 
 # -----------------------------------------------------------------
 
