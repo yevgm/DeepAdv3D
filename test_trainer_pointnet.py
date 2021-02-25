@@ -130,6 +130,7 @@ def show_model_accuracy(PARAMS_FILE, model):
 
     print('test mean loss:', test_mean_loss, ' test_accuracy:', test_accuracy)
 
+
 if __name__ == "__main__":
 
     model = PointNetCls(k=10, feature_transform=False, global_transform=False)

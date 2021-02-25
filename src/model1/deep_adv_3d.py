@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import adversarial.carlini_wagner as cw
 
 # variable definitions
 from config import *
@@ -9,7 +10,7 @@ from models.Origin_pointnet import PointNetCls, Regressor
 import torch.nn.functional as F
 from tqdm import tqdm
 from utils.misc import kNN
-import adversarial.carlini_wagner as cw
+from utils import laplacebeltrami_FEM_v2
 
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   Classes Definition
@@ -67,11 +68,12 @@ class trainer:
 
         self.model.to(DEVICE)
 
+        target_class = 5  # temporary and will need access from outside later on
+
         for epoch in range(self.n_epoch):
             scheduler.step()
             for i, data in enumerate(self.train_data, 0):
                 points, target = data
-                # points, _ = data
                 target = target[:, 0]
                 cur_batch_len = len(points)
                 points = points.transpose(2, 1)
@@ -90,17 +92,19 @@ class trainer:
                     logits = self.classifier(perturbed_ex)
                     pred = F.log_softmax(logits, dim=1)  # CW page 5: we don't use this (this if F), we need Z
 
-                # loss = F.nll_loss(pred, target)
-                loss = self.lossFunction(points, perturbed_ex, logits, target)  # TODO: create lossFunction in regressor_trainer.py
+                # loss = F.nll_loss(pred, target)  # for training classifier
+                MisclassifyLoss = AdversarialLoss(perturbed_ex, logits, target_class)  # target is constant 5 for now
+                L2Loss = L2Similarity(points, perturbed_ex, data.f)
+                loss = MisclassifyLoss() + L2Loss()
 
                 self.loss_values.append(loss.item())
 
                 loss.backward()
                 optimizer.step()
                 pred_choice = pred.data.max(1)[1]
-                correct = pred_choice.eq(target.data).cpu().sum()
+                num_misclassified = pred_choice.eq(target_class).cpu().sum()
                 print('[%d: %d/%d] train loss: %f accuracy: %f' % (
-                    epoch, i, self.num_batch, loss.item(), correct.item() / float(cur_batch_len)))
+                    epoch, i, self.num_batch, loss.item(), num_misclassified.item() / float(cur_batch_len)))
 
         torch.save(self.model.state_dict(), self.save_weights_dir)
         return self.loss_values
@@ -146,30 +150,33 @@ class LossFunction(object):
 
 
 class AdversarialLoss(LossFunction):
-    def __init__(self, adv_example: torch.Tensor, perturbed_logits, k: float = 0):
+    def __init__(self, adv_example: torch.Tensor, perturbed_logits, target, k: float = 0):
         super().__init__(adv_example)
         self.k = torch.tensor([k], device=adv_example.device, dtype=adv_example.dtype_float)
         self.perturbed_logits = perturbed_logits
+        self.target = target
 
     def __call__(self) -> torch.Tensor:
         Z = self.perturbed_logits
         values, index = torch.sort(Z, dim=1)
         index = index[-1]
-        argmax = index[-1] if index[-1] != self.adv_example.target else index[-2]  # max{Z(i): i != target}
+        argmax = index[-1] if index[-1] != self.target else index[-2]  # max{Z(i): i != target}
         Z = Z[-1]
-        Ztarget, Zmax = Z[self.adv_example.target], Z[argmax]
+        Ztarget, Zmax = Z[self.target], Z[argmax]
         return torch.max(Zmax - Ztarget, -self.k)
 
 
 class L2Similarity(LossFunction):
-    def __init__(self, original_pos: torch.Tensor, perturbed_pos: torch.Tensor):
+    def __init__(self, original_pos: torch.Tensor, perturbed_pos: torch.Tensor, faces):
         super().__init__(original_pos)
         self.original_pos = original_pos
         self.perturbed_pos = perturbed_pos
+        self.faces = faces
 
     def __call__(self) -> torch.Tensor:
+        _, area = laplacebeltrami_FEM_v2(self.original_pos, self.faces)
         diff = self.perturbed_pos - self.original_pos
-        area_indices, area_values = self.adv_example.area
+        area_indices, area_values = area
         weight_diff = diff * torch.sqrt(
             area_values.view(-1, 1))  # (sqrt(ai)*(xi-perturbed(xi)) )^2  = ai*(x-perturbed(xi))^2
         L2 = weight_diff.norm(

@@ -34,19 +34,12 @@ from test_trainer_pointnet import load_datasets
 #     return trainLoader, testLoader, traindata, testdata
 
 
-def RegressorLoss(points, v, pred, target, similarityLoss):  # TODO: write this
-    pass
-    # TODO: use the loss classes in deep_adv_3d as they are or turn them into regular functions
-    # TODO: gotta find a way to grab the data's faces for the computation of the area.
-    # TODO: it might be done using geometric data like in carlini_wagner.py line 610
-
-
 if __name__ == '__main__':
     pass
     # data loading
     # traindata = dataset.FaustDataset(FAUST, device=DEVICE, train=True, test=False, transform_data=True)
     # testdata = dataset.FaustDataset(FAUST, device=DEVICE, train=False, test=True, transform_data=True)
-    trainLoader, testLoader, traindata, testdata = load_datasets(train_batch=32, test_batch=20) # torch data, not geometric
+    trainLoader, testLoader, traindata, testdata = load_datasets(train_batch=32, test_batch=20)  # torch data, not geometric!
 
     # model definition
     num_nodes = testdata.get(0).num_nodes
@@ -58,8 +51,7 @@ if __name__ == '__main__':
 
     # train network
     train_ins = trainer(train_data=trainLoader, test_data=testLoader,
-                        model=regressor, lossFunction=RegressorLoss,
-                        classifier=classifier)
+                        model=regressor, classifier=classifier)
     train_ins.train()
 
 
