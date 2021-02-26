@@ -262,7 +262,7 @@ class Decoder(nn.Module):
 
 class Regressor(nn.Module):
 
-    def __init__(self, numVertices, firstDim=64, feature_transform=True,  global_transform=False):
+    def __init__(self, numVertices, firstDim=64, feature_transform=False,  global_transform=False):
         super(Regressor, self).__init__()
         self.numVertices = numVertices
         self.outDim = 3*numVertices

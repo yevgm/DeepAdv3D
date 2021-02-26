@@ -35,7 +35,6 @@ from test_trainer_pointnet import load_datasets
 
 
 if __name__ == '__main__':
-    pass
     # data loading
     # traindata = dataset.FaustDataset(FAUST, device=DEVICE, train=True, test=False, transform_data=True)
     # testdata = dataset.FaustDataset(FAUST, device=DEVICE, train=False, test=True, transform_data=True)

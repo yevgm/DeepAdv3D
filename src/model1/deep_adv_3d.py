@@ -11,6 +11,7 @@ import torch.nn.functional as F
 from tqdm import tqdm
 from utils.misc import kNN
 from utils import laplacebeltrami_FEM_v2
+from utils import eigenpairs
 
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   Classes Definition
@@ -47,11 +48,10 @@ from utils import laplacebeltrami_FEM_v2
 
 class trainer:
 
-    def __init__(self, train_data, test_data, model: nn.Module, lossFunction, classifier): #TODO: add datatype assert
+    def __init__(self, train_data, test_data, model: nn.Module, classifier): #TODO: add datatype assert
         self.classifier = classifier
         self.train_data = train_data
         self.test_data = test_data
-        self.lossFunction = lossFunction
         self.model = model
         self.batch_size = BATCH_SIZE
         self.num_batch = int(len(train_data.dataset) / self.batch_size)
@@ -78,8 +78,8 @@ class trainer:
                 cur_batch_len = len(points)
                 points = points.transpose(2, 1)
 
-                points.to(DEVICE)
-                target.to(DEVICE)
+                points = points.to(DEVICE)
+                target = target.to(DEVICE)
 
                 # adex = cw.generate_adversarial_example(mesh=data, classifier=self.classifier,
                 #                                        target=target, lowband_perturbation=False)
@@ -180,7 +180,7 @@ class L2Similarity(LossFunction):
         weight_diff = diff * torch.sqrt(
             area_values.view(-1, 1))  # (sqrt(ai)*(xi-perturbed(xi)) )^2  = ai*(x-perturbed(xi))^2
         L2 = weight_diff.norm(
-            p="fro")  # this reformulation uses the sub-gradient (hance ensuring a valid behaviour at zero)
+            p="fro")  # this reformulation uses the sub-gradient (hence ensuring a valid behaviour at zero)
         return L2
 
 # -----------------------------------------------------------------
