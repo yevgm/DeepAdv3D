@@ -73,7 +73,7 @@ class trainer:
         for epoch in range(self.n_epoch):
             scheduler.step()
             for i, data in enumerate(self.train_data, 0):
-                points, target = data
+                points, target, faces = data
                 target = target[:, 0]
                 cur_batch_len = len(points)
                 points = points.transpose(2, 1)
@@ -86,15 +86,17 @@ class trainer:
 
                 optimizer.zero_grad()
                 self.model = self.model.train()
+                self.classifier = self.classifier.eval()
                 perturbed_ex = self.model(points)
 
-                with torch.no_grad:
-                    logits = self.classifier(perturbed_ex)
-                    pred = F.log_softmax(logits, dim=1)  # CW page 5: we don't use this (this if F), we need Z
+                with torch.no_grad():
+                    logits, _, _ = self.classifier(perturbed_ex)
+                    pred = torch.nn.functional.log_softmax(logits, dim=1)  # CW page 5: we don't use this (this if F), we need Z
+
 
                 # loss = F.nll_loss(pred, target)  # for training classifier
                 MisclassifyLoss = AdversarialLoss(perturbed_ex, logits, target_class)  # target is constant 5 for now
-                L2Loss = L2Similarity(points, perturbed_ex, data.f)
+                L2Loss = L2Similarity(points, perturbed_ex, faces)
                 loss = MisclassifyLoss() + L2Loss()
 
                 self.loss_values.append(loss.item())
@@ -152,7 +154,7 @@ class LossFunction(object):
 class AdversarialLoss(LossFunction):
     def __init__(self, adv_example: torch.Tensor, perturbed_logits, target, k: float = 0):
         super().__init__(adv_example)
-        self.k = torch.tensor([k], device=adv_example.device, dtype=adv_example.dtype_float)
+        self.k = torch.tensor([k], device=adv_example.device, dtype=torch.float32)
         self.perturbed_logits = perturbed_logits
         self.target = target
 

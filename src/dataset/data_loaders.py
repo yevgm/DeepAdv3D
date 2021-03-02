@@ -263,7 +263,7 @@ class FaustDataset(data.Dataset):
 
         v = torch.from_numpy(v.astype(np.float32))
         cls = torch.from_numpy(np.array([index % 10]).astype(np.int64))
-        return v, cls
+        return v, cls, f
 
 
     def __len__(self):

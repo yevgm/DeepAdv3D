@@ -249,7 +249,7 @@ class Decoder(nn.Module):
         self.relu = nn.ReLU()
         self.fc2 = nn.Linear(2048, 4096)  # 2048, 8192
         self.dropout = nn.Dropout(p=0.3)
-        self.bn2 = nn.BatchNorm1d(8192)  # 8192
+        self.bn2 = nn.BatchNorm1d(4096)  # 8192
         self.relu = nn.ReLU()
         self.fc3 = nn.Linear(4096, outDim)  # 8192, outDim , 6890 is for faust
 
