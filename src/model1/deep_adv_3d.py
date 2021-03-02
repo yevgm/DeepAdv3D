@@ -176,7 +176,7 @@ class L2Similarity(LossFunction):
         self.faces = faces
 
     def __call__(self) -> torch.Tensor:
-        _, area = laplacebeltrami_FEM_v2(self.original_pos, self.faces)
+        area = laplacebeltrami_FEM_v2(self.original_pos, self.faces)
         diff = self.perturbed_pos - self.original_pos
         area_indices, area_values = area
         weight_diff = diff * torch.sqrt(

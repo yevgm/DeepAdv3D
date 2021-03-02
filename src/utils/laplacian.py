@@ -3,6 +3,7 @@ import torch_sparse as tsparse
 import torch_scatter as tscatter
 import tqdm
 
+
 def tri_areas(vertices, faces):
     v1 = vertices[faces[:, 0], :]
     v2 = vertices[faces[:, 1], :]
@@ -11,6 +12,19 @@ def tri_areas(vertices, faces):
     v1 = v1 - v3
     v2 = v2 - v3
     return torch.norm(torch.cross(v1, v2, dim=1), dim=1) * .5
+
+
+def tri_areas_batch(vertices, faces):
+    batchsize = faces.shape[0]
+    for i in batchsize:
+        v1 = vertices[i, faces[i, :, 0], :]
+        v2 = vertices[i, faces[i, :, 1], :]
+        v3 = vertices[i, faces[i, :, 2], :]
+
+        v1 = v1 - v3
+        v2 = v2 - v3
+        areas_list = torch.cat(torch.norm(torch.cross(v1, v2, dim=1), dim=1) * .5)
+    return areas_list
 
 
 def laplacebeltrami_FEM(vertices, faces):
@@ -70,6 +84,7 @@ def laplacebeltrami_FEM(vertices, faces):
     lumped_mass = torch.sparse.sum(mass, dim=1).to_dense()
     return stiff, mass, lumped_mass
 
+
 def laplacebeltrami_FEM_v2(pos, faces):
     if pos.shape[1] != 3: raise ValueError("input position must have shape: [#vertices, 3]")
     if faces.shape[1] != 3: raise ValueError("input faces must have shape [#faces,3]")
@@ -112,6 +127,7 @@ def laplacebeltrami_FEM_v2(pos, faces):
     ai,av = _lumped_scatter(indices, areas, n)
     return (Si,Sv), (ai,av)
 
+
 def _stiffness_scatter(indices, cotan, n):
     stiff_i, stiff_v = tsparse.coalesce(indices, -cotan, m=n, n=n, op="add")
     eye_indices = torch.cat((stiff_i[0,:].view(1,-1), stiff_i[0,:].view(1,-1)), dim=0)
@@ -119,6 +135,7 @@ def _stiffness_scatter(indices, cotan, n):
     Si = torch.cat((stiff_eye_i, stiff_i), dim=1)
     Sv = torch.cat((-stiff_eye_v, stiff_v))
     return tsparse.coalesce(Si,Sv, n, n)
+
 
 def _lumped_scatter(indices, areas, n):
     eye_indices = torch.cat((indices[0,:].view(1,-1), indices[0,:].view(1,-1)), dim=0)
