@@ -128,6 +128,7 @@ def laplacebeltrami_FEM_v2(pos, faces):
     return (Si, Sv), (ai, av)
 
 
+
 def _stiffness_scatter(indices, cotan, n):
     stiff_i, stiff_v = tsparse.coalesce(indices, -cotan, m=n, n=n, op="add")
     eye_indices = torch.cat((stiff_i[0, :].view(1, -1), stiff_i[0, :].view(1, -1)), dim=0)
@@ -135,6 +136,7 @@ def _stiffness_scatter(indices, cotan, n):
     Si = torch.cat((stiff_eye_i, stiff_i), dim=1)
     Sv = torch.cat((-stiff_eye_v, stiff_v))
     return tsparse.coalesce(Si, Sv, n, n)
+
 
 
 def _lumped_scatter(indices, areas, n):

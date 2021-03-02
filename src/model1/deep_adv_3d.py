@@ -12,6 +12,7 @@ from tqdm import tqdm
 from utils.misc import kNN
 from utils import laplacebeltrami_FEM_v2
 from utils import eigenpairs
+from utils.laplacian import tri_areas_batch
 
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   Classes Definition
