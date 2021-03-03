@@ -72,7 +72,8 @@ class trainer:
         target_class = 5  # temporary and will need access from outside later on
 
         for epoch in range(self.n_epoch):
-            scheduler.step()
+            if epoch is not 0:
+                scheduler.step()
             for i, data in enumerate(self.train_data, 0):
                 points, target, faces = data
                 target = target[:, 0]
@@ -98,7 +99,10 @@ class trainer:
                 # loss = F.nll_loss(pred, target)  # for training classifier
                 MisclassifyLoss = AdversarialLoss(perturbed_ex, logits, target_class)  # target is constant 5 for now
                 L2Loss = L2Similarity(points, perturbed_ex, faces)
-                loss = MisclassifyLoss() + L2Loss()
+                # loss = MisclassifyLoss() + L2Loss()  # commented out cuz its hard to debug
+                missloss = MisclassifyLoss()
+                l2 = L2Loss()
+                loss = missloss + l2
 
                 self.loss_values.append(loss.item())
 
@@ -106,8 +110,8 @@ class trainer:
                 optimizer.step()
                 pred_choice = pred.data.max(1)[1]
                 num_misclassified = pred_choice.eq(target_class).cpu().sum()
-                print('[%d: %d/%d] train loss: %f accuracy: %f' % (
-                    epoch, i, self.num_batch, loss.item(), num_misclassified.item() / float(cur_batch_len)))
+                print('[Epoch #%d: Batch %d/%d] train loss: %f, num misclassified: [%d/%d]' % (
+                    epoch, i, self.num_batch, loss.item(), num_misclassified.item(), float(cur_batch_len)))
 
         torch.save(self.model.state_dict(), self.save_weights_dir)
         return self.loss_values
@@ -177,11 +181,11 @@ class L2Similarity(LossFunction):
         self.faces = faces
 
     def __call__(self) -> torch.Tensor:
-        area = laplacebeltrami_FEM_v2(self.original_pos, self.faces)
+        area_values = tri_areas_batch(self.original_pos, self.faces)
         diff = self.perturbed_pos - self.original_pos
-        area_indices, area_values = area
-        weight_diff = diff * torch.sqrt(
-            area_values.view(-1, 1))  # (sqrt(ai)*(xi-perturbed(xi)) )^2  = ai*(x-perturbed(xi))^2
+        weight_diff = diff
+        # weight_diff = diff * torch.sqrt( # TODO: uncomment
+        #     area_values.view(-1, 1))  # (sqrt(ai)*(xi-perturbed(xi)) )^2  = ai*(x-perturbed(xi))^2
         L2 = weight_diff.norm(
             p="fro")  # this reformulation uses the sub-gradient (hence ensuring a valid behaviour at zero)
         return L2

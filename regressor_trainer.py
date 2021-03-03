@@ -38,7 +38,7 @@ if __name__ == '__main__':
     # data loading
     # traindata = dataset.FaustDataset(FAUST, device=DEVICE, train=True, test=False, transform_data=True)
     # testdata = dataset.FaustDataset(FAUST, device=DEVICE, train=False, test=True, transform_data=True)
-    trainLoader, testLoader, traindata, testdata = load_datasets(train_batch=32, test_batch=20)  # torch data, not geometric!
+    trainLoader, testLoader, traindata, testdata = load_datasets(train_batch=16, test_batch=20)  # torch data, not geometric!
 
     # model definition
     num_nodes = testdata.get(0).num_nodes

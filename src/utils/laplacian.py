@@ -15,16 +15,24 @@ def tri_areas(vertices, faces):
 
 
 def tri_areas_batch(vertices, faces):
+    vertices = vertices.long().transpose(1, 2)
+    faces = faces.long()
     batchsize = faces.shape[0]
-    for i in batchsize:
-        v1 = vertices[i, faces[i, :, 0], :]
-        v2 = vertices[i, faces[i, :, 1], :]
-        v3 = vertices[i, faces[i, :, 2], :]
+    for i in range(batchsize):
+        vertices_row = vertices[i]
+        faces_row = faces[i]
+        v1 = vertices_row[faces_row[:, 0], :]
+        v2 = vertices_row[faces_row[:, 1], :]
+        v3 = vertices_row[faces_row[:, 2], :]
 
         v1 = v1 - v3
         v2 = v2 - v3
-        areas_list = torch.cat(torch.norm(torch.cross(v1, v2, dim=1), dim=1) * .5)
-    return areas_list
+        result = torch.norm(torch.cross(v1.float(), v2.float(), dim=1), dim=1) * .5
+        if i==0:
+            areas_vec = result
+        else:
+            torch.cat((areas_vec, result))
+    return areas_vec
 
 
 def laplacebeltrami_FEM(vertices, faces):
