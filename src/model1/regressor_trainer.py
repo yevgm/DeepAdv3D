@@ -11,14 +11,18 @@ from config import *
 
 # repository modules
 from models.Origin_pointnet import PointNetCls, Regressor
-from model1.deep_adv_3d import Model1, trainer
+from model1.deep_adv_3d import Model1, Trainer
 import dataset
 
 if __name__ == '__main__':
-    pass
     # data loading
     traindata = dataset.FaustDataset(FAUST, device=DEVICE, train=True, test=False, transform_data=True)
-    testdata = dataset.FaustDataset(FAUST, device=DEVICE, train=False, test=True, transform_data=True)
+    testdata = dataset.FaustDataset(FAUST, device=DEVICE, train=False, test=True, transform_data=False)
+
+    trainLoader = torch.utils.data.DataLoader(traindata,
+                                               batch_size=32,
+                                               shuffle=True,
+                                               num_workers=4)
     # model definition
     num_nodes = testdata.get(0).num_nodes
     classifier = PointNetCls(k=10, feature_transform=False, global_transform=False)
@@ -27,7 +31,7 @@ if __name__ == '__main__':
     model1 = model1.to(DEVICE)
 
     # train network
-    train_ins = trainer(train_data=traindata, test_data=testdata, model=model1)
+    train_ins = Trainer(train_data=traindata, test_data=testdata, model=model1)
     train_ins.train()
 
 

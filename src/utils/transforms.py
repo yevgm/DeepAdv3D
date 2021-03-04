@@ -47,6 +47,15 @@ class Rotate(object):
         mesh.pos = torch.matmul(pos, R.t())
         return mesh 
 
+class UnitaryRotate(object):
+    def __init__(self):
+        super().__init__()
+
+    def __call__(self, mesh:Data):
+        # random unitary rotation
+        r = random_uniform_rotation()
+        mesh.pos = mesh.pos @ r
+        return mesh
 
 class Move(object):
     def __init__(self, mean=[0,0,0], std=[0.05,0.05,0.05]):

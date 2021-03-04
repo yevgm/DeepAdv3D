@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch_geometric
 
 # variable definitions
 from config import *
@@ -38,10 +39,11 @@ class Model1(nn.Module):
         return classification, v
 
 
+class Trainer:
 
-class trainer:
-
-    def __init__(self, train_data, test_data, model: nn.Module): #TODO: add datatype assert
+    def __init__(self, train_data: torch_geometric.data.InMemoryDataset,
+                 test_data: torch_geometric.data.InMemoryDataset,
+                 model: nn.Module):
         self.train_data = train_data
         self.test_data = test_data
 

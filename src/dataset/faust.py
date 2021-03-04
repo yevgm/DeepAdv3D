@@ -9,7 +9,7 @@ import torch_geometric.transforms as transforms
 import tqdm
 
 import dataset.downscale as dscale
-from utils.transforms import Move, Rotate, ToDevice
+from utils.transforms import Move, UnitaryRotate, ToDevice
 
 class FaustDataset(torch_geometric.data.InMemoryDataset):
     def __init__(self, 
@@ -23,8 +23,8 @@ class FaustDataset(torch_geometric.data.InMemoryDataset):
         if transform_data:
             # rotate and move
             transform = transforms.Compose([
-                Move(mean=[0,0,0], std=0),#std=[0.05,0.05,0.05]), # std=0),
-                #Rotate(dims=[0,1,2]),
+                Move(mean=[0, 0, 0], std=[0.01, 0.01, 0.01]),#std=[0.05,0.05,0.05]), # std=0),
+                UnitaryRotate(),
                 ToDevice(device)])
         else:
             transform = ToDevice(device)

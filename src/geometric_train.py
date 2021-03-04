@@ -18,9 +18,9 @@ def train(train_data,
 
 	blue = lambda x: '\033[94m' + x + '\033[0m'
 
-	print(len(train_data.dataset), len(test_data.dataset))
-	num_classes = int(len(train_data.dataset) / batchSize)
-	print('classes', num_classes)
+	# print(len(train_data.dataset), len(test_data.dataset))
+	# num_classes = int(len(train_data.dataset) / batchSize)
+	# print('classes', num_classes)
 
 
 	# load parameters:
@@ -40,7 +40,7 @@ def train(train_data,
 	if train==True:
 
 		for epoch in range(epoch_number):
-			# scheduler.step()
+
 			for i, data in enumerate(train_data, 0):
 				points, target = data
 				target = target[:, 0]
@@ -77,7 +77,7 @@ def train(train_data,
 				# 	pred_choice = pred.data.max(1)[1]
 				# 	correct = pred_choice.eq(target.data).cpu().sum()
 				# 	print('[%d: %d/%d] %s loss: %f accuracy: %f' % (epoch, i, num_batch, blue('test'), loss.item(), correct.item()/float(test_data.batch_size)))
-
+			scheduler.step()
 		torch.save(classifier.state_dict(), parameters_file)
 
 	total_correct = 0

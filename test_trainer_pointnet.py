@@ -33,6 +33,7 @@ from vista.animation import animate, multianimate
 
 import models
 import ntrain
+import geometric_train
 import dataset
 import utils
 from models.pointnet import SimplePointNet
@@ -43,29 +44,31 @@ from adversarial.carlini_wagner import CWBuilder, LowbandPerturbation
 
 
 def load_datasets(train_batch=8, test_batch=20):
-    train_dataset = FaustDataset(
-        root=os.path.join(FAUST, r'raw'),
-        classification=True,
-        split='train',
-        data_augmentation=True)
+    # train_dataset = FaustDataset(
+    #     root=os.path.join(FAUST, r'raw'),
+    #     classification=True,
+    #     split='train',
+    #     data_augmentation=True)
+    #
+    # test_dataset = FaustDataset(
+    #     root=os.path.join(FAUST, r'raw'),
+    #     classification=True,
+    #     split='test',
+    #     data_augmentation=False)
 
-    test_dataset = FaustDataset(
-        root=os.path.join(FAUST, r'raw'),
-        classification=True,
-        split='test',
-        data_augmentation=False)
-
-    trainLoader = torch.utils.data.DataLoader(train_dataset,
-                                               batch_size=train_batch,
-                                               shuffle=True,
-                                               num_workers=4)
-    testLoader = torch.utils.data.DataLoader(test_dataset,
-                                               batch_size=test_batch,
-                                               shuffle=False,
-                                               num_workers=4)
     # load data in different format for Adversarial code
     traindata = dataset.FaustDataset(FAUST, device=DEVICE, train=True, test=False, transform_data=True)
     testdata = dataset.FaustDataset(FAUST, device=DEVICE, train=False, test=True, transform_data=True)
+
+    trainLoader = torch.utils.data.DataLoader(traindata,
+                                               batch_size=train_batch,
+                                               shuffle=True,
+                                               num_workers=4)
+    testLoader = torch.utils.data.DataLoader(testdata,
+                                               batch_size=test_batch,
+                                               shuffle=False,
+                                               num_workers=4)
+
 
     return trainLoader,testLoader, traindata,testdata
 
@@ -136,9 +139,10 @@ if __name__ == "__main__":
 
     batchsize = 32
     trainLoader,testLoader, traindata, testdata = load_datasets(train_batch=batchsize, test_batch=20)
-
+    # for i in range(0,20):
+    #     plot_mesh_montage([trainLoader.dataset[0].pos], [trainLoader.dataset[0].face.T])
     # train network
-    loss_values, test_mean_loss, test_accuracy = ntrain.train(
+    loss_values, test_mean_loss, test_accuracy = geometric_train.train(
                                                             train_data=trainLoader,
                                                             test_data=testLoader,
                                                             classifier=model,

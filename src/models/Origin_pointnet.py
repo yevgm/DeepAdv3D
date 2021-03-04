@@ -306,6 +306,6 @@ if __name__ == '__main__':
     # out, _, _ = seg(sim_data)
     # print('seg', out.size())
 
-    model = Regressor(numVertices=2500, numExamples=32)
+    model = Regressor(numVertices=2500)
     out = model(sim_data)
     print('Regressor', out.size())
