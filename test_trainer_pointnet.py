@@ -44,23 +44,20 @@ from adversarial.carlini_wagner import CWBuilder, LowbandPerturbation
 
 
 def load_datasets(train_batch=8, test_batch=20):
-    # train_dataset = FaustDataset(
-    #     root=os.path.join(FAUST, r'raw'),
-    #     classification=True,
-    #     split='train',
-    #     data_augmentation=True)
-    #
-    # test_dataset = FaustDataset(
-    #     root=os.path.join(FAUST, r'raw'),
-    #     classification=True,
-    #     split='test',
-    #     data_augmentation=False)
+    # here we use FaustDataset class that inherits from torch.utils.data.Dataloader. it's a map-style dataset.
+    train_dataset = FaustDataset(
+        root=os.path.join(FAUST, r'raw'),
+        classification=True,
+        split='train',
+        data_augmentation=True)
 
-    # load data in different format for Adversarial code
-    traindata = dataset.FaustDataset(FAUST, device=DEVICE, train=True, test=False, transform_data=True)
-    testdata = dataset.FaustDataset(FAUST, device=DEVICE, train=False, test=True, transform_data=True)
+    test_dataset = FaustDataset(
+        root=os.path.join(FAUST, r'raw'),
+        classification=True,
+        split='test',
+        data_augmentation=False)
 
-    trainLoader = torch.utils.data.DataLoader(traindata,
+    trainLoader = torch.utils.data.DataLoader(train_dataset,
                                                batch_size=train_batch,
                                                shuffle=True,
                                                num_workers=4)
@@ -69,6 +66,10 @@ def load_datasets(train_batch=8, test_batch=20):
                                                shuffle=False,
                                                num_workers=4)
 
+    # load data in different format for Adversarial code
+    # it uses carlini's FaustDataset class that inherits from torch_geometric.data.InMemoryDataset
+    traindata = dataset.FaustDataset(FAUST, device=DEVICE, train=True, test=False, transform_data=True)
+    testdata = dataset.FaustDataset(FAUST, device=DEVICE, train=False, test=True, transform_data=True)
 
     return trainLoader,testLoader, traindata,testdata
 
@@ -130,6 +131,7 @@ def show_model_accuracy(PARAMS_FILE, model):
         train=False)
 
     print('test mean loss:', test_mean_loss, ' test_accuracy:', test_accuracy)
+
 
 if __name__ == "__main__":
 

@@ -108,7 +108,7 @@ class PointNetfeat(nn.Module):
             x = x.transpose(2, 1)
         else:
             trans = None
-        x = F.relu(self.bn1(self.conv1(x))) # the first MLP layer (mlp64,64 shared)
+        x = F.relu(self.bn1(self.conv1(x)))  # the first MLP layer (mlp64,64 shared)
 
         if self.feature_transform:
             trans_feat = self.fstn(x)
@@ -244,14 +244,14 @@ class Decoder(nn.Module):
     def __init__(self, outDim, feature_transform=True,  global_transform=False):
         super(Decoder, self).__init__()
 
-        self.fc1 = nn.Linear(1024, 2048)
-        self.bn1 = nn.BatchNorm1d(2048)
+        self.fc1 = nn.Linear(1024, 2048)  # 1024, 2048
+        self.bn1 = nn.BatchNorm1d(2048)  # 2048
         self.relu = nn.ReLU()
-        self.fc2 = nn.Linear(2048, 8192)
+        self.fc2 = nn.Linear(2048, 4096)  # 2048, 8192
         self.dropout = nn.Dropout(p=0.3)
-        self.bn2 = nn.BatchNorm1d(8192)
+        self.bn2 = nn.BatchNorm1d(4096)  # 8192
         self.relu = nn.ReLU()
-        self.fc3 = nn.Linear(8192, outDim)
+        self.fc3 = nn.Linear(4096, outDim)  # 8192, outDim , 6890 is for faust
 
     def forward(self, x):
         x = F.relu(self.bn1(self.fc1(x)))
@@ -262,7 +262,7 @@ class Decoder(nn.Module):
 
 class Regressor(nn.Module):
 
-    def __init__(self, numVertices, firstDim=64, feature_transform=True,  global_transform=False):
+    def __init__(self, numVertices, firstDim=64, feature_transform=False,  global_transform=False):
         super(Regressor, self).__init__()
         self.numVertices = numVertices
         self.outDim = 3*numVertices
@@ -278,7 +278,7 @@ class Regressor(nn.Module):
 
 
 if __name__ == '__main__':
-    sim_data = Variable(torch.rand(32, 3, 2500))
+    sim_data = Variable(torch.rand(32, 3, 6890))
     # trans = STN3d()
     # out = trans(sim_data)
     # print('stn', out.size())
@@ -306,6 +306,6 @@ if __name__ == '__main__':
     # out, _, _ = seg(sim_data)
     # print('seg', out.size())
 
-    model = Regressor(numVertices=2500)
+    model = Regressor(numVertices=6890)
     out = model(sim_data)
     print('Regressor', out.size())
