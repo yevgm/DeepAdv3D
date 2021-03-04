@@ -53,13 +53,13 @@ class trainer:
         self.train_data = train_data
         self.test_data = test_data
         self.model = model
-        self.batch_size = BATCH_SIZE
+        self.batch_size = TRAIN_BATCH_SIZE
         self.num_batch = int(len(train_data.dataset) / self.batch_size)
         self.scheduler_step = SCH_STEP
         self.n_epoch = N_EPOCH
         self.lr = LR
 
-        self.loss_values = [] #TODO: add tensorboard support instead
+        self.loss_values = []  # TODO: add tensorboard support instead
         self.save_weights_dir = PARAMS_FILE
 
     def train(self):
@@ -68,7 +68,7 @@ class trainer:
 
         self.model.to(DEVICE)
 
-        target_class = 5  # temporary and will need access from outside later on
+        target_class = TARGET_CLASS  # temporary and will need access from outside later on
 
         for epoch in range(self.n_epoch):
             if epoch is not 0:

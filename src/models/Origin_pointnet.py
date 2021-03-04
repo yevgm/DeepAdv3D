@@ -260,10 +260,10 @@ class Decoder(nn.Module):
         return x
 
 
-class Regressor(nn.Module):
+class Model1(nn.Module):
 
     def __init__(self, numVertices, firstDim=64, feature_transform=False,  global_transform=False):
-        super(Regressor, self).__init__()
+        super(Model1, self).__init__()
         self.numVertices = numVertices
         self.outDim = 3*numVertices
         self.feature_transform = feature_transform

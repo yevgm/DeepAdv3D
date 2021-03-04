@@ -1,8 +1,8 @@
 # This is the main script that runs out model1:
 
 # Using the central article's method in the neural setting
-# '(revolves around regressing for the optimal smooth deformation field parameters needed to optimally deform the target'
-# ' shape to achieve target/untargeted adverserial attack success)
+# revolves around regressing for the optimal smooth deformation field parameters needed to optimally deform the target
+# shape to achieve target/untargeted adversarial attack success
 # Architecture: Simple PointNet (Without T-Nets, see implementation in the Shape Completion Repo)
 # + switch last layer to regression layer
 
@@ -10,7 +10,7 @@
 from config import *
 
 # repository modules
-from models.Origin_pointnet import PointNetCls, Regressor
+from models.Origin_pointnet import PointNetCls, Model1
 from model1.deep_adv_3d import *
 
 import dataset
@@ -38,19 +38,19 @@ if __name__ == '__main__':
     # data loading
     # traindata = dataset.FaustDataset(FAUST, device=DEVICE, train=True, test=False, transform_data=True)
     # testdata = dataset.FaustDataset(FAUST, device=DEVICE, train=False, test=True, transform_data=True)
-    trainLoader, testLoader, traindata, testdata = load_datasets(train_batch=16, test_batch=20)  # torch data, not geometric!
+    # torch data, not geometric!
+    trainLoader, testLoader, traindata, testdata = load_datasets(train_batch=TRAIN_BATCH_SIZE, test_batch=TEST_BATCH_SIZE)
 
     # model definition
     num_nodes = testdata.get(0).num_nodes
+    # TODO: load classifier parameters
     classifier = PointNetCls(k=10, feature_transform=False, global_transform=False)
     classifier.to(DEVICE)
-    # model1 = Model1(outDim=num_nodes, classifier_model=classifier)
-    # model1 = model1.to(DEVICE)
-    regressor = Regressor(numVertices=6890)  # FAUST has 6890
+    model = Model1(numVertices=6890)  # FAUST has 6890
 
     # train network
     train_ins = trainer(train_data=trainLoader, test_data=testLoader,
-                        model=regressor, classifier=classifier)
+                        model=model, classifier=classifier)
     train_ins.train()
 
 

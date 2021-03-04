@@ -13,12 +13,8 @@ import torch.nn.functional as func
 import random
 
 # variable definitions
-REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath('__file__')),""))  # need ".." in linux
-DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-# DEVICE = torch.device("cpu")
-SRC_DIR = os.path.join(REPO_ROOT,"src")
-FAUST = os.path.join(REPO_ROOT,"datasets/faust")
-PARAMS_FILE = os.path.join(REPO_ROOT, "model_data/FAUST10_pointnet_rot_b32.pt")
+from config import *
+
 
 # repository modules
 sys.path.insert(0, SRC_DIR)
@@ -60,18 +56,18 @@ def load_datasets(train_batch=8, test_batch=20):
     trainLoader = torch.utils.data.DataLoader(train_dataset,
                                                batch_size=train_batch,
                                                shuffle=True,
-                                               num_workers=4)
-    testLoader = torch.utils.data.DataLoader(testdata,
+                                               num_workers=NUM_WORKERS)
+    testLoader = torch.utils.data.DataLoader(test_dataset,
                                                batch_size=test_batch,
                                                shuffle=False,
-                                               num_workers=4)
+                                               num_workers=NUM_WORKERS)
 
     # load data in different format for Adversarial code
     # it uses carlini's FaustDataset class that inherits from torch_geometric.data.InMemoryDataset
     traindata = dataset.FaustDataset(FAUST, device=DEVICE, train=True, test=False, transform_data=True)
     testdata = dataset.FaustDataset(FAUST, device=DEVICE, train=False, test=True, transform_data=True)
 
-    return trainLoader,testLoader, traindata,testdata
+    return trainLoader, testLoader, traindata, testdata
 
 def random_uniform_rotation(dim=3):
     H = np.eye(dim)
@@ -139,35 +135,32 @@ if __name__ == "__main__":
     model = model.to(DEVICE)
     # print(model)
 
-    batchsize = 32
-    trainLoader,testLoader, traindata, testdata = load_datasets(train_batch=batchsize, test_batch=20)
-    # for i in range(0,20):
-    #     plot_mesh_montage([trainLoader.dataset[0].pos], [trainLoader.dataset[0].face.T])
-    # train network
-    loss_values, test_mean_loss, test_accuracy = geometric_train.train(
+    trainLoader,testLoader, traindata, testdata = load_datasets(train_batch=TRAIN_BATCH_SIZE, test_batch=20)
+
+    loss_values, test_mean_loss, test_accuracy = ntrain.train(
                                                             train_data=trainLoader,
                                                             test_data=testLoader,
                                                             classifier=model,
-                                                            batchSize=batchsize,
+                                                            batchSize=TRAIN_BATCH_SIZE,
                                                             parameters_file=PARAMS_FILE,
-                                                            epoch_number=20,
-                                                            learning_rate=4e-3,
+                                                            epoch_number=N_EPOCH,
+                                                            learning_rate=LR,
                                                             train=True)
     # # # temp train visualizer - in the future : add tensorboard?
     # print('test mean loss:',test_mean_loss,' test_accuracy:',test_accuracy)
-    # loss_values = np.array(loss_values)
-    # sliced_loss = loss_values[0::5]#sliced
-    #
-    # fig, axs = plt.subplots(2)
-    # fig.suptitle('losses')
-    # axs[0].plot(np.arange(1,len(sliced_loss)+1,1), sliced_loss)
-    # axs[1].plot(np.arange(1,len(loss_values)+1,1), loss_values)
-    #
-    # axs[0].set(xlabel='5*batches index', ylabel='loss')
-    # axs[0].grid()
-    # axs[1].set(xlabel='batches index', ylabel='loss')
-    # axs[1].grid()
-    # plt.show()
+    loss_values = np.array(loss_values)
+    sliced_loss = loss_values[0::5] #sliced
+
+    fig, axs = plt.subplots(2)
+    fig.suptitle('losses')
+    axs[0].plot(np.arange(1,len(sliced_loss)+1,1), sliced_loss)
+    axs[1].plot(np.arange(1,len(loss_values)+1,1), loss_values)
+
+    axs[0].set(xlabel='5*batches index', ylabel='loss')
+    axs[0].grid()
+    axs[1].set(xlabel='batches index', ylabel='loss')
+    axs[1].grid()
+    plt.show()
 
 
     model.load_state_dict(torch.load(PARAMS_FILE, map_location=DEVICE))
@@ -201,7 +194,7 @@ if __name__ == "__main__":
         f_rot = torch.nn.functional.log_softmax(Z_rot, dim=1)
         pred_y_rot = f_rot.argmax()
 
-        plot_mesh_montage([v, v_rot], [faces, faces])
+        # plot_mesh_montage([v, v_rot], [faces, faces])
 
 
 
