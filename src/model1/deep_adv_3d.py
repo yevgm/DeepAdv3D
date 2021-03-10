@@ -1,6 +1,9 @@
 import torch
 import torch.nn as nn
 import adversarial.carlini_wagner as cw
+from torch.utils.tensorboard import SummaryWriter
+import numpy as np
+
 
 # variable definitions
 from config import *
@@ -9,13 +12,14 @@ from config import *
 from models.Origin_pointnet import PointNetCls, Regressor
 import torch.nn.functional as F
 from tqdm import tqdm
-from utils.misc import kNN
+from model1.loss import *
+from model1.tensorboard import *
 from utils import laplacebeltrami_FEM_v2
 from utils import eigenpairs
 from utils.laplacian import tri_areas_batch
-
+from vista.geom_vis import plot_mesh, plot_mesh_montage
 # ----------------------------------------------------------------------------------------------------------------------#
-#                                                   Classes Definition
+#                                                   Trainer Class
 # ----------------------------------------------------------------------------------------------------------------------#
 
 # Model 1 with classifier inside. Commenented out since I'm trying to shove the classifier inside the loss function,
@@ -45,171 +49,138 @@ from utils.laplacian import tri_areas_batch
 #         return classification, v
 
 
-
 class trainer:
 
-    def __init__(self, train_data, test_data, model: nn.Module, classifier): #TODO: add datatype assert
-        self.classifier = classifier
+    def __init__(self, train_data: torch.utils.data.DataLoader,
+                       test_data: torch.utils.data.DataLoader,
+                       model: nn.Module,
+                       classifier: nn.Module):
+
         self.train_data = train_data
         self.test_data = test_data
-        self.model = model
         self.batch_size = TRAIN_BATCH_SIZE
-        self.num_batch = int(len(train_data.dataset) / self.batch_size)
-        self.scheduler_step = SCH_STEP
+        self.num_batch = len(self.train_data)
+        self.scheduler_step = SCHEDULER_STEP_SIZE
         self.n_epoch = N_EPOCH
+        self.weight_decay = WEIGHT_DECAY
         self.lr = LR
 
-        self.loss_values = []  # TODO: add tensorboard support instead
-        self.save_weights_dir = PARAMS_FILE
+        self.classifier = classifier
+        self.classifier.eval()
+        self.classifier.to(DEVICE)
+        for param in self.classifier.parameters():
+            param.requires_grad = False
 
-    def train(self):
-        optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr, betas=(0.9, 0.999))
-        scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=self.scheduler_step, gamma=0.5)
-
+        self.model = model
         self.model.to(DEVICE)
 
-        target_class = TARGET_CLASS  # temporary and will need access from outside later on
+        self.loss_values = []
+        tensor_log_dir = generate_new_tensorboard_results_dir()
+        self.writer = SummaryWriter(tensor_log_dir, flush_secs=FLUSH_RESULTS)
+        self.save_weights_dir = MODEL1_PARAMS_FILE
 
+    def train(self):
+        if OPTIMIZER == 'AdamW':
+            optimizer = torch.optim.AdamW(self.model.parameters(), lr=self.lr, betas=(0.9, 0.999), weight_decay=self.weight_decay)
+        else:
+            optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr, betas=(0.9, 0.999), weight_decay=self.weight_decay)
+        scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=self.scheduler_step, gamma=0.5)
+
+        running_loss = 0.0
+        num_misclassified = 0
+        step_cntr = 0
         for epoch in range(self.n_epoch):
-            if epoch is not 0:
+            if epoch != 0:
                 scheduler.step()
             for i, data in enumerate(self.train_data, 0):
-                points, target, faces = data
-                target = target[:, 0]
-                cur_batch_len = len(points)
-                points = points.transpose(2, 1)
-
-                points = points.to(DEVICE)
-                target = target.to(DEVICE)
-
-                # adex = cw.generate_adversarial_example(mesh=data, classifier=self.classifier,
-                #                                        target=target, lowband_perturbation=False)
+                orig_vertices, label, eigvals, eigvecs, vertex_area, targets, faces = data
+                # label = label[:, 0].to(DEVICE) TODO: remove this later on
+                cur_batch_len = orig_vertices.shape[0]
+                orig_vertices = orig_vertices.transpose(2, 1).to(DEVICE)
 
                 optimizer.zero_grad()
-                self.model = self.model.train()
-                self.classifier = self.classifier.eval()
-                perturbed_ex = self.model(points)
+                self.model = self.model.train()  # set to train mode
+                # get Eigenspace vector field
+                eigen_space_v = self.model(orig_vertices).transpose(2, 1)
+                # adversarial example (smoothly perturbed)
+                adex = orig_vertices + torch.bmm(eigvecs, eigen_space_v).transpose(2, 1)
 
-                with torch.no_grad():
-                    logits, _, _ = self.classifier(perturbed_ex)
-                    pred = torch.nn.functional.log_softmax(logits, dim=1)  # CW page 5: we don't use this (this if F), we need Z
+                # DEBUG - visualize the adex
+                if DEBUG & (step_cntr % SHOW_TRAIN_SAMPLE_EVERY == 0):
+                    plot_mesh_montage([orig_vertices[0].T, adex[0].T], [faces[0], faces[0]])
+
+                # no grad is already implemented in the constructor
+                perturbed_logits, _, _ = self.classifier(adex)
+
+                MisclassifyLoss = AdversarialLoss(perturbed_logits, targets)
+                if LOSS == 'l2':
+                    Similarity_loss = L2Similarity(orig_vertices, adex, vertex_area)
+                else:
+                    Similarity_loss = LocalEuclideanSimilarity(orig_vertices, adex)#, edges)
 
 
-                # loss = F.nll_loss(pred, target)  # for training classifier
-                MisclassifyLoss = AdversarialLoss(perturbed_ex, logits, target_class)  # target is constant 5 for now
-                L2Loss = L2Similarity(points, perturbed_ex, faces)
-                # loss = MisclassifyLoss() + L2Loss()  # commented out cuz its hard to debug
                 missloss = MisclassifyLoss()
-                l2 = L2Loss()
-                loss = missloss + l2
+                # similarity_loss = 0
+                similarity_loss = Similarity_loss()
+                loss = missloss + RECON_LOSS_CONST * similarity_loss
 
-                self.loss_values.append(loss.item())
-
+                # Back-propagation step
                 loss.backward()
                 optimizer.step()
-                pred_choice = pred.data.max(1)[1]
-                num_misclassified = pred_choice.eq(target_class).cpu().sum()
-                print('[Epoch #%d: Batch %d/%d] train loss: %f, num misclassified: [%d/%d]' % (
-                    epoch, i, self.num_batch, loss.item(), num_misclassified.item(), float(cur_batch_len)))
+
+                # Metrics
+                # stdout prints
+                self.loss_values.append(loss.item())
+                pred_choice = perturbed_logits.data.max(1)[1]
+                num_misclassified += pred_choice.eq(targets).cpu().sum()
+                print('[Epoch #%d: Batch %d/%d] train loss: %f, Misclassified: [%d/%d]' % (
+                    epoch, self.num_batch, i, loss.item(), float(cur_batch_len), num_misclassified.item()))
+
+                # tensorboard
+                running_loss += loss.item()
+                if i % SHOW_LOSS_EVERY == SHOW_LOSS_EVERY-1:  # every SHOW_LOSS_EVERY mini-batches
+
+                    # ...log the running loss
+                    self.writer.add_scalar('Loss/Train',
+                                      running_loss / SHOW_LOSS_EVERY,
+                                      epoch * self.num_batch + i)
+                    self.writer.add_scalar('Accuracy/Train_Misclassified_targets',
+                                      num_misclassified / float(cur_batch_len),
+                                      epoch * self.num_batch + i)
+
+                    running_loss = 0.0
+                    num_misclassified = 0
+                step_cntr += 1
 
         torch.save(self.model.state_dict(), self.save_weights_dir)
         return self.loss_values
 
-    def evaluate(self):
-        # the evaluation is based purely on the misclassifications amount on the test set
-        total_misclassified = 0
-        total_testset = 0
-        total_loss = 0
-        test_loss_values = []
-        for i, data in tqdm(enumerate(self.test_data, 0)):
-            points, target = data
-            target = target[:, 0]
-            points = points.transpose(2, 1)
-            if torch.cuda.is_available():
-                points, target = points.cuda(), target.cuda()
-            self.model = self.model.eval()
-            perturbed_ex = self.model(points)
+    # def evaluate(self): ## TODO: remove this later on
+    #     # the evaluation is based purely on the misclassifications amount on the test set
+    #     total_misclassified = 0
+    #     total_testset = 0
+    #     total_loss = 0
+    #     test_loss_values = []
+    #     for i, data in tqdm(enumerate(self.test_data, 0)):
+    #         points, target = data
+    #         target = target[:, 0]
+    #         points = points.transpose(2, 1)
+    #         if torch.cuda.is_available():
+    #             points, target = points.cuda(), target.cuda()
+    #         self.model = self.model.eval()
+    #         perturbed_ex = self.model(points)
+    #
+    #         logits = self.classifier(perturbed_ex)
+    #         pred = F.log_softmax(logits, dim=1)  # CW page 5: we don't use this (this if F), we need Z
+    #         classifier_loss = F.nll_loss(pred, target)
+    #
+    #         pred_choice = pred.data.max(1)[1]
+    #         correct = pred_choice.eq(target.data).cpu().sum()
+    #         test_loss_values.append(classifier_loss.item())
+    #         total_misclassified += 1 if correct.item() != 0 else total_misclassified  # not sure it works like that
+    #         total_testset += points.size()[0]
+    #     test_accuracy = total_misclassified / len(self.test_data.dataset)
+    #     test_mean_loss = sum(test_loss_values) / len(test_loss_values)
+    #
+    #     return test_mean_loss, test_accuracy
 
-            logits = self.classifier(perturbed_ex)
-            pred = F.log_softmax(logits, dim=1)  # CW page 5: we don't use this (this if F), we need Z
-            classifier_loss = F.nll_loss(pred, target)
-
-            pred_choice = pred.data.max(1)[1]
-            correct = pred_choice.eq(target.data).cpu().sum()
-            test_loss_values.append(classifier_loss.item())
-            total_misclassified += 1 if correct.item() is 0 else total_misclassified  # not sure it works like that
-            total_testset += points.size()[0]
-        test_accuracy = total_misclassified / len(self.test_data.dataset)
-        test_mean_loss = sum(test_loss_values) / len(test_loss_values)
-
-        return test_mean_loss, test_accuracy
-
-# losses ----------------------------------------------------------
-
-
-class LossFunction(object):
-    def __init__(self, adv_example):
-        self.adv_example = adv_example
-
-    def __call__(self) -> torch.Tensor:
-        raise NotImplementedError
-
-
-class AdversarialLoss(LossFunction):
-    def __init__(self, adv_example: torch.Tensor, perturbed_logits, target, k: float = 0):
-        super().__init__(adv_example)
-        self.k = torch.tensor([k], device=adv_example.device, dtype=torch.float32)
-        self.perturbed_logits = perturbed_logits
-        self.target = target
-
-    def __call__(self) -> torch.Tensor:
-        Z = self.perturbed_logits
-        values, index = torch.sort(Z, dim=1)
-        index = index[-1]
-        argmax = index[-1] if index[-1] != self.target else index[-2]  # max{Z(i): i != target}
-        Z = Z[-1]
-        Ztarget, Zmax = Z[self.target], Z[argmax]
-        return torch.max(Zmax - Ztarget, -self.k)
-
-
-class L2Similarity(LossFunction):
-    def __init__(self, original_pos: torch.Tensor, perturbed_pos: torch.Tensor, faces):
-        super().__init__(original_pos)
-        self.original_pos = original_pos
-        self.perturbed_pos = perturbed_pos
-        self.faces = faces
-
-    def __call__(self) -> torch.Tensor:
-        area_values = tri_areas_batch(self.original_pos, self.faces)
-        diff = self.perturbed_pos - self.original_pos
-        weight_diff = diff
-        # weight_diff = diff * torch.sqrt( # TODO: uncomment
-        #     area_values.view(-1, 1))  # (sqrt(ai)*(xi-perturbed(xi)) )^2  = ai*(x-perturbed(xi))^2
-        L2 = weight_diff.norm(
-            p="fro")  # this reformulation uses the sub-gradient (hence ensuring a valid behaviour at zero)
-        return L2
-
-# -----------------------------------------------------------------
-
-## TODO: I am not sure about this one at all
-class ModelHandler:
-
-    def __init__(self, model: nn.Module, param_file: str = "", auto_grad=True):
-        """
-        This class handles the correct switch between evaluation and training for a given model
-        NOTE loads pretrained parameters
-        """
-        self.model = model.to(DEVICE)
-
-        # load parameters
-        if auto_grad == False:
-            self.model.load_state_dict(torch.load(param_file, map_location=DEVICE))
-            for param in model.features.parameters():
-                param.requires_grad = False
-            self.model.eval()
-        # else: //TODO: Do we need this?
-        #     for param in model.features.parameters():
-        #         param.requires_grad = True
-
-    def __call__(self):
-        return self.model

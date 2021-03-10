@@ -141,7 +141,7 @@ def l2_distance(pos, ppos, faces, normalize=False):
     check_data(pos=pos, faces=faces)
     check_data(pos=ppos)
     diff = pos - ppos
-    areas = pos_areas(pos,faces)
+    areas = pos_areas(pos, faces)
     weight_diff = diff*torch.sqrt(areas.view(-1,1))
     L2 = weight_diff.norm(p="fro")
     if normalize: L2 = L2/areas.sum().sqrt()

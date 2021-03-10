@@ -182,7 +182,7 @@ if __name__ == "__main__":
         pred_y = f.argmax()
 
         v_rot = v
-        # v_rot = torch.mm(v, R).to(DEVICE)
+        v_rot = torch.mm(v, R).to(DEVICE)
         # v_rot = np.abs(np.random.normal()) * v
         v_rot = v_rot + torch.Tensor(np.random.normal(0, 0.01, size=(1, 3)).astype('f')).to(DEVICE)
         # theta = np.random.uniform(0, np.pi * 2)

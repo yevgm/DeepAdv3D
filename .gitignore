@@ -7,6 +7,11 @@ datasets/**
 experiments/**
 src/ChamferDistancePytorch/**
 src/KNN_CUDA
+src/utils/__pycache__
+src/vista/__pycache__
+src/dataset/__pycache__
+src/adversarial/__pycache__
+src/models/__pycache__
 coma/**
 .idea/**
 .ipynb_checkpoints/**

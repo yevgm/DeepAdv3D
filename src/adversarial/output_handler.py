@@ -9,7 +9,7 @@ REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath('__fil
 def save_results(example_list:list, testdata, CWparams=None, hyperParams=None,
                  folder_name=None, file_name=None):
     '''
-    If saving one figure at a time, you mut pass a unique folder ID -
+    If saving one figure at a time, you must pass a unique folder ID -
         batch_time
     '''
     out_folder = os.path.join(REPO_ROOT, 'outputFolder')

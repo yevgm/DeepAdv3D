@@ -1,14 +1,23 @@
 from __future__ import print_function
-import torch.utils.data as data
+
+# library imports
 import os
+import random
 import os.path
 import torch
 import numpy as np
 import sys
 from tqdm import tqdm 
 import json
+
+# module imports
+import torch.utils.data as data
 from plyfile import PlyData, PlyElement
 from utils.transforms import random_uniform_rotation
+from utils.eigenpairs import eigenpairs
+
+# variable definitions
+from config import *
 
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   Functions
@@ -221,6 +230,8 @@ class FaustDataset(data.Dataset):
         else:
             self.fns = self.fns[80:]
 
+        self.set_targets()
+
     def __getitem__(self, index):
         if index < 10 :
             fn = 'tr_reg_00'+str(index)+'.ply'
@@ -242,7 +253,7 @@ class FaustDataset(data.Dataset):
         else:
             rgb = None
         f = np.stack(plydata['face']['vertex_indices'])
-        self.f = torch.from_numpy(f.astype(np.int))
+        faces = torch.from_numpy(f.astype(np.int))
         self.rgb = rgb
 
         # # center and scale
@@ -263,11 +274,28 @@ class FaustDataset(data.Dataset):
 
         v = torch.from_numpy(v.astype(np.float32))
         cls = torch.from_numpy(np.array([index % 10]).astype(np.int64))
-        return v, cls, f
 
+        # from utils.misc import pos_areas
+        # areas_1 = pos_areas(v, self.f)
+        # calculate laplacian eigenvectors matrix and areas
+        eigvals, eigvecs, vertex_area = eigenpairs(v, faces, K, double_precision=True)
+
+
+        return v, cls, eigvals, eigvecs, vertex_area, self.targets[index], faces
 
     def __len__(self):
         return len(self.fns)
+
+    def set_targets(self):
+        # draw random target for each shape
+        self.targets = np.zeros(len(self))-1
+        for i in np.arange(0, len(self)):
+            target = random.randint(0, 9)
+            while target == (i % 10):
+                target = random.randint(0, 9)
+            self.targets[i] = target
+        self.targets = torch.from_numpy(self.targets).long().to(DEVICE)
+
 
 
 if __name__ == '__main__':

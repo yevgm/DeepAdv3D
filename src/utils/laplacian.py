@@ -28,7 +28,7 @@ def tri_areas_batch(vertices, faces):
         v1 = v1 - v3
         v2 = v2 - v3
         result = torch.norm(torch.cross(v1.float(), v2.float(), dim=1), dim=1) * .5
-        if i==0:
+        if i == 0:
             areas_vec = result
         else:
             torch.cat((areas_vec, result))
@@ -107,8 +107,8 @@ def laplacebeltrami_FEM_v2(pos, faces):
         b = torch.fmod(torch.as_tensor(i), torch.as_tensor(3.)).long()
         c = torch.fmod(torch.as_tensor(i + 1), torch.as_tensor(3.)).long()
 
-        ab = pos[faces[:, b], :] - pos[faces[:, a], :];
-        ac = pos[faces[:, c], :] - pos[faces[:, a], :];
+        ab = pos[faces[:, b], :] - pos[faces[:, a], :]
+        ac = pos[faces[:, c], :] - pos[faces[:, a], :]
 
         ab = torch.nn.functional.normalize(ab, p=2, dim=1)
         ac = torch.nn.functional.normalize(ac, p=2, dim=1)

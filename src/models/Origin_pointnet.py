@@ -241,17 +241,17 @@ class Encoder(nn.Module):
 
 class Decoder(nn.Module):
 
-    def __init__(self, outDim, feature_transform=True,  global_transform=False):
+    def __init__(self, outDim):
         super(Decoder, self).__init__()
 
-        self.fc1 = nn.Linear(1024, 2048)  # 1024, 2048
-        self.bn1 = nn.BatchNorm1d(2048)  # 2048
+        self.fc1 = nn.Linear(1024, 512)  # 1024, 2048
+        self.bn1 = nn.BatchNorm1d(512)  # 2048
         self.relu = nn.ReLU()
-        self.fc2 = nn.Linear(2048, 4096)  # 2048, 8192
+        self.fc2 = nn.Linear(512, 256)  # 2048, 8192
         self.dropout = nn.Dropout(p=0.3)
-        self.bn2 = nn.BatchNorm1d(4096)  # 8192
+        self.bn2 = nn.BatchNorm1d(256)  # 8192
         self.relu = nn.ReLU()
-        self.fc3 = nn.Linear(4096, outDim)  # 8192, outDim , 6890 is for faust
+        self.fc3 = nn.Linear(256, outDim)  # 8192, outDim , 6890 is for faust
 
     def forward(self, x):
         x = F.relu(self.bn1(self.fc1(x)))
@@ -260,10 +260,10 @@ class Decoder(nn.Module):
         return x
 
 
-class Model1(nn.Module):
+class Regressor(nn.Module):
 
     def __init__(self, numVertices, firstDim=64, feature_transform=False,  global_transform=False):
-        super(Model1, self).__init__()
+        super(Regressor, self).__init__()
         self.numVertices = numVertices
         self.outDim = 3*numVertices
         self.feature_transform = feature_transform

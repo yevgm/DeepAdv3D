@@ -1,9 +1,12 @@
-
 import scipy
 import scipy.sparse.linalg  as slinalg
 import torch
 
 from .laplacian import laplacebeltrami_FEM
+
+# variable definitions
+from config import *
+
 
 def eigenpairs(pos:torch.Tensor, faces:torch.Tensor, K:int, double_precision:bool=False):
     r"""Compute first K eigenvalues and eigenvectors for the input mesh.
@@ -26,13 +29,16 @@ def eigenpairs(pos:torch.Tensor, faces:torch.Tensor, K:int, double_precision:boo
     si, sv = stiff.indices().cpu(), stiff.values().cpu()
     ai, av = area.indices().cpu(), area.values().cpu()
 
-    ri,ci = si
-    S = scipy.sparse.csr_matrix( (sv, (ri,ci)), shape=(n,n))
+    ri, ci = si
+    S = scipy.sparse.csr_matrix( (sv, (ri, ci)), shape=(n, n))
+    S = S + scipy.sparse.eye(n, dtype=S.dtype) * EPS  # for numerical stability
 
-    ri,ci = ai
-    A = scipy.sparse.csr_matrix( (av, (ri,ci)), shape=(n,n))
+    ri, ci = ai
+    A = scipy.sparse.csr_matrix( (av, (ri, ci)), shape=(n, n))
 
-    eigvals, eigvecs = slinalg.eigsh(S, M=A, k=K, sigma=-1e-6)
+    eigvals, eigvecs = slinalg.eigsh(S , M=A, k=K, sigma=-1e-6)
+
     eigvals = torch.tensor(eigvals, device=device, dtype=dtype)
     eigvecs = torch.tensor(eigvecs, device=device, dtype=dtype)
-    return eigvals, eigvecs
+    areas = torch.tensor(A.diagonal(), device=device)
+    return eigvals, eigvecs, areas
