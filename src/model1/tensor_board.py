@@ -37,3 +37,28 @@ def generate_new_tensorboard_results_dir(mode="train"):
         sys.exit("Can't copy config file to new tensorboard log dir")
 
     return new_dir_name
+
+
+def report_to_tensorboard(tensor_obj, idx, epoch, batch_size, cur_batch_len, running_loss,
+                          running_recon_loss, running_missclassify_loss, num_misclassified):
+    if idx % SHOW_LOSS_EVERY == SHOW_LOSS_EVERY - 1:  # every SHOW_LOSS_EVERY mini-batches
+
+        # ...log the running loss
+        tensor_obj.add_scalar('Loss/Train_total',
+                               running_loss / SHOW_LOSS_EVERY,
+                               epoch * batch_size + idx)
+        tensor_obj.add_scalar('Loss/Train_reconstruction_loss',
+                               running_recon_loss / SHOW_LOSS_EVERY,
+                               epoch * batch_size + idx)
+        tensor_obj.add_scalar('Loss/Train_misclassification_loss',
+                               running_missclassify_loss / SHOW_LOSS_EVERY,
+                               epoch * batch_size + idx)
+        tensor_obj.add_scalar('Accuracy/Train_Misclassified_targets',
+                               num_misclassified / float(cur_batch_len),
+                               epoch * batch_size + idx)
+
+        running_loss = 0.0
+        running_recon_loss = 0.0
+        running_missclassify_loss = 0.0
+        num_misclassified = 0
+    return running_loss, running_recon_loss, running_missclassify_loss, num_misclassified

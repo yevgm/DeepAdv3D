@@ -1,9 +1,6 @@
 import torch
 import torch.nn as nn
-import adversarial.carlini_wagner as cw
 from torch.utils.tensorboard import SummaryWriter
-import numpy as np
-
 
 # variable definitions
 from config import *
@@ -13,7 +10,7 @@ from models.Origin_pointnet import PointNetCls, Regressor
 import torch.nn.functional as F
 from tqdm import tqdm
 from model1.loss import *
-from model1.tensorboard import *
+from model1.tensor_board import *
 from utils import laplacebeltrami_FEM_v2
 from utils import eigenpairs
 from utils.laplacian import tri_areas_batch
@@ -87,13 +84,15 @@ class trainer:
         scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=self.scheduler_step, gamma=0.5)
 
         running_loss = 0.0
+        running_recon_loss = 0.0
+        running_missclassify_loss = 0.0
         num_misclassified = 0
         step_cntr = 0
         for epoch in range(self.n_epoch):
             if epoch != 0:
                 scheduler.step()
             for i, data in enumerate(self.train_data, 0):
-                orig_vertices, label, eigvals, eigvecs, vertex_area, targets, faces = data
+                orig_vertices, label, _, eigvecs, vertex_area, targets, faces, edges = data
                 # label = label[:, 0].to(DEVICE) TODO: remove this later on
                 cur_batch_len = orig_vertices.shape[0]
                 orig_vertices = orig_vertices.transpose(2, 1).to(DEVICE)
@@ -116,7 +115,7 @@ class trainer:
                 if LOSS == 'l2':
                     Similarity_loss = L2Similarity(orig_vertices, adex, vertex_area)
                 else:
-                    Similarity_loss = LocalEuclideanSimilarity(orig_vertices, adex)#, edges)
+                    Similarity_loss = LocalEuclideanSimilarity(orig_vertices.transpose(2, 1), adex.transpose(2, 1), edges)
 
 
                 missloss = MisclassifyLoss()
@@ -136,20 +135,15 @@ class trainer:
                 print('[Epoch #%d: Batch %d/%d] train loss: %f, Misclassified: [%d/%d]' % (
                     epoch, self.num_batch, i, loss.item(), float(cur_batch_len), num_misclassified.item()))
 
-                # tensorboard
+                # report to tensorboard
                 running_loss += loss.item()
-                if i % SHOW_LOSS_EVERY == SHOW_LOSS_EVERY-1:  # every SHOW_LOSS_EVERY mini-batches
+                running_recon_loss += similarity_loss.item()
+                running_missclassify_loss += missloss.item()
+                running_loss, running_recon_loss, running_missclassify_loss, num_misclassified = \
+                report_to_tensorboard(self.writer, i, epoch, self.batch_size, cur_batch_len,
+                                     running_loss, running_recon_loss, running_missclassify_loss,
+                                     num_misclassified)
 
-                    # ...log the running loss
-                    self.writer.add_scalar('Loss/Train',
-                                      running_loss / SHOW_LOSS_EVERY,
-                                      epoch * self.num_batch + i)
-                    self.writer.add_scalar('Accuracy/Train_Misclassified_targets',
-                                      num_misclassified / float(cur_batch_len),
-                                      epoch * self.num_batch + i)
-
-                    running_loss = 0.0
-                    num_misclassified = 0
                 step_cntr += 1
 
         torch.save(self.model.state_dict(), self.save_weights_dir)

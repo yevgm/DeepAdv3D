@@ -135,8 +135,17 @@ def pos_normals(pos, faces):
       posnormals[:,j] +=  tscatter.scatter_add(trinormals[:,j], faces[:,i], dim_size=n)
   return posnormals/posnormals.norm(p=2,dim=1,keepdim=True)
 
+# -----------------------------------------------------------------------------
 
-#-----------------------------------------------------------------------------
+
+def edges_from_faces(f: np.array, unique=True, return_index=False, return_inverse=False, return_counts=False):
+
+    e = np.sort(f[:, [0, 1, 1, 2, 2, 0]].reshape((-1, 2)), axis=1)
+    return np.unique(e, axis=0, return_inverse=return_inverse, return_index=return_index,
+                     return_counts=return_counts) if unique else e
+
+
+# -----------------------------------------------------------------------------
 def l2_distance(pos, ppos, faces, normalize=False):
     check_data(pos=pos, faces=faces)
     check_data(pos=ppos)

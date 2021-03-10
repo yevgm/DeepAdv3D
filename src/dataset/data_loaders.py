@@ -15,7 +15,7 @@ import torch.utils.data as data
 from plyfile import PlyData, PlyElement
 from utils.transforms import random_uniform_rotation
 from utils.eigenpairs import eigenpairs
-
+from utils.misc import edges_from_faces
 # variable definitions
 from config import *
 
@@ -256,6 +256,13 @@ class FaustDataset(data.Dataset):
         faces = torch.from_numpy(f.astype(np.int))
         self.rgb = rgb
 
+        # calculate edges from faces for local euclidean similarity
+        if LOSS == 'local_euclidean':
+            e = edges_from_faces(f)
+            edges = torch.from_numpy(e.astype(np.int))
+        else:
+            edges = 0
+
         # # center and scale
         v = v - np.expand_dims(np.mean(v, axis=0), 0)  # center
         # dist = np.max(np.sqrt(np.sum(v ** 2, axis=1)), 0)
@@ -275,13 +282,10 @@ class FaustDataset(data.Dataset):
         v = torch.from_numpy(v.astype(np.float32))
         cls = torch.from_numpy(np.array([index % 10]).astype(np.int64))
 
-        # from utils.misc import pos_areas
-        # areas_1 = pos_areas(v, self.f)
         # calculate laplacian eigenvectors matrix and areas
         eigvals, eigvecs, vertex_area = eigenpairs(v, faces, K, double_precision=True)
 
-
-        return v, cls, eigvals, eigvecs, vertex_area, self.targets[index], faces
+        return v, cls, eigvals, eigvecs, vertex_area, self.targets[index], faces, edges
 
     def __len__(self):
         return len(self.fns)
