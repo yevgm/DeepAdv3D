@@ -10,6 +10,7 @@ from models.Origin_pointnet import PointNetCls, Regressor
 import torch.nn.functional as F
 from tqdm import tqdm
 from model1.loss import *
+from model1.utils import *
 from model1.tensor_board import *
 from utils import laplacebeltrami_FEM_v2
 from utils import eigenpairs
@@ -53,6 +54,8 @@ class trainer:
                        model: nn.Module,
                        classifier: nn.Module):
 
+        generate_data_output_dir()
+
         self.train_data = train_data
         self.test_data = test_data
         self.batch_size = TRAIN_BATCH_SIZE
@@ -95,7 +98,7 @@ class trainer:
                 orig_vertices, label, _, eigvecs, vertex_area, targets, faces, edges = data
                 # label = label[:, 0].to(DEVICE) TODO: remove this later on
                 cur_batch_len = orig_vertices.shape[0]
-                orig_vertices = orig_vertices.transpose(2, 1).to(DEVICE)
+                orig_vertices = orig_vertices.transpose(2, 1)
 
                 optimizer.zero_grad()
                 self.model = self.model.train()  # set to train mode
@@ -105,7 +108,7 @@ class trainer:
                 adex = orig_vertices + torch.bmm(eigvecs, eigen_space_v).transpose(2, 1)
 
                 # DEBUG - visualize the adex
-                if DEBUG & (step_cntr % SHOW_TRAIN_SAMPLE_EVERY == 0):
+                if DEBUG & (step_cntr > 0) & (step_cntr % SHOW_TRAIN_SAMPLE_EVERY == 0):
                     plot_mesh_montage([orig_vertices[0].T, adex[0].T], [faces[0], faces[0]])
 
                 # no grad is already implemented in the constructor
@@ -119,7 +122,6 @@ class trainer:
 
 
                 missloss = MisclassifyLoss()
-                # similarity_loss = 0
                 similarity_loss = Similarity_loss()
                 loss = missloss + RECON_LOSS_CONST * similarity_loss
 
@@ -128,7 +130,7 @@ class trainer:
                 optimizer.step()
 
                 # Metrics
-                # stdout prints
+                # old stdout prints
                 self.loss_values.append(loss.item())
                 pred_choice = perturbed_logits.data.max(1)[1]
                 num_misclassified += pred_choice.eq(targets).cpu().sum()
@@ -146,7 +148,9 @@ class trainer:
 
                 step_cntr += 1
 
-        torch.save(self.model.state_dict(), self.save_weights_dir)
+            if (epoch > 0) & (epoch % SAVE_PARAMS_EVERY == 0):
+                torch.save(self.model.state_dict(), self.save_weights_dir)
+
         return self.loss_values
 
     # def evaluate(self): ## TODO: remove this later on

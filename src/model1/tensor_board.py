@@ -15,6 +15,13 @@ def generate_new_tensorboard_results_dir(mode="train"):
     else:
         batch_size = TEST_BATCH_SIZE
 
+    # create the main folder if not exists
+    if not os.path.isdir(TENSOR_LOG_DIR):
+        try:
+            os.mkdir(TENSOR_LOG_DIR)
+        except:
+            sys.exit("New tensorboard folder could not be created")
+
     dir_list = os.listdir(TENSOR_LOG_DIR)
     cur_idx = len(dir_list) + 1
     new_tensorboard_name = str(cur_idx)+"_"+str(DATASET_NAME)+"_Lr_"+str(LR)+"_Batch_"+str(batch_size)+"_"\
@@ -46,7 +53,7 @@ def report_to_tensorboard(tensor_obj, idx, epoch, batch_size, cur_batch_len, run
         # ...log the running loss
         tensor_obj.add_scalar('Loss/Train_total',
                                running_loss / SHOW_LOSS_EVERY,
-                               epoch * batch_size + idx)
+                               epoch * batch_size + idx) # TODO: fix the x scale
         tensor_obj.add_scalar('Loss/Train_reconstruction_loss',
                                running_recon_loss / SHOW_LOSS_EVERY,
                                epoch * batch_size + idx)

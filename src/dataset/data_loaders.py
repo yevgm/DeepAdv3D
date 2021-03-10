@@ -253,13 +253,13 @@ class FaustDataset(data.Dataset):
         else:
             rgb = None
         f = np.stack(plydata['face']['vertex_indices'])
-        faces = torch.from_numpy(f.astype(np.int))
+        faces = torch.from_numpy(f).type(torch.long)
         self.rgb = rgb
 
         # calculate edges from faces for local euclidean similarity
         if LOSS == 'local_euclidean':
             e = edges_from_faces(f)
-            edges = torch.from_numpy(e.astype(np.int))
+            edges = torch.from_numpy(e).type(torch.long).to(DEVICE)
         else:
             edges = 0
 
@@ -285,7 +285,8 @@ class FaustDataset(data.Dataset):
         # calculate laplacian eigenvectors matrix and areas
         eigvals, eigvecs, vertex_area = eigenpairs(v, faces, K, double_precision=True)
 
-        return v, cls, eigvals, eigvecs, vertex_area, self.targets[index], faces, edges
+        return v.to(DEVICE), cls.to(DEVICE), eigvals.to(DEVICE), eigvecs.to(DEVICE), vertex_area.to(DEVICE)\
+            , self.targets[index].to(DEVICE), faces.to(DEVICE), edges
 
     def __len__(self):
         return len(self.fns)
