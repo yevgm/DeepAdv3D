@@ -13,7 +13,7 @@ from config import *
 from models.Origin_pointnet import PointNetCls, Regressor
 from model1.deep_adv_3d import *
 import dataset
-from dataset.data_loaders import FaustDataset
+from dataset.data_loaders import FaustDataset, FaustDatasetInMemory
 
 # # geometric loader
 # def load_datasets_for_regressor(train_batch=8, test_batch=20):
@@ -34,15 +34,13 @@ from dataset.data_loaders import FaustDataset
 
 def load_datasets(train_batch=8, test_batch=20):
     # here we use FaustDataset class that inherits from torch.utils.data.Dataloader. it's a map-style dataset.
-    train_dataset = FaustDataset(
+    train_dataset = FaustDatasetInMemory(
         root=os.path.join(FAUST, r'raw'),
-        classification=True,
         split='train',
         data_augmentation=True)
 
-    test_dataset = FaustDataset(
+    test_dataset = FaustDatasetInMemory(
         root=os.path.join(FAUST, r'raw'),
-        classification=True,
         split='test',
         data_augmentation=False)
 

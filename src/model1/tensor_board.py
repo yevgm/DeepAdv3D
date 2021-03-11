@@ -53,11 +53,11 @@ def report_to_tensorboard(tensor_obj, batch_idx, step_cntr, cur_batch_len, epoch
 
         # ...log the running loss
         tensor_obj.add_scalar('Loss/Train_total',
-                               total_loss / SHOW_LOSS_EVERY, step_cntr)
+                               total_loss, step_cntr)
         tensor_obj.add_scalar('Loss/Train_reconstruction_loss',
-                               RECON_LOSS_CONST * recon_loss / SHOW_LOSS_EVERY, step_cntr)
+                               RECON_LOSS_CONST * recon_loss, step_cntr)
         tensor_obj.add_scalar('Loss/Train_misclassification_loss',
-                               missclassify_loss / SHOW_LOSS_EVERY, step_cntr)
+                               missclassify_loss, step_cntr)
         tensor_obj.add_scalar('Accuracy/Train_Misclassified_targets',
                                num_misclassified / float(cur_batch_len), step_cntr)
 

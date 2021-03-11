@@ -303,6 +303,97 @@ class FaustDataset(data.Dataset):
 
 
 
+class FaustDatasetInMemory(data.Dataset):
+
+    def __init__(self, root, split='train', data_augmentation=False):
+        self.root = root
+        self.split = split
+        self.data_augmentation = data_augmentation
+
+        # create list of valid files
+        self.fns = []
+        for file in os.listdir(self.root):
+            if file.endswith(".ply"):
+                self.fns.append(file)
+        assert len(self.fns) == 100, "assumed that there are 100 train examples"
+        # sort - very important
+        list.sort(self.fns)
+
+        # split tran\test
+        if self.split == 'train':
+            self.fns = self.fns[0:80]
+        else:
+            self.fns = self.fns[80:]
+
+        self.set_targets()
+
+        # load all dataset to memory
+        self.v = []
+        self.faces = []
+        self.edges = []
+        for index, fn in enumerate(self.fns):
+
+            with open(os.path.join(self.root, fn), 'rb') as f:
+                plydata = PlyData.read(f)
+            x = plydata['vertex']['x']
+            y = plydata['vertex']['y']
+            z = plydata['vertex']['z']
+            self.v.append(np.column_stack((x, y, z)))
+
+            f = np.stack(plydata['face']['vertex_indices'])
+            faces = torch.from_numpy(f).type(torch.long)
+            self.faces.append(faces)
+
+            # calculate edges from faces for local euclidean similarity
+            if LOSS == 'local_euclidean':
+                e = edges_from_faces(faces)
+                edges = torch.from_numpy(e).type(torch.long).to(DEVICE)
+            else:
+                edges = 0
+            self.edges.append(edges)
+
+
+    def __getitem__(self, index):
+
+        # # center and scale
+        v = self.v[index] - np.expand_dims(np.mean(self.v[index], axis=0), 0)  # center
+        # dist = np.max(np.sqrt(np.sum(v ** 2, axis=1)), 0)
+        # v = v / dist  # scale
+        if self.data_augmentation:
+            # theta = np.random.uniform(0, np.pi * 2)
+            # rotation_matrix = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
+            # v[:, [0, 2]] = v[:, [0, 2]].dot(rotation_matrix)  # random Z rotation
+
+            # random unitary rotation
+            r = random_uniform_rotation()
+            v = v @ r
+
+            # random translation
+            v += np.random.normal(0, 0.01, size=(1, 3))
+
+        v = torch.from_numpy(v.astype(np.float32))
+        cls = torch.from_numpy(np.array([index % 10]).astype(np.int64))
+
+        # calculate laplacian eigenvectors matrix and areas
+        eigvals, eigvecs, vertex_area = eigenpairs(v, self.faces[index], K, double_precision=True)
+
+        return v.to(DEVICE), cls.to(DEVICE), eigvals.to(DEVICE), eigvecs.to(DEVICE), vertex_area.to(DEVICE) \
+            , self.targets[index].to(DEVICE), self.faces[index].to(DEVICE), self.edges[index]
+
+    def __len__(self):
+        return len(self.fns)
+
+    def set_targets(self):
+        # draw random target for each shape
+        self.targets = np.zeros(len(self))-1
+        for i in np.arange(0, len(self)):
+            target = random.randint(0, 9)
+            while target == (i % 10):
+                target = random.randint(0, 9)
+            self.targets[i] = target
+        self.targets = torch.from_numpy(self.targets).long().to(DEVICE)
+
+
 if __name__ == '__main__':
     pass
 
