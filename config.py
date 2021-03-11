@@ -26,14 +26,14 @@ SAVE_PARAMS_EVERY = 1 # epochs
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   TRAIN HYPERPARAMETERS
 # ----------------------------------------------------------------------------------------------------------------------#
-LR = 4e-3  # learning rate
+LR = 1e-2  # learning rate
 OPTIMIZER = 'Adam' # 'Adam', 'AdamW'
-WEIGHT_DECAY = 0 # regularization
-SCHEDULER_STEP_SIZE = 500
+WEIGHT_DECAY = 0.1 # regularization
+SCHEDULER_STEP_SIZE = 200
 TRAIN_BATCH_SIZE = 8  # number of data examples in one batch
 TEST_BATCH_SIZE = 20
-N_EPOCH = 100  # number of train epochs
-RECON_LOSS_CONST = 200 # ratio between reconstruction loss and missclasificaition loss 
+N_EPOCH = 600  # number of train epochs
+RECON_LOSS_CONST = 50 # ratio between reconstruction loss and missclasificaition loss 
 
 # adversarial example params:
 K = 40 # number of laplacian eigenvectors to take. NOTE: up to 70. more then that the model decoder is "broken" - see model
@@ -62,4 +62,4 @@ FLUSH_RESULTS = 5 # in seconds
 #                                                   DEBUG
 # ----------------------------------------------------------------------------------------------------------------------#
 DEBUG = True
-SHOW_TRAIN_SAMPLE_EVERY = 100 # plot vista every SHOW_TRAIN_SAMPLE_EVERY batches
+SHOW_TRAIN_SAMPLE_EVERY = 200 # plot vista every SHOW_TRAIN_SAMPLE_EVERY batches

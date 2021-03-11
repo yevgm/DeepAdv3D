@@ -142,7 +142,7 @@ class trainer:
                 running_recon_loss += similarity_loss.item()
                 running_missclassify_loss += missloss.item()
                 running_loss, running_recon_loss, running_missclassify_loss, num_misclassified = \
-                report_to_tensorboard(self.writer, i, epoch, self.batch_size, cur_batch_len,
+                report_to_tensorboard(self.writer, step_cntr, self.batch_size, cur_batch_len,
                                      running_loss, running_recon_loss, running_missclassify_loss,
                                      num_misclassified)
 
