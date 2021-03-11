@@ -21,8 +21,8 @@ sys.path.insert(0, SRC_DIR)
 # classifier:
 PARAMS_FILE = os.path.join(MODEL_DATA_DIR, "FAUST10_pointnet_rot_b128.pt")
 # model1:
-MODEL1_PARAMS_FILE = os.path.join(MODEL_DATA_DIR, "model1_params.pt")
-SAVE_PARAMS_EVERY = 1 # epochs
+MODEL1_PARAMS_FILE = os.path.join(MODEL_DATA_DIR, "model1_params") # .pt will be added in the code
+SAVE_PARAMS_EVERY = 300 # steps
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   TRAIN HYPERPARAMETERS
 # ----------------------------------------------------------------------------------------------------------------------#
@@ -62,4 +62,4 @@ FLUSH_RESULTS = 5 # in seconds
 #                                                   DEBUG
 # ----------------------------------------------------------------------------------------------------------------------#
 DEBUG = True
-SHOW_TRAIN_SAMPLE_EVERY = 200 # plot vista every SHOW_TRAIN_SAMPLE_EVERY batches
+SHOW_TRAIN_SAMPLE_EVERY = 200 # plot vista every SHOW_TRAIN_SAMPLE_EVERY gradient steps

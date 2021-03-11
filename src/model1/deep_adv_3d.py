@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from torch.utils.tensorboard import SummaryWriter
+from datetime import datetime
 
 # variable definitions
 from config import *
@@ -70,14 +71,17 @@ class trainer:
         self.classifier.to(DEVICE)
         for param in self.classifier.parameters():
             param.requires_grad = False
-
         self.model = model
         self.model.to(DEVICE)
 
         self.loss_values = []
-        tensor_log_dir = generate_new_tensorboard_results_dir()
+        now = datetime.now()
+        d = now.strftime("%b-%d-%Y_%H-%M-%S")
+        tensor_log_dir = generate_new_tensorboard_results_dir(d)
         self.writer = SummaryWriter(tensor_log_dir, flush_secs=FLUSH_RESULTS)
-        self.save_weights_dir = MODEL1_PARAMS_FILE
+
+        self.save_weights_dir = generate_unique_params_name(d)
+
 
     def train(self):
         if OPTIMIZER == 'AdamW':
@@ -148,9 +152,11 @@ class trainer:
 
                 step_cntr += 1
 
-            if (epoch > 0) & (epoch % SAVE_PARAMS_EVERY == 0):
+            if (step_cntr > 0) & (step_cntr % SAVE_PARAMS_EVERY == 0):
                 torch.save(self.model.state_dict(), self.save_weights_dir)
 
+        # save at the end also
+        torch.save(self.model.state_dict(), self.save_weights_dir)
         return self.loss_values
 
     # def evaluate(self): ## TODO: remove this later on

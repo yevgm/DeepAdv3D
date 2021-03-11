@@ -7,7 +7,7 @@ from shutil import copyfile
 # ----------------------------------------------------------------------------------------------------------------------#
 
 
-def generate_new_tensorboard_results_dir(mode="train"):
+def generate_new_tensorboard_results_dir(date, mode="train"):
 
     # find folder name
     if mode == "train":
@@ -24,7 +24,7 @@ def generate_new_tensorboard_results_dir(mode="train"):
 
     dir_list = os.listdir(TENSOR_LOG_DIR)
     cur_idx = len(dir_list) + 1
-    new_tensorboard_name = str(cur_idx)+"_"+str(DATASET_NAME)+"_Lr_"+str(LR)+"_Batch_"+str(batch_size)+"_"\
+    new_tensorboard_name = date + "_" +str(cur_idx)+"_"+str(DATASET_NAME)+"_Lr_"+str(LR)+"_Batch_"+str(batch_size)+"_"\
                           +LOSS+"_epoch_"+str(N_EPOCH)+"_K_"+str(K)
     new_dir_name = os.path.join(TENSOR_LOG_DIR, new_tensorboard_name)
 
