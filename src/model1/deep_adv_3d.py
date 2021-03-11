@@ -89,10 +89,6 @@ class trainer:
             optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr, betas=(0.9, 0.999), weight_decay=self.weight_decay)
         scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=self.scheduler_step, gamma=0.5)
 
-        running_loss = 0.0
-        running_recon_loss = 0.0
-        running_missclassify_loss = 0.0
-        num_misclassified = 0
         step_cntr = 0
         for epoch in range(self.n_epoch):
             if epoch != 0:
@@ -134,21 +130,13 @@ class trainer:
                 optimizer.step()
 
                 # Metrics
-                # old stdout prints
                 self.loss_values.append(loss.item())
                 pred_choice = perturbed_logits.data.max(1)[1]
-                num_misclassified += pred_choice.eq(targets).cpu().sum()
-                print('[Epoch #%d: Batch %d/%d] train loss: %f, Misclassified: [%d/%d]' % (
-                    epoch, self.num_batch, i, loss.item(), float(cur_batch_len), num_misclassified.item()))
+                num_misclassified = pred_choice.eq(targets).cpu().sum()
 
                 # report to tensorboard
-                running_loss += loss.item()
-                running_recon_loss += similarity_loss.item()
-                running_missclassify_loss += missloss.item()
-                running_loss, running_recon_loss, running_missclassify_loss, num_misclassified = \
-                report_to_tensorboard(self.writer, step_cntr, self.batch_size, cur_batch_len,
-                                     running_loss, running_recon_loss, running_missclassify_loss,
-                                     num_misclassified)
+                report_to_tensorboard(self.writer, i, step_cntr, cur_batch_len, epoch, self.num_batch, loss.item(),
+                                      similarity_loss.item(), missloss.item(), num_misclassified)
 
                 step_cntr += 1
 

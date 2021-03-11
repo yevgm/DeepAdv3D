@@ -32,8 +32,8 @@ WEIGHT_DECAY = 0.1 # regularization
 SCHEDULER_STEP_SIZE = 200
 TRAIN_BATCH_SIZE = 8  # number of data examples in one batch
 TEST_BATCH_SIZE = 20
-N_EPOCH = 600  # number of train epochs
-RECON_LOSS_CONST = 50 # ratio between reconstruction loss and missclasificaition loss 
+N_EPOCH = 80  # number of train epochs
+RECON_LOSS_CONST = 400 # ratio between reconstruction loss and missclasificaition loss 
 
 # adversarial example params:
 K = 40 # number of laplacian eigenvectors to take. NOTE: up to 70. more then that the model decoder is "broken" - see model
@@ -56,10 +56,10 @@ EPS = 1e-9 # for numerical stability - used in calculating eigenvectors
 #                                                   TENSORBOARD
 # ----------------------------------------------------------------------------------------------------------------------#
 TENSOR_LOG_DIR = os.path.abspath(os.path.join(REPO_ROOT, "..", "tensor_board_logs"))
-SHOW_LOSS_EVERY = 1 # log the loss value every SHOW_LOSS_EVERY mini-batches
+SHOW_LOSS_EVERY = 5 # log the loss value every SHOW_LOSS_EVERY mini-batches
 FLUSH_RESULTS = 5 # in seconds
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   DEBUG
 # ----------------------------------------------------------------------------------------------------------------------#
 DEBUG = True
-SHOW_TRAIN_SAMPLE_EVERY = 3 # plot vista / save image to folder every SHOW_TRAIN_SAMPLE_EVERY gradient steps
+SHOW_TRAIN_SAMPLE_EVERY = 100 # plot vista / save image to folder every SHOW_TRAIN_SAMPLE_EVERY gradient steps

@@ -44,22 +44,20 @@ def generate_new_tensorboard_results_dir(date, mode="train"):
     return new_dir_name
 
 
-def report_to_tensorboard(tensor_obj, idx, batch_size, cur_batch_len, running_loss,
-                          running_recon_loss, running_missclassify_loss, num_misclassified):
-    if idx % SHOW_LOSS_EVERY == SHOW_LOSS_EVERY - 1:  # every SHOW_LOSS_EVERY mini-batches
+def report_to_tensorboard(tensor_obj, batch_idx, step_cntr, cur_batch_len, epoch, n_batches, total_loss,
+                          recon_loss, missclassify_loss, num_misclassified):
+    if step_cntr % SHOW_LOSS_EVERY == SHOW_LOSS_EVERY - 1:  # every SHOW_LOSS_EVERY mini-batches
+        # old stdout prints
+        print('[Epoch #%d: Batch %d/%d] train loss: %f, Misclassified: [%d/%d]' % (
+            epoch, n_batches, batch_idx, total_loss, float(cur_batch_len), num_misclassified.item()))
 
         # ...log the running loss
         tensor_obj.add_scalar('Loss/Train_total',
-                               running_loss / SHOW_LOSS_EVERY, idx)
+                               total_loss / SHOW_LOSS_EVERY, step_cntr)
         tensor_obj.add_scalar('Loss/Train_reconstruction_loss',
-                               RECON_LOSS_CONST * running_recon_loss / SHOW_LOSS_EVERY, idx)
+                               RECON_LOSS_CONST * recon_loss / SHOW_LOSS_EVERY, step_cntr)
         tensor_obj.add_scalar('Loss/Train_misclassification_loss',
-                               running_missclassify_loss / SHOW_LOSS_EVERY, idx)
+                               missclassify_loss / SHOW_LOSS_EVERY, step_cntr)
         tensor_obj.add_scalar('Accuracy/Train_Misclassified_targets',
-                               num_misclassified / float(cur_batch_len), idx)
+                               num_misclassified / float(cur_batch_len), step_cntr)
 
-        running_loss = 0.0
-        running_recon_loss = 0.0
-        running_missclassify_loss = 0.0
-        num_misclassified = 0
-    return running_loss, running_recon_loss, running_missclassify_loss, num_misclassified
