@@ -16,7 +16,6 @@ from model1.tensor_board import *
 from utils import laplacebeltrami_FEM_v2
 from utils import eigenpairs
 from utils.laplacian import tri_areas_batch
-from vista.geom_vis import plot_mesh, plot_mesh_montage
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   Trainer Class
 # ----------------------------------------------------------------------------------------------------------------------#
@@ -77,8 +76,8 @@ class trainer:
         self.loss_values = []
         now = datetime.now()
         d = now.strftime("%b-%d-%Y_%H-%M-%S")
-        tensor_log_dir = generate_new_tensorboard_results_dir(d)
-        self.writer = SummaryWriter(tensor_log_dir, flush_secs=FLUSH_RESULTS)
+        self.tensor_log_dir = generate_new_tensorboard_results_dir(d)
+        self.writer = SummaryWriter(self.tensor_log_dir, flush_secs=FLUSH_RESULTS)
 
         self.save_weights_dir = generate_unique_params_name(d)
 
@@ -113,7 +112,8 @@ class trainer:
 
                 # DEBUG - visualize the adex
                 if DEBUG & (step_cntr > 0) & (step_cntr % SHOW_TRAIN_SAMPLE_EVERY == 0):
-                    plot_mesh_montage([orig_vertices[0].T, adex[0].T], [faces[0], faces[0]])
+                    dump_adversarial_example_image(orig_vertices, adex, faces, step_cntr, self.tensor_log_dir)
+
 
                 # no grad is already implemented in the constructor
                 perturbed_logits, _, _ = self.classifier(adex)

@@ -22,9 +22,7 @@ def generate_new_tensorboard_results_dir(date, mode="train"):
         except:
             sys.exit("New tensorboard folder could not be created")
 
-    dir_list = os.listdir(TENSOR_LOG_DIR)
-    cur_idx = len(dir_list) + 1
-    new_tensorboard_name = date + "_" +str(cur_idx)+"_"+str(DATASET_NAME)+"_Lr_"+str(LR)+"_Batch_"+str(batch_size)+"_"\
+    new_tensorboard_name = date + "_" + str(DATASET_NAME)+"_Lr_"+str(LR)+"_Batch_"+str(batch_size)+"_"\
                           +LOSS+"_epoch_"+str(N_EPOCH)+"_K_"+str(K)
     new_dir_name = os.path.join(TENSOR_LOG_DIR, new_tensorboard_name)
 
@@ -54,7 +52,7 @@ def report_to_tensorboard(tensor_obj, idx, batch_size, cur_batch_len, running_lo
         tensor_obj.add_scalar('Loss/Train_total',
                                running_loss / SHOW_LOSS_EVERY, idx)
         tensor_obj.add_scalar('Loss/Train_reconstruction_loss',
-                               running_recon_loss / SHOW_LOSS_EVERY, idx)
+                               RECON_LOSS_CONST * running_recon_loss / SHOW_LOSS_EVERY, idx)
         tensor_obj.add_scalar('Loss/Train_misclassification_loss',
                                running_missclassify_loss / SHOW_LOSS_EVERY, idx)
         tensor_obj.add_scalar('Accuracy/Train_Misclassified_targets',

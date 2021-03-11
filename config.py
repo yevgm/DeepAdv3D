@@ -21,12 +21,12 @@ sys.path.insert(0, SRC_DIR)
 # classifier:
 PARAMS_FILE = os.path.join(MODEL_DATA_DIR, "FAUST10_pointnet_rot_b128.pt")
 # model1:
-MODEL1_PARAMS_FILE = os.path.join(MODEL_DATA_DIR, "model1_params") # .pt will be added in the code
+MODEL1_PARAMS_DIR = os.path.join(MODEL_DATA_DIR, "model1_params") # .pt will be added in the code
 SAVE_PARAMS_EVERY = 300 # steps
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   TRAIN HYPERPARAMETERS
 # ----------------------------------------------------------------------------------------------------------------------#
-LR = 1e-2  # learning rate
+LR = 4e-3  # learning rate
 OPTIMIZER = 'Adam' # 'Adam', 'AdamW'
 WEIGHT_DECAY = 0.1 # regularization
 SCHEDULER_STEP_SIZE = 200
@@ -62,4 +62,4 @@ FLUSH_RESULTS = 5 # in seconds
 #                                                   DEBUG
 # ----------------------------------------------------------------------------------------------------------------------#
 DEBUG = True
-SHOW_TRAIN_SAMPLE_EVERY = 200 # plot vista every SHOW_TRAIN_SAMPLE_EVERY gradient steps
+SHOW_TRAIN_SAMPLE_EVERY = 3 # plot vista / save image to folder every SHOW_TRAIN_SAMPLE_EVERY gradient steps
