@@ -37,12 +37,12 @@ def load_datasets(train_batch=8, test_batch=20):
     train_dataset = FaustDatasetInMemory(
         root=os.path.join(FAUST, r'raw'),
         split='train',
-        data_augmentation=True)
+        data_augmentation=TRAIN_DATA_AUG)
 
     test_dataset = FaustDatasetInMemory(
         root=os.path.join(FAUST, r'raw'),
         split='test',
-        data_augmentation=False)
+        data_augmentation=TEST_DATA_AUG)
 
     trainLoader = torch.utils.data.DataLoader(train_dataset,
                                                batch_size=train_batch,
@@ -60,9 +60,7 @@ if __name__ == '__main__':
     # traindata = dataset.FaustDataset(FAUST, device=DEVICE, train=True, test=False, transform_data=True)
     # testdata = dataset.FaustDataset(FAUST, device=DEVICE, train=False, test=True, transform_data=True)
     # torch data, not geometric!
-
     trainLoader, testLoader = load_datasets(train_batch=TRAIN_BATCH_SIZE, test_batch=TEST_BATCH_SIZE)
-    # TODO: check if the data loads into GPU
 
     # classifier and model definition
     classifier = PointNetCls(k=10, feature_transform=False, global_transform=False)
@@ -72,6 +70,6 @@ if __name__ == '__main__':
     # train network
     train_ins = trainer(train_data=trainLoader, test_data=testLoader,
                         model=model, classifier=classifier)
-    train_ins.train()
-
+    # train_ins.train()
+    train_ins.evaluate(TEST_PARAMS_DIR)
 

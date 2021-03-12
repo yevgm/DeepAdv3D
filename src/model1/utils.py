@@ -15,10 +15,16 @@ def generate_data_output_dir():
             sys.exit("New model data folder could not be created")
 
 
-def generate_unique_params_name(date):
+# def generate_unique_params_name(date):
+#
+#     dir_list = os.listdir(MODEL_DATA_DIR)
+#     return MODEL1_PARAMS_DIR + "_" + date + ".pt"
 
-    dir_list = os.listdir(MODEL_DATA_DIR)
-    return MODEL1_PARAMS_DIR + "_" + date + ".pt"
+def get_param_file(dir_name):
+    dir_list = os.listdir(dir_name)
+    for file in dir_list:
+        if file.endswith(".pt"):
+            return os.path.join(dir_name, file)
 
 
 def dump_adversarial_example_image(orig_vertices, adex, faces, step_num, file_path):

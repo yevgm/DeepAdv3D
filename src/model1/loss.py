@@ -59,12 +59,14 @@ class L2Similarity(LossFunction):
             raise ValueError("Vertices positions must have shape [b,3,n]")
 
     def __call__(self) -> torch.Tensor:
+
         diff = self.perturbed_pos - self.original_pos
         N = self.perturbed_pos.shape[0]  # batch size
         # (sqrt(ai)*(xi-perturbed(xi)) )^2  = ai*(x-perturbed(xi))^2
         weight_diff = diff * torch.sqrt(self.vertex_area)[:, None, :]
         # this reformulation uses the sub-gradient (hance ensuring a valid behaviour at zero)
         L2 = weight_diff.norm(p="fro")
+
         return L2 / N
 
 

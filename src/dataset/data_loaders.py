@@ -207,12 +207,7 @@ class ModelNetDataset(data.Dataset):
 
 
 class FaustDataset(data.Dataset):
-    def __init__(self,
-                 root,
-                 npoints=2500,
-                 split='train',
-                 data_augmentation=False,
-                 classification=True):
+    def __init__(self, root, split='train', data_augmentation=False):
         self.root = root
         self.split = split
         self.data_augmentation = data_augmentation
@@ -252,41 +247,48 @@ class FaustDataset(data.Dataset):
             rgb = torch.from_numpy(rgb.astype(np.float32))
         else:
             rgb = None
-        f = np.stack(plydata['face']['vertex_indices'])
-        faces = torch.from_numpy(f).type(torch.long)
+        if self.split == 'train':
+            f = np.stack(plydata['face']['vertex_indices'])
+            faces = torch.from_numpy(f).type(torch.long).to(DEVICE)
+        else:
+            faces = 0
         self.rgb = rgb
 
-        # calculate edges from faces for local euclidean similarity
-        if LOSS == 'local_euclidean':
-            e = edges_from_faces(f)
-            edges = torch.from_numpy(e).type(torch.long).to(DEVICE)
-        else:
-            edges = 0
+        if self.split == 'train':
+            # calculate edges from faces for local euclidean similarity
+            if (self.split == 'train') & (LOSS == 'local_euclidean'):
+                e = edges_from_faces(f)
+                edges = torch.from_numpy(e).type(torch.long).to(DEVICE)
+            else:
+                edges = 0
 
-        # # center and scale
-        v = v - np.expand_dims(np.mean(v, axis=0), 0)  # center
-        # dist = np.max(np.sqrt(np.sum(v ** 2, axis=1)), 0)
-        # v = v / dist  # scale
+            # # center and scale
+            v = v - np.expand_dims(np.mean(v, axis=0), 0)  # center
+            # dist = np.max(np.sqrt(np.sum(v ** 2, axis=1)), 0)
+            # v = v / dist  # scale
 
-        if self.data_augmentation:
-            # theta = np.random.uniform(0, np.pi * 2)
-            # rotation_matrix = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
-            # v[:, [0, 2]] = v[:, [0, 2]].dot(rotation_matrix)  # random Z rotation
+            if self.data_augmentation:
+                # theta = np.random.uniform(0, np.pi * 2)
+                # rotation_matrix = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
+                # v[:, [0, 2]] = v[:, [0, 2]].dot(rotation_matrix)  # random Z rotation
 
-            # random unitary rotation
-            r = random_uniform_rotation()
-            v = v @ r
-            # random translation
-            v += np.random.normal(0, 0.01, size=(1, 3))
+                # random unitary rotation
+                r = random_uniform_rotation()
+                v = v @ r
+                # random translation
+                v += np.random.normal(0, 0.01, size=(1, 3))
 
-        v = torch.from_numpy(v.astype(np.float32))
-        cls = torch.from_numpy(np.array([index % 10]).astype(np.int64))
+            v = torch.from_numpy(v.astype(np.float32))
+            cls = torch.from_numpy(np.array([index % 10]).astype(np.int64))
 
-        # calculate laplacian eigenvectors matrix and areas
-        eigvals, eigvecs, vertex_area = eigenpairs(v, faces, K, double_precision=True)
+            # calculate laplacian eigenvectors matrix and areas
+            eigvals, eigvecs, vertex_area = eigenpairs(v, faces, K, double_precision=True)
+            eigvals = eigvals.to(DEVICE)
+            eigvecs = eigvecs.to(DEVICE)
+            vertex_area = vertex_area.to(DEVICE)
 
-        return v.to(DEVICE), cls.to(DEVICE), eigvals.to(DEVICE), eigvecs.to(DEVICE), vertex_area.to(DEVICE)\
-            , self.targets[index].to(DEVICE), faces.to(DEVICE), edges
+        return v.to(DEVICE), cls.to(DEVICE), eigvals, eigvecs, vertex_area, \
+               self.targets[index].to(DEVICE), faces, edges
 
     def __len__(self):
         return len(self.fns)
@@ -345,7 +347,7 @@ class FaustDatasetInMemory(data.Dataset):
             self.faces.append(faces)
 
             # calculate edges from faces for local euclidean similarity
-            if LOSS == 'local_euclidean':
+            if (self.split == 'train') & (LOSS == 'local_euclidean'):
                 e = edges_from_faces(faces)
                 edges = torch.from_numpy(e).type(torch.long).to(DEVICE)
             else:
@@ -369,15 +371,19 @@ class FaustDatasetInMemory(data.Dataset):
             v = v @ r
 
             # random translation
-            v += np.random.normal(0, 0.01, size=(1, 3))
+            jitter = np.random.normal(0, 0.01, size=(1, 3))
+            v += jitter
 
         v = torch.from_numpy(v.astype(np.float32))
         cls = torch.from_numpy(np.array([index % 10]).astype(np.int64))
 
         # calculate laplacian eigenvectors matrix and areas
         eigvals, eigvecs, vertex_area = eigenpairs(v, self.faces[index], K, double_precision=True)
+        eigvals = eigvals.to(DEVICE)
+        eigvecs = eigvecs.to(DEVICE)
+        vertex_area = vertex_area.to(DEVICE)
 
-        return v.to(DEVICE), cls.to(DEVICE), eigvals.to(DEVICE), eigvecs.to(DEVICE), vertex_area.to(DEVICE) \
+        return v.to(DEVICE), cls.to(DEVICE),  eigvals, eigvecs, vertex_area \
             , self.targets[index].to(DEVICE), self.faces[index].to(DEVICE), self.edges[index]
 
     def __len__(self):

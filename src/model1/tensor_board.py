@@ -61,3 +61,16 @@ def report_to_tensorboard(tensor_obj, batch_idx, step_cntr, cur_batch_len, epoch
         tensor_obj.add_scalar('Accuracy/Train_Misclassified_targets',
                                num_misclassified / float(cur_batch_len), step_cntr)
 
+def report_test_to_tensorboard(tensor_obj, total_loss, recon_loss, missclassify_loss, num_misclassified, cur_batch_len):
+
+    print('test loss: %f, Misclassified: [%d/%d]' % (total_loss, float(cur_batch_len), num_misclassified.item()))
+
+    # ...log the running loss
+    tensor_obj.add_scalar('Loss/Test_total',
+                          total_loss, 1)
+    tensor_obj.add_scalar('Loss/Test_reconstruction_loss',
+                          recon_loss, 1)
+    tensor_obj.add_scalar('Loss/Test_misclassification_loss',
+                          missclassify_loss, 1)
+    tensor_obj.add_scalar('Accuracy/Test_Misclassified_targets',
+                          num_misclassified / float(cur_batch_len), 1)
