@@ -327,8 +327,6 @@ class FaustDatasetInMemory(data.Dataset):
         else:
             self.fns = self.fns[80:]
 
-        self.set_targets()
-
         # load all dataset to memory
         self.v = []
         self.faces = []
@@ -383,21 +381,25 @@ class FaustDatasetInMemory(data.Dataset):
         eigvecs = eigvecs.to(DEVICE)
         vertex_area = vertex_area.to(DEVICE)
 
+        # draw new targets every time a new data is created
+        targets = self.set_targets()
+
         return v.to(DEVICE), cls.to(DEVICE),  eigvals, eigvecs, vertex_area \
-            , self.targets[index].to(DEVICE), self.faces[index].to(DEVICE), self.edges[index]
+            , targets[index].to(DEVICE), self.faces[index].to(DEVICE), self.edges[index]
 
     def __len__(self):
         return len(self.fns)
 
     def set_targets(self):
         # draw random target for each shape
-        self.targets = np.zeros(len(self))-1
+        targets = np.zeros(len(self))-1
         for i in np.arange(0, len(self)):
             target = random.randint(0, 9)
             while target == (i % 10):
                 target = random.randint(0, 9)
-            self.targets[i] = target
-        self.targets = torch.from_numpy(self.targets).long().to(DEVICE)
+            targets[i] = target
+        targets = torch.from_numpy(targets).long().to(DEVICE)
+        return targets
 
 
 if __name__ == '__main__':
