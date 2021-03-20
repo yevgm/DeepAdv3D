@@ -30,8 +30,8 @@ def train(train_data,
 
 	loss_values = []
 
-	optimizer = optim.Adam(classifier.parameters(), lr=learning_rate, betas=(0.9, 0.999))
-	scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.5)
+	optimizer = optim.AdamW(classifier.parameters(), lr=learning_rate, betas=(0.9, 0.999), weight_decay=0.5)
+	scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=500, gamma=0.5)
 	if torch.cuda.is_available():
 		classifier.cuda()
 
@@ -40,9 +40,9 @@ def train(train_data,
 	if train:
 
 		for epoch in range(epoch_number):
-			# scheduler.step()
+			scheduler.step()
 			for i, data in enumerate(train_data, 0):
-				points, target = data
+				points, target, faces = data
 				target = target[:, 0]
 				cur_batch_len = len(points)
 				points = points.transpose(2, 1)
@@ -86,7 +86,7 @@ def train(train_data,
 	total_loss = 0
 	test_loss_values = []
 	for i,data in tqdm(enumerate(test_data, 0)):
-		points, target = data
+		points, target, faces = data
 		target = target[:, 0]
 		points = points.transpose(2, 1)
 		if torch.cuda.is_available():

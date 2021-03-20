@@ -7,6 +7,9 @@ from torch.autograd import Variable
 import numpy as np
 import torch.nn.functional as F
 
+# variable definitions
+from config import BATCH_NORM_USE_STATISTICS, BATCH_NORM_MOMENTUM, USE_BN
+
 class STN3d(nn.Module):
     def __init__(self):
         super(STN3d, self).__init__()
@@ -87,9 +90,15 @@ class PointNetfeat(nn.Module):
         self.conv1 = torch.nn.Conv1d(3, 64, 1)
         self.conv2 = torch.nn.Conv1d(64, 128, 1)
         self.conv3 = torch.nn.Conv1d(128, 1024, 1)
-        self.bn1 = nn.BatchNorm1d(64)
-        self.bn2 = nn.BatchNorm1d(128)
-        self.bn3 = nn.BatchNorm1d(1024)
+        if USE_BN:
+            self.bn1 = nn.BatchNorm1d(64, momentum=BATCH_NORM_MOMENTUM, track_running_stats=BATCH_NORM_USE_STATISTICS)
+            self.bn2 = nn.BatchNorm1d(128, momentum=BATCH_NORM_MOMENTUM, track_running_stats=BATCH_NORM_USE_STATISTICS)
+            self.bn3 = nn.BatchNorm1d(1024, momentum=BATCH_NORM_MOMENTUM, track_running_stats=BATCH_NORM_USE_STATISTICS)
+        else:
+            self.bn1 = nn.Identity()
+            self.bn2 = nn.Identity()
+            self.bn3 = nn.Identity()
+
         self.global_feat = global_feat
         self.feature_transform = feature_transform
         self.global_transform = global_transform
@@ -165,11 +174,17 @@ class PointNetCls(nn.Module):
         self.feature_transform = feature_transform
         self.feat = PointNetfeat(global_transform=global_transform, feature_transform=feature_transform)
         self.fc1 = nn.Linear(1024, 512)
-        self.bn1 = nn.BatchNorm1d(512)
+        if USE_BN:
+            self.bn1 = nn.BatchNorm1d(512, momentum=BATCH_NORM_MOMENTUM, track_running_stats=BATCH_NORM_USE_STATISTICS)
+        else:
+            self.bn1 = nn.Identity()
         self.relu = nn.ReLU()
         self.fc2 = nn.Linear(512, 256)
         self.dropout = nn.Dropout(p=0.3)
-        self.bn2 = nn.BatchNorm1d(256)
+        if USE_BN:
+            self.bn2 = nn.BatchNorm1d(256, momentum=BATCH_NORM_MOMENTUM, track_running_stats=BATCH_NORM_USE_STATISTICS)
+        else:
+            self.bn2 = nn.Identity()
         self.relu = nn.ReLU()
         self.fc3 = nn.Linear(256, self.classes)
 

@@ -17,7 +17,22 @@
 # [5] Datasets:
 #	    -FAUST: http://faust.is.tue.mpg.de/
 # [6] create a folder datasets/faust/raw <- put here the test data
-#
+
+# [7] open tensorboard:
+# cd <main location of tensor_board_logs>
+# tensorboard --logdir=tensor_board_logs
+#---------------------------------------------------------------------------------------------#
+#                                       		Usefull commands
+#---------------------------------------------------------------------------------------------#
+# conda env remove -n DeepAdv3D
+#---------------------------------------------------------------------------------------------#
+#                                       	
+#---------------------------------------------------------------------------------------------#
+# add to path conda, pip, python, tensorboard. Create new container for faust dataset
+# mkdir -p parentfolder/{subfolder1,subfolder2,subfolder3} for multiple subfolders
+./tensorboard.sh
+mkdir -p "./datasets/faust/raw"
+mkdir -p "../model_data"
 #---------------------------------------------------------------------------------------------#
 #                                       	
 #---------------------------------------------------------------------------------------------#
@@ -33,17 +48,19 @@ conda activate DeepAdv3D
 #                                     	Primary Dependencies
 #---------------------------------------------------------------------------------------------#
 # Installs torch for Python 3.7 + Cuda 10.2 and Pytorch Geometric 
-conda install -y pytorch==1.5.0 torchvision==0.6.0 cudatoolkit=10.2 -c pytorch
 
-pip install torch-scatter==latest+cu102 -f https://pytorch-geometric.com/whl/torch-1.5.0.html
-pip install torch-sparse==latest+cu102 -f https://pytorch-geometric.com/whl/torch-1.5.0.html
-pip install torch-cluster==latest+cu102 -f https://pytorch-geometric.com/whl/torch-1.5.0.html
-pip install torch-spline-conv==latest+cu102 -f https://pytorch-geometric.com/whl/torch-1.5.0.html
-pip install torch-geometric
+conda install pytorch==1.5.0 torchvision==0.6.0 cudatoolkit=10.1 -c pytorch
+# Primary 3D Geometry Modules:  
+pip install torch-scatter -f https://pytorch-geometric.com/whl/torch-1.4.0+cu101.html
+pip install torch-sparse -f https://pytorch-geometric.com/whl/torch-1.4.0+cu101.html
+pip install torch-cluster -f https://pytorch-geometric.com/whl/torch-1.4.0+cu101.html
+pip install torch-spline-conv -f https://pytorch-geometric.com/whl/torch-1.4.0+cu101.html
 
+pip install torch-geometric==1.3.2
 # pip install tensorflow # Optional 
 pip install tensorboard
-
+pip install tb-nightly
+conda install -c conda​-forge tensorboard 
 # Primary 3D Geometry Modules:  
 
 # Primary Visualizers:
@@ -53,8 +70,8 @@ pip install seaborn
 
 # Utilities: 
 pip install networkx
-pip install numpy
-pip install scipy
+pip install numpy==1.18.5
+pip install scipy==1.5.0
 pip install yagmail
 pip install meshio
 pip install openmesh

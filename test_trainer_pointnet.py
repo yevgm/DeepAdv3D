@@ -15,7 +15,6 @@ import random
 # variable definitions
 from config import *
 
-
 # repository modules
 sys.path.insert(0, SRC_DIR)
 from utils.ios import write_off
@@ -134,33 +133,33 @@ if __name__ == "__main__":
     model = PointNetCls(k=10, feature_transform=False, global_transform=False)
     model = model.to(DEVICE)
     # print(model)
-
     trainLoader,testLoader, traindata, testdata = load_datasets(train_batch=TRAIN_BATCH_SIZE, test_batch=20)
 
-    loss_values, test_mean_loss, test_accuracy = ntrain.train(
-                                                            train_data=trainLoader,
-                                                            test_data=testLoader,
-                                                            classifier=model,
-                                                            batchSize=TRAIN_BATCH_SIZE,
-                                                            parameters_file=PARAMS_FILE,
-                                                            epoch_number=N_EPOCH,
-                                                            learning_rate=LR,
-                                                            train=True)
+    # loss_values, test_mean_loss, test_accuracy = ntrain.train(
+    #                                                         train_data=trainLoader,
+    #                                                         test_data=testLoader,
+    #                                                         classifier=model,
+    #                                                         batchSize=TRAIN_BATCH_SIZE,
+    #                                                         parameters_file=PARAMS_FILE,
+    #                                                         epoch_number=N_EPOCH,
+    #                                                         learning_rate=LR,
+    #                                                         train=True)
     # # # temp train visualizer - in the future : add tensorboard?
     # print('test mean loss:',test_mean_loss,' test_accuracy:',test_accuracy)
-    loss_values = np.array(loss_values)
-    sliced_loss = loss_values[0::5] #sliced
-
-    fig, axs = plt.subplots(2)
-    fig.suptitle('losses')
-    axs[0].plot(np.arange(1,len(sliced_loss)+1,1), sliced_loss)
-    axs[1].plot(np.arange(1,len(loss_values)+1,1), loss_values)
-
-    axs[0].set(xlabel='5*batches index', ylabel='loss')
-    axs[0].grid()
-    axs[1].set(xlabel='batches index', ylabel='loss')
-    axs[1].grid()
-    plt.show()
+    # loss_values = np.array(loss_values)
+    #
+    # sliced_loss = loss_values[0::5] #sliced
+    #
+    # fig, axs = plt.subplots(2)
+    # fig.suptitle('losses')
+    # axs[0].plot(np.arange(1,len(sliced_loss)+1,1), sliced_loss)
+    # axs[1].plot(np.arange(1,len(loss_values)+1,1), loss_values)
+    #
+    # axs[0].set(xlabel='5*batches index', ylabel='loss')
+    # axs[0].grid()
+    # axs[1].set(xlabel='batches index', ylabel='loss')
+    # axs[1].grid()
+    # plt.show()
 
 
     model.load_state_dict(torch.load(PARAMS_FILE, map_location=DEVICE))
@@ -168,7 +167,7 @@ if __name__ == "__main__":
     # show_model_accuracy(PARAMS_FILE, model)
 
     count = 0
-    number_of_tests = 100
+    number_of_tests = 1000x
     # rotation invariance testing
     for i in np.arange(0,number_of_tests,1):
         R = torch.Tensor(random_uniform_rotation()).to(DEVICE)
