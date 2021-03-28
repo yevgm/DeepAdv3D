@@ -42,7 +42,7 @@ def train(train_data,
 		for epoch in range(epoch_number):
 			scheduler.step()
 			for i, data in enumerate(train_data, 0):
-				points, target, faces = data
+				points, target, _, _, _, _, _, _= data
 				target = target[:, 0]
 				cur_batch_len = len(points)
 				points = points.transpose(2, 1)
@@ -86,7 +86,7 @@ def train(train_data,
 	total_loss = 0
 	test_loss_values = []
 	for i,data in tqdm(enumerate(test_data, 0)):
-		points, target, faces = data
+		points, target, _, _, _, _, _, _= data
 		target = target[:, 0]
 		points = points.transpose(2, 1)
 		if torch.cuda.is_available():

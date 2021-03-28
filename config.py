@@ -19,7 +19,7 @@ sys.path.insert(0, SRC_DIR)
 #                                                   MODEL
 # ----------------------------------------------------------------------------------------------------------------------#
 # classifier:
-PARAMS_FILE = os.path.join(MODEL_DATA_DIR, "FAUST10_pointnet_rot_b128.pt") # FAUST10_pointnet_rot_b128.pt
+PARAMS_FILE = os.path.join(MODEL_DATA_DIR, "FAUST10_pointnet_no_bn.pt") # FAUST10_pointnet_rot_b128.pt
 # model1:
 # MODEL1_PARAMS_DIR = os.path.join(MODEL_DATA_DIR, "model1_params") # .pt will be added in the code
 PARAM_FILE_NAME = "model_params.pt"
