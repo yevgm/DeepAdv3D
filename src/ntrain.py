@@ -5,6 +5,22 @@ import torch.optim as optim
 import torch.utils.data
 import torch.nn.functional as F
 from tqdm import tqdm
+import numpy as np
+# variable definitions
+from config import *
+
+def weights_init_normal(m):
+        '''Takes in a module and initializes all linear layers with weight
+           values taken from a normal distribution.'''
+
+        classname = m.__class__.__name__
+        # for every Linear layer in a model
+        if classname.find('Linear') != -1:
+            y = m.in_features
+        # m.weight.data shoud be taken from a normal distribution
+            m.weight.data.normal_(0.0,1/np.sqrt(y))
+        # m.bias.data should be 0
+            m.bias.data.fill_(0)
 
 
 def train(train_data,
@@ -27,11 +43,12 @@ def train(train_data,
 
 	# if opt.model != '':
 	#     classifier.load_state_dict(torch.load(opt.model))
+	classifier.apply(weights_init_normal)
 
 	loss_values = []
 
 	optimizer = optim.AdamW(classifier.parameters(), lr=learning_rate, betas=(0.9, 0.999), weight_decay=0.5)
-	scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=500, gamma=0.5)
+	scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=SCHEDULER_STEP_SIZE, gamma=0.5)
 	if torch.cuda.is_available():
 		classifier.cuda()
 

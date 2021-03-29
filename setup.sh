@@ -30,7 +30,9 @@
 #---------------------------------------------------------------------------------------------#
 # add to path conda, pip, python, tensorboard. Create new container for faust dataset
 # mkdir -p parentfolder/{subfolder1,subfolder2,subfolder3} for multiple subfolders
-./tensorboard.sh
+export PATH=$PATH:"/c/Users/`whoami`/AppData/Local/Continuum/anaconda3"
+export PATH=$PATH:"/c/Users/`whoami`/AppData/Local/Continuum/anaconda3/Scripts"
+
 mkdir -p "./datasets/faust/raw"
 mkdir -p "../model_data"
 #---------------------------------------------------------------------------------------------#
@@ -48,20 +50,24 @@ conda activate DeepAdv3D
 #                                     	Primary Dependencies
 #---------------------------------------------------------------------------------------------#
 # Installs torch for Python 3.7 + Cuda 10.2 and Pytorch Geometric 
+conda install pytorch==1.5.0 torchvision==0.6.0 cudatoolkit=10.1 -y -c pytorch
 
-conda install pytorch==1.5.0 torchvision==0.6.0 cudatoolkit=10.1 -c pytorch
+
 # Primary 3D Geometry Modules:  
-pip install torch-scatter -f https://pytorch-geometric.com/whl/torch-1.4.0+cu101.html
-pip install torch-sparse -f https://pytorch-geometric.com/whl/torch-1.4.0+cu101.html
-pip install torch-cluster -f https://pytorch-geometric.com/whl/torch-1.4.0+cu101.html
-pip install torch-spline-conv -f https://pytorch-geometric.com/whl/torch-1.4.0+cu101.html
+# pip install torch-scatter -f https://pytorch-geometric.com/whl/torch-1.4.0+cu101.html
+# pip install torch-sparse -f https://pytorch-geometric.com/whl/torch-1.4.0+cu101.html
+# pip install torch-cluster -f https://pytorch-geometric.com/whl/torch-1.4.0+cu101.html
+# pip install torch-spline-conv -f https://pytorch-geometric.com/whl/torch-1.4.0+cu101.html
+# pip install torch-geometric==1.3.2
 
-pip install torch-geometric==1.3.2
 # pip install tensorflow # Optional 
 pip install tensorboard
 pip install tb-nightly
-conda install -c conda​-forge tensorboard 
-# Primary 3D Geometry Modules:  
+conda install -y -c conda​-forge tensorboard 
+
+# add tensorboard to path
+export PATH=$PATH:"`python tensor_board.py`"
+echo $PATH
 
 # Primary Visualizers:
 pip install pyvista     

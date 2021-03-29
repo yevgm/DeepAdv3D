@@ -29,15 +29,14 @@ from vista.animation import animate, multianimate
 
 import models
 import classifier_trainer
+import ntrain
 import geometric_train
 import dataset
 import utils
 from models.pointnet import SimplePointNet
 from models.Origin_pointnet import PointNetCls
 from dataset.data_loaders import FaustDataset, FaustDatasetInMemory
-from dataset.faust import FaustDataset as FaustData
-import adversarial.carlini_wagner as cw
-from adversarial.carlini_wagner import CWBuilder, LowbandPerturbation
+# from dataset.faust import FaustDataset as FaustData
 
 
 def load_datasets(train_batch=8, test_batch=20):
@@ -144,7 +143,7 @@ if __name__ == "__main__":
     model = PointNetCls(k=10, feature_transform=False, global_transform=False)
     model = model.to(DEVICE)
 
-    trainLoader, testLoader = load_datasets(train_batch=TRAIN_BATCH_SIZE, test_batch=20)
+    trainLoader, testLoader = load_datasets(train_batch=TRAIN_BATCH_SIZE, test_batch=TEST_BATCH_SIZE)
 
     classifier_trainer.train(
                             train_data=trainLoader,
@@ -155,21 +154,15 @@ if __name__ == "__main__":
                             epoch_number=N_EPOCH,
                             learning_rate=LR,
                             train=True)
-    # # # temp train visualizer - in the future : add tensorboard?
-    # print('test mean loss:',test_mean_loss,' test_accuracy:',test_accuracy)
-    # loss_values = np.array(loss_values)
-    # sliced_loss = loss_values[0::5] #sliced
-    #
-    # fig, axs = plt.subplots(2)
-    # fig.suptitle('losses')
-    # axs[0].plot(np.arange(1,len(sliced_loss)+1,1), sliced_loss)
-    # axs[1].plot(np.arange(1,len(loss_values)+1,1), loss_values)
-    #
-    # axs[0].set(xlabel='5*batches index', ylabel='loss')
-    # axs[0].grid()
-    # axs[1].set(xlabel='batches index', ylabel='loss')
-    # axs[1].grid()
-    # plt.show()
+    # ntrain.train(
+    #             train_data=trainLoader,
+    #             test_data=testLoader,
+    #             classifier=model,
+    #             batchSize=TRAIN_BATCH_SIZE,
+    #             parameters_file=PARAMS_FILE,
+    #             epoch_number=N_EPOCH,
+    #             learning_rate=LR,
+    #             train=True)
 
 
     # model.load_state_dict(torch.load(PARAMS_FILE, map_location=DEVICE))
