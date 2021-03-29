@@ -30,7 +30,7 @@
 #---------------------------------------------------------------------------------------------#
 # add to path conda, pip, python, tensorboard. Create new container for faust dataset
 # mkdir -p parentfolder/{subfolder1,subfolder2,subfolder3} for multiple subfolders
-./tensorboard.sh
+./tensor_board.sh
 mkdir -p "./datasets/faust/raw"
 mkdir -p "../model_data"
 #---------------------------------------------------------------------------------------------#
