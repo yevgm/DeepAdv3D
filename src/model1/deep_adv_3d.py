@@ -12,6 +12,8 @@ from model1.loss import *
 from model1.utils import *
 from model1.tensor_board import *
 
+import torch.nn.functional as F
+
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   Trainer Class
 # ----------------------------------------------------------------------------------------------------------------------#
@@ -112,6 +114,13 @@ class trainer:
 
                 # no grad is already implemented in the constructor
                 perturbed_logits, _, _ = self.classifier(adex)
+
+                # for debugging the BN momentum thingy
+                # perturbed_probabilities = F.softmax(perturbed_logits, dim=1)
+                # perturbed_probabilities_max = perturbed_logits.data.max(1)
+                # orig_perturbed_logits, _, _ = self.classifier(orig_vertices)
+                # orig_probabilities = F.softmax(orig_perturbed_logits, dim=1)
+                # orig_probabilities_max = orig_probabilities.data.max(1)
 
                 MisclassifyLoss = AdversarialLoss(perturbed_logits, targets)
                 if LOSS == 'l2':

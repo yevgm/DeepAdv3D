@@ -3,10 +3,10 @@ import networkx as nx
 import numpy as np
 import torch
 from torch import LongTensor, Tensor
-import torch_sparse as tsparse
-import torch_scatter as tscatter
-import torch_geometric
-from torch_geometric.data.data import Data
+# import torch_sparse as tsparse
+# import torch_scatter as tscatter
+# import torch_geometric
+# from torch_geometric.data.data import Data
 import tqdm
 
 from . import eigenpairs

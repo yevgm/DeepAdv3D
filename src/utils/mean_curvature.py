@@ -1,5 +1,5 @@
 import torch
-import torch_sparse as tsparse
+# import torch_sparse as tsparse
 from .laplacian import laplacebeltrami_FEM_v2
 
 def meancurvature(pos, faces):

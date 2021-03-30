@@ -4,8 +4,8 @@ from typing import List
 import torch.nn
 from torch.nn import Parameter
 import torch.nn.functional as func
-import torch_geometric
-import torch_sparse
+# import torch_geometric
+# import torch_sparse
 
 class ChebnetClassifier(torch.nn.Module):
     def __init__(

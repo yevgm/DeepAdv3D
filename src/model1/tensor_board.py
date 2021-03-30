@@ -7,7 +7,7 @@ from shutil import copyfile
 # ----------------------------------------------------------------------------------------------------------------------#
 
 
-def generate_new_tensorboard_results_dir(date, mode="train"):
+def generate_new_tensorboard_results_dir(date, mode="train", model='adv3d'):
 
     # find folder name
     if mode == "train":
@@ -21,9 +21,12 @@ def generate_new_tensorboard_results_dir(date, mode="train"):
             os.mkdir(TENSOR_LOG_DIR)
         except:
             sys.exit("New tensorboard folder could not be created")
-
-    new_tensorboard_name = date + "_" + str(DATASET_NAME)+"_Lr_"+str(LR)+"_Batch_"+str(batch_size)+"_"\
-                          +LOSS+"_epoch_"+str(N_EPOCH)+"_K_"+str(K)
+    if model == "adv3d":
+        new_tensorboard_name = date + "_" + str(DATASET_NAME)+"_Lr_"+str(LR)+"_Batch_"+str(batch_size)+"_"\
+                              +LOSS+"_epoch_"+str(N_EPOCH)+"_K_"+str(K)
+    else:
+        new_tensorboard_name = date + "_" + str(DATASET_NAME) + "_Lr_" + str(LR) + "_Batch_" + str(batch_size) + "_" \
+                               + LOSS + "_epoch_" + str(N_EPOCH) + "_classifier_train"
     new_dir_name = os.path.join(TENSOR_LOG_DIR, new_tensorboard_name)
 
     # create the folder if not exists

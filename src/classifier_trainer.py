@@ -42,6 +42,7 @@ def train(train_data,
 
 	# load parameters:
 	# classifier.load_state_dict(torch.load(PARAMS_FILE, map_location=DEVICE))
+
 	# initialize weights with normal distribution
 	classifier.apply(weights_init_normal)
 
@@ -49,7 +50,7 @@ def train(train_data,
 	generate_data_output_dir()
 	now = datetime.now()
 	d = now.strftime("%b-%d-%Y_%H-%M-%S")
-	tensor_log_dir = generate_new_tensorboard_results_dir(d)
+	tensor_log_dir = generate_new_tensorboard_results_dir(d, model='classifier')
 	writer = SummaryWriter(tensor_log_dir, flush_secs=FLUSH_RESULTS)
 	save_weights_dir = os.path.join(tensor_log_dir, PARAM_FILE_NAME)
 
@@ -62,14 +63,13 @@ def train(train_data,
 	scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=SCHEDULER_STEP_SIZE, gamma=0.5)
 
 
-	# num_batch = int(len(train_data.dataset) / batchSize)
 	step_cntr = 0
 	if train:
 		for epoch in range(epoch_number):
 			if epoch != 0:
 				scheduler.step()
 			for i, data in enumerate(train_data, 0):
-				points, target, _, _, _, _, _, _= data
+				points, target, _, _, _, _, _, _ = data
 				target = target[:, 0]
 				cur_batch_len = len(points)
 				points = points.transpose(2, 1)
@@ -131,7 +131,7 @@ def evaluate(test_data, classifier, test_param_dir=TEST_PARAMS_DIR):
 
 				running_total_loss += loss
 
-		classifier_report_test_to_tensorboard(s_writer, running_total_loss / (test_len*TEST_EPOCHS),
+		classifier_report_test_to_tensorboard(s_writer, running_total_loss / TEST_EPOCHS,
 											  num_classified, TEST_EPOCHS * test_len)
 
 	# total_correct = 0
