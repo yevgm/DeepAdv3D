@@ -8,7 +8,7 @@ import numpy as np
 import torch.nn.functional as F
 
 # variable definitions
-from config import BATCH_NORM_USE_STATISTICS, BATCH_NORM_MOMENTUM, USE_BN
+from config import *
 
 class STN3d(nn.Module):
     def __init__(self):
@@ -91,9 +91,9 @@ class PointNetfeat(nn.Module):
         self.conv2 = torch.nn.Conv1d(64, 128, 1)
         self.conv3 = torch.nn.Conv1d(128, 1024, 1)
         if USE_BN:
-            self.bn1 = nn.BatchNorm1d(64, momentum=BATCH_NORM_MOMENTUM, track_running_stats=BATCH_NORM_USE_STATISTICS)
-            self.bn2 = nn.BatchNorm1d(128, momentum=BATCH_NORM_MOMENTUM, track_running_stats=BATCH_NORM_USE_STATISTICS)
-            self.bn3 = nn.BatchNorm1d(1024, momentum=BATCH_NORM_MOMENTUM, track_running_stats=BATCH_NORM_USE_STATISTICS)
+            self.bn1 = nn.BatchNorm1d(64, momentum=CLS_BATCH_NORM_MOMENTUM, track_running_stats=CLS_BATCH_NORM_USE_STATISTICS)
+            self.bn2 = nn.BatchNorm1d(128, momentum=CLS_BATCH_NORM_MOMENTUM, track_running_stats=CLS_BATCH_NORM_USE_STATISTICS)
+            self.bn3 = nn.BatchNorm1d(1024, momentum=CLS_BATCH_NORM_MOMENTUM, track_running_stats=CLS_BATCH_NORM_USE_STATISTICS)
         else:
             self.bn1 = nn.Identity()
             self.bn2 = nn.Identity()
@@ -175,14 +175,14 @@ class PointNetCls(nn.Module):
         self.feat = PointNetfeat(global_transform=global_transform, feature_transform=feature_transform)
         self.fc1 = nn.Linear(1024, 512)
         if USE_BN:
-            self.bn1 = nn.BatchNorm1d(512, momentum=BATCH_NORM_MOMENTUM, track_running_stats=BATCH_NORM_USE_STATISTICS)
+            self.bn1 = nn.BatchNorm1d(512, momentum=CLS_BATCH_NORM_MOMENTUM, track_running_stats=CLS_BATCH_NORM_USE_STATISTICS)
         else:
             self.bn1 = nn.Identity()
         self.relu = nn.ReLU()
         self.fc2 = nn.Linear(512, 256)
         self.dropout = nn.Dropout(p=0.3)
         if USE_BN:
-            self.bn2 = nn.BatchNorm1d(256, momentum=BATCH_NORM_MOMENTUM, track_running_stats=BATCH_NORM_USE_STATISTICS)
+            self.bn2 = nn.BatchNorm1d(256, momentum=CLS_BATCH_NORM_MOMENTUM, track_running_stats=CLS_BATCH_NORM_USE_STATISTICS)
         else:
             self.bn2 = nn.Identity()
         self.relu = nn.ReLU()
@@ -211,9 +211,9 @@ class Encoder(nn.Module):
         self.conv1 = torch.nn.Conv1d(3, firstDim, 1)  # default 3, 64
         self.conv2 = torch.nn.Conv1d(firstDim, 2*firstDim, 1)  # default 64, 128
         self.conv3 = torch.nn.Conv1d(2*firstDim, 16*firstDim, 1)  # default 128,1024
-        self.bn1 = nn.BatchNorm1d(firstDim)  # default 64
-        self.bn2 = nn.BatchNorm1d(2*firstDim)  # default 128
-        self.bn3 = nn.BatchNorm1d(16*firstDim)  # default 1024
+        self.bn1 = nn.BatchNorm1d(firstDim, momentum=MODEL_BATCH_NORM_MOMENTUM, track_running_stats=MODEL_BATCH_NORM_USE_STATISTICS)  # default 64
+        self.bn2 = nn.BatchNorm1d(2*firstDim, momentum=MODEL_BATCH_NORM_MOMENTUM, track_running_stats=MODEL_BATCH_NORM_USE_STATISTICS)  # default 128
+        self.bn3 = nn.BatchNorm1d(16*firstDim, momentum=MODEL_BATCH_NORM_MOMENTUM, track_running_stats=MODEL_BATCH_NORM_USE_STATISTICS)  # default 1024
         self.global_feat = global_feat
         self.feature_transform = feature_transform
         self.global_transform = global_transform
@@ -260,11 +260,11 @@ class Decoder(nn.Module):
         super(Decoder, self).__init__()
 
         self.fc1 = nn.Linear(1024, 512)  # 1024, 2048
-        self.bn1 = nn.BatchNorm1d(512)  # 2048
+        self.bn1 = nn.BatchNorm1d(512, momentum=MODEL_BATCH_NORM_MOMENTUM, track_running_stats=MODEL_BATCH_NORM_USE_STATISTICS)  # 2048
         self.relu = nn.ReLU()
         self.fc2 = nn.Linear(512, 256)  # 2048, 8192
         self.dropout = nn.Dropout(p=0.3)
-        self.bn2 = nn.BatchNorm1d(256)  # 8192
+        self.bn2 = nn.BatchNorm1d(256, momentum=MODEL_BATCH_NORM_MOMENTUM, track_running_stats=MODEL_BATCH_NORM_USE_STATISTICS)  # 8192
         self.relu = nn.ReLU()
         self.fc3 = nn.Linear(256, outDim)  # 8192, outDim , 6890 is for faust
 

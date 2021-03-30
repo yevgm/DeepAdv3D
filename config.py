@@ -34,13 +34,13 @@ FLUSH_RESULTS = 5 # in seconds
 #                                                   TRAIN HYPERPARAMETERS
 # ----------------------------------------------------------------------------------------------------------------------#
 TRAINING_CLASSIFIER = False # turn on to switch between classifier train and model train
-LR = 4e-3  # learning rate
+LR = 1e-3  # learning rate
 OPTIMIZER = 'AdamW' # 'Adam', 'AdamW'
 WEIGHT_DECAY = 0.5 # regularization
-SCHEDULER_STEP_SIZE = 50
-TRAIN_BATCH_SIZE = 16  # number of data examples in one batch
+SCHEDULER_STEP_SIZE = 250
+TRAIN_BATCH_SIZE = 32  # number of data examples in one batch
 TEST_BATCH_SIZE = 20
-N_EPOCH = 1500  # number of train epochs
+N_EPOCH = 300  # number of train epochs
 RECON_LOSS_CONST = 400 # ratio between reconstruction loss and missclasificaition loss 
 TRAIN_DATA_AUG = True
 
@@ -77,6 +77,10 @@ CLIM = [0, 0.01] # None or [0, 0.2] - it's the color limit of the shapes
 # ----------------------------------------------------------------------------------------------------------------------#
 PLOT_TRAIN_IMAGES = True
 SHOW_TRAIN_SAMPLE_EVERY = 100 # plot vista / save image to folder every SHOW_TRAIN_SAMPLE_EVERY gradient steps
-BATCH_NORM_USE_STATISTICS = True
-BATCH_NORM_MOMENTUM = 0.5 # default is 0.1
+# classifier bn
 USE_BN = True
+CLS_BATCH_NORM_USE_STATISTICS = True
+CLS_BATCH_NORM_MOMENTUM = 0.5 # default is 0.1
+# model bn
+MODEL_BATCH_NORM_USE_STATISTICS = True
+MODEL_BATCH_NORM_MOMENTUM = 0.5 # default is 0.1
