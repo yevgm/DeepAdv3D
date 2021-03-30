@@ -131,7 +131,7 @@ def evaluate(test_data, classifier, test_param_dir=TEST_PARAMS_DIR):
 
 				running_total_loss += loss
 
-		classifier_report_test_to_tensorboard(s_writer, running_total_loss / (test_len*TEST_EPOCHS),
+		classifier_report_test_to_tensorboard(s_writer, running_total_loss / TEST_EPOCHS,
 											  num_classified, TEST_EPOCHS * test_len)
 
 	# total_correct = 0

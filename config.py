@@ -19,7 +19,7 @@ sys.path.insert(0, SRC_DIR)
 #                                                   MODEL
 # ----------------------------------------------------------------------------------------------------------------------#
 # classifier:
-PARAMS_FILE = os.path.join(MODEL_DATA_DIR, "FAUST10_pointnet_rot_b128.pt") # FAUST10_pointnet_rot_b128.pt
+PARAMS_FILE = os.path.join(MODEL_DATA_DIR, "momentum_03.pt") # FAUST10_pointnet_rot_b128.pt
 # model1:
 # MODEL1_PARAMS_DIR = os.path.join(MODEL_DATA_DIR, "model1_params") # .pt will be added in the code
 PARAM_FILE_NAME = "model_params.pt"
@@ -33,12 +33,12 @@ FLUSH_RESULTS = 5 # in seconds
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   TRAIN HYPERPARAMETERS
 # ----------------------------------------------------------------------------------------------------------------------#
-TRAINING_CLASSIFIER = True # turn on to switch between classifier train and model train
-LR = 1e-2  # learning rate
+TRAINING_CLASSIFIER = False # turn on to switch between classifier train and model train
+LR = 4e-3  # learning rate
 OPTIMIZER = 'AdamW' # 'Adam', 'AdamW'
 WEIGHT_DECAY = 0.5 # regularization
 SCHEDULER_STEP_SIZE = 50
-TRAIN_BATCH_SIZE = 80  # number of data examples in one batch
+TRAIN_BATCH_SIZE = 16  # number of data examples in one batch
 TEST_BATCH_SIZE = 20
 N_EPOCH = 1500  # number of train epochs
 RECON_LOSS_CONST = 400 # ratio between reconstruction loss and missclasificaition loss 
@@ -54,7 +54,8 @@ NEIGHBORS = 20 # 140
 #                                                   TEST
 # ----------------------------------------------------------------------------------------------------------------------#
 # Don't forget to update the test parameters to the original train!
-TEST_PARAMS_DIR = os.path.join(TENSOR_LOG_DIR, "3_Faust_Lr_0.004_Batch_8_l2_epoch_100_K_40")
+SHUFFLE_TEST_DATA = True
+TEST_PARAMS_DIR = os.path.join(TENSOR_LOG_DIR, "Mar-29-2021_23-51-05_Faust_Lr_0.005_Batch_32_l2_epoch_800_K_40")  # here you put the tensor_board_logs foldername to test the model
 TARGET_CLASS = 5 # the attack target - still not used\
 TEST_DATA_AUG = True
 PLOT_TEST_SAMPLE = True
@@ -68,9 +69,13 @@ DATASET_NAME = "Faust"
 EPS = 1e-9 # for numerical stability - used in calculating eigenvectors
 LOAD_WHOLE_DATA_TO_MEMORY = True # use InMemory of Not in dataset loader stage
 # ----------------------------------------------------------------------------------------------------------------------#
+#                                                   VISTA
+# ----------------------------------------------------------------------------------------------------------------------#
+CLIM = [0, 0.01] # None or [0, 0.2] - it's the color limit of the shapes
+# ----------------------------------------------------------------------------------------------------------------------#
 #                                                   DEBUG
 # ----------------------------------------------------------------------------------------------------------------------#
-DEBUG = True
+PLOT_TRAIN_IMAGES = True
 SHOW_TRAIN_SAMPLE_EVERY = 100 # plot vista / save image to folder every SHOW_TRAIN_SAMPLE_EVERY gradient steps
 BATCH_NORM_USE_STATISTICS = True
 BATCH_NORM_MOMENTUM = 0.5 # default is 0.1

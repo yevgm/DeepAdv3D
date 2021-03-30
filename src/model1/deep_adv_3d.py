@@ -106,12 +106,19 @@ class trainer:
                 # adversarial example (smoothly perturbed)
                 adex = orig_vertices + torch.bmm(eigvecs, eigen_space_v).transpose(2, 1)
                 # DEBUG - visualize the adex
-                if DEBUG & (step_cntr > 0) & (step_cntr % SHOW_TRAIN_SAMPLE_EVERY == 0):
+                if PLOT_TRAIN_IMAGES & (step_cntr > 0) & (step_cntr % SHOW_TRAIN_SAMPLE_EVERY == 0):
                     dump_adversarial_example_image(orig_vertices, adex, faces, step_cntr, tensor_log_dir)
-
 
                 # no grad is already implemented in the constructor
                 perturbed_logits, _, _ = self.classifier(adex)
+
+                #debug
+                # logits, _, _ = self.classifier(orig_vertices)
+                # label = label[:, 0]
+                # pred_orig = logits.data.max(1)[1]
+                # pred_choice = perturbed_logits.data.max(1)[1]
+                # num_classified = pred_orig.eq(label).cpu().sum()
+                # num_misclassified = pred_choice.eq(targets).cpu().sum()
 
                 MisclassifyLoss = AdversarialLoss(perturbed_logits, targets)
                 if LOSS == 'l2':
@@ -177,8 +184,14 @@ class trainer:
                 logits, _, _ = self.classifier(orig_vertices)
                 perturbed_logits, _, _ = self.classifier(adex)
 
-                # visualize the output TODO: think about how exactly, maybe augment the test also?
-                if PLOT_TEST_SAMPLE & (i == 0): # save first batch (16 examples) as png
+                # debug
+                # pred_orig = logits.data.max(1)[1]
+                # pred_choice = perturbed_logits.data.max(1)[1]
+                # num_classified = pred_orig.eq(label).cpu().sum()
+                # num_misclassified = pred_choice.eq(targets).cpu().sum()
+
+                # visualize the output TODO: think about how exactly
+                if PLOT_TEST_SAMPLE & (i == 0):  # save first batch (20 examples) as png
                     dump_adversarial_example_image_batch(orig_vertices, adex, faces, label, targets, logits, perturbed_logits, test_param_dir)
 
                 pred_choice = perturbed_logits.data.max(1)[1]

@@ -154,6 +154,9 @@ if __name__ == "__main__":
                             epoch_number=N_EPOCH,
                             learning_rate=LR,
                             train=True)
+
+
+    # classifier_trainer.evaluate(testLoader, classifier)
     # ntrain.train(
     #             train_data=trainLoader,
     #             test_data=testLoader,
