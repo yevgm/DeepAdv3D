@@ -45,8 +45,6 @@ def check_FAUST2000_dataset(data_dir):
         tf = tarfile.open(data_dir + '/dataset.tar')
         tf.extractall(data_dir)
 
-        # os.system('mv %s %s' % (data_dir + '/FAUST/* ', data_dir))
-        # os.system('rmdir %s' % (data_dir + '/FAUST'))
         os.system('rm %s' % (data_dir + '/dataset.tar'))
 
 

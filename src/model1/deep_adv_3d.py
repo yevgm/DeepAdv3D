@@ -145,7 +145,7 @@ class trainer:
                                       similarity_loss.item(), missloss.item(), num_misclassified)
 
                 step_cntr += 1
-
+            # TODO: validation
             if (step_cntr > 0) & (step_cntr % SAVE_PARAMS_EVERY == 0):
                 torch.save(self.model.state_dict(), save_weights_file)
 
