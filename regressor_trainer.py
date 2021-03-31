@@ -94,7 +94,7 @@ if __name__ == '__main__':
 
     # classifier and model definition
     classifier = PointNetCls(k=10, feature_transform=False, global_transform=False)
-    classifier.load_state_dict(torch.load(PARAMS_FILE, map_location=DEVICE), strict=True)  #strict = False for dropping running mean and var of train batchnorm
+    classifier.load_state_dict(torch.load(PARAMS_FILE, map_location=DEVICE), strict=CLS_STRICT_PARAM_LOADING)  #strict = False for dropping running mean and var of train batchnorm
     model = Regressor(numVertices=K)  # K - additive vector field (V) dimension in eigen-space
 
     # classifier = classifier.eval()
@@ -146,6 +146,6 @@ if __name__ == '__main__':
     # train network
     train_ins = trainer(train_data=trainLoader, test_data=testLoader,
                         model=model, classifier=classifier)
-    # train_ins.train()
-    train_ins.evaluate(TEST_PARAMS_DIR)
+    train_ins.train()
+    # train_ins.evaluate(TEST_PARAMS_DIR)
 

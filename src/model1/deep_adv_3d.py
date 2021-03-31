@@ -160,7 +160,7 @@ class trainer:
         # pre-test preparations
         s_writer = SummaryWriter(test_param_dir, flush_secs=FLUSH_RESULTS)
         test_param_file = get_param_file(test_param_dir)
-        self.model.load_state_dict(torch.load(test_param_file, map_location=DEVICE))
+        self.model.load_state_dict(torch.load(test_param_file, map_location=DEVICE), strict=MODEL_STRICT_PARAM_LOADING)
         self.model = self.model.eval()  # set to test mode
 
         running_total_loss = 0.0

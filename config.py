@@ -78,9 +78,12 @@ CLIM = [0, 0.01] # None or [0, 0.2] - it's the color limit of the shapes
 PLOT_TRAIN_IMAGES = True
 SHOW_TRAIN_SAMPLE_EVERY = 100 # plot vista / save image to folder every SHOW_TRAIN_SAMPLE_EVERY gradient steps
 # classifier bn
-USE_BN = True
+CLS_USE_BN = True
 CLS_BATCH_NORM_USE_STATISTICS = True
-CLS_BATCH_NORM_MOMENTUM = 0.5 # default is 0.1
+CLS_BATCH_NORM_MOMENTUM = 0.5  # default is 0.1
+CLS_STRICT_PARAM_LOADING = True  # strict = False for dropping running mean and var of train batchnorm
 # model bn
+MODEL_USE_BN = True
 MODEL_BATCH_NORM_USE_STATISTICS = True
 MODEL_BATCH_NORM_MOMENTUM = 0.5 # default is 0.1
+MODEL_STRICT_PARAM_LOADING = True  # strict = False for dropping running mean and var of train batchnorm
