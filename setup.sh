@@ -33,7 +33,8 @@
 export PATH=$PATH:"/c/Users/`whoami`/AppData/Local/Continuum/anaconda3"
 export PATH=$PATH:"/c/Users/`whoami`/AppData/Local/Continuum/anaconda3/Scripts"
 
-mkdir -p "./datasets/faust/raw"
+# download data
+python ./download_data.py
 mkdir -p "../model_data"
 #---------------------------------------------------------------------------------------------#
 #                                       	

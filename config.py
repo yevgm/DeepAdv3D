@@ -38,9 +38,9 @@ LR = 1e-3  # learning rate
 OPTIMIZER = 'AdamW' # 'Adam', 'AdamW'
 WEIGHT_DECAY = 0.5 # regularization
 SCHEDULER_STEP_SIZE = 250
-TRAIN_BATCH_SIZE = 32  # number of data examples in one batch
+TRAIN_BATCH_SIZE = 8  # number of data examples in one batch
 TEST_BATCH_SIZE = 20
-N_EPOCH = 300  # number of train epochs
+N_EPOCH = 2  # number of train epochs
 RECON_LOSS_CONST = 400 # ratio between reconstruction loss and missclasificaition loss 
 TRAIN_DATA_AUG = True
 

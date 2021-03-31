@@ -86,10 +86,7 @@ def load_datasets(train_batch=8, test_batch=20):
 #     return H
 
 if __name__ == '__main__':
-    # data loading
-    # traindata = dataset.FaustDataset(FAUST, device=DEVICE, train=True, test=False, transform_data=True)
-    # testdata = dataset.FaustDataset(FAUST, device=DEVICE, train=False, test=True, transform_data=True)
-    # torch data, not geometric!
+    # Data Loading and pre-processing
     trainLoader, testLoader = load_datasets(train_batch=TRAIN_BATCH_SIZE, test_batch=TEST_BATCH_SIZE)
 
     # classifier and model definition
@@ -142,10 +139,11 @@ if __name__ == '__main__':
     #
     # print("accuracy is :", count / float(number_of_tests))
 
-
-    # train network
     train_ins = trainer(train_data=trainLoader, test_data=testLoader,
                         model=model, classifier=classifier)
+
+    # train network
     train_ins.train()
+    # evaluate network
     # train_ins.evaluate(TEST_PARAMS_DIR)
 
