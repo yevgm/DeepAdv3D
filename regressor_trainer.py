@@ -61,29 +61,29 @@ def load_datasets(train_batch=8, test_batch=20):
                                                num_workers=NUM_WORKERS)
     testLoader = torch.utils.data.DataLoader(test_dataset,
                                                batch_size=test_batch,
-                                               shuffle=False,
+                                               shuffle=SHUFFLE_TEST_DATA,
                                                num_workers=NUM_WORKERS)
 
     return trainLoader, testLoader
 
-# TODO: remove this block - it's debug
-def random_uniform_rotation(dim=3):
-    H = np.eye(dim)
-    D = np.ones((dim,))
-    for n in range(1, dim):
-        x = np.random.normal(size=(dim - n + 1,))
-        D[n - 1] = np.sign(x[0])
-        x[0] -= D[n - 1] * np.sqrt((x * x).sum())
-        # Householder transformation
-        Hx = (np.eye(dim - n + 1) - 2. * np.outer(x, x) / (x * x).sum())
-        mat = np.eye(dim)
-        mat[n - 1:, n - 1:] = Hx
-        H = np.dot(H, mat)
-        # Fix the last sign such that the determinant is 1
-    D[-1] = (-1) ** (1 - (dim % 2)) * D.prod()
-    # Equivalent to np.dot(np.diag(D), H) but faster, apparently
-    H = (D * H.T).T
-    return H
+# # TODO: remove this block - it's debug
+# def random_uniform_rotation(dim=3):
+#     H = np.eye(dim)
+#     D = np.ones((dim,))
+#     for n in range(1, dim):
+#         x = np.random.normal(size=(dim - n + 1,))
+#         D[n - 1] = np.sign(x[0])
+#         x[0] -= D[n - 1] * np.sqrt((x * x).sum())
+#         # Householder transformation
+#         Hx = (np.eye(dim - n + 1) - 2. * np.outer(x, x) / (x * x).sum())
+#         mat = np.eye(dim)
+#         mat[n - 1:, n - 1:] = Hx
+#         H = np.dot(H, mat)
+#         # Fix the last sign such that the determinant is 1
+#     D[-1] = (-1) ** (1 - (dim % 2)) * D.prod()
+#     # Equivalent to np.dot(np.diag(D), H) but faster, apparently
+#     H = (D * H.T).T
+#     return H
 
 if __name__ == '__main__':
     # data loading
@@ -94,7 +94,7 @@ if __name__ == '__main__':
 
     # classifier and model definition
     classifier = PointNetCls(k=10, feature_transform=False, global_transform=False)
-    classifier.load_state_dict(torch.load(PARAMS_FILE, map_location=DEVICE), strict=False)  #strict = False for dropping running mean and var of train batchnorm
+    classifier.load_state_dict(torch.load(PARAMS_FILE, map_location=DEVICE), strict=True)  #strict = False for dropping running mean and var of train batchnorm
     model = Regressor(numVertices=K)  # K - additive vector field (V) dimension in eigen-space
 
     # classifier = classifier.eval()
@@ -146,6 +146,6 @@ if __name__ == '__main__':
     # train network
     train_ins = trainer(train_data=trainLoader, test_data=testLoader,
                         model=model, classifier=classifier)
-    train_ins.train()
-    # train_ins.evaluate(TEST_PARAMS_DIR)
+    # train_ins.train()
+    train_ins.evaluate(TEST_PARAMS_DIR)
 

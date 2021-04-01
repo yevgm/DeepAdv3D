@@ -17,16 +17,17 @@ from config import *
 
 
 # repository modules
-# from utils.ios import write_off
-# import vista.adv_plotter
-# from vista.adv_plotter import show_perturbation, show_all_perturbations
-# from vista.geom_vis import plot_mesh, plot_mesh_montage
-# import adversarial.output_handler as op
-# import vista.animation
-# from vista.animation import animate, multianimate
+sys.path.insert(0, SRC_DIR)
+from utils.ios import write_off
+import vista.adv_plotter
+from vista.adv_plotter import show_perturbation, show_all_perturbations
+from vista.geom_vis import plot_mesh, plot_mesh_montage
+import adversarial.output_handler as op
+import vista.animation
+from vista.animation import animate, multianimate
 
 
-# import models
+import models
 import classifier_trainer
 import ntrain
 import geometric_train
@@ -154,7 +155,8 @@ if __name__ == "__main__":
                             learning_rate=LR,
                             train=True)
 
-    # classifier_trainer.evaluate(testLoader, model)
+
+    # classifier_trainer.evaluate(testLoader, classifier)
     # ntrain.train(
     #             train_data=trainLoader,
     #             test_data=testLoader,

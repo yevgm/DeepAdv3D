@@ -10,6 +10,8 @@ from vista.utils import concat_cell_qualifier, color_to_pyvista_color_params, bu
 # from geom.tool.vis import add_skeleton
 # from numeric.np import l2_norm_over_last_axis
 
+# variable definitions
+from config import *
 pv.set_plot_theme('document')  # Change global behaviour - TODO - move this
 
 # ---------------------------------------------------------------------------------------------------------------------#
@@ -159,7 +161,7 @@ def plot_mesh_montage(vb, fb=None, nb=None, strategy='mesh', labelb=None, grid_o
                 labelC = label2C
 
             _, m = add_mesh(p, v=verts, f=faces, n=n, strategy=strategy, title=label, grid_on=grid_on,
-                            normal_scale=normal_scale, camera_pos=camera_pos, cmap=cmap, clim=[0, 0.2],
+                            normal_scale=normal_scale, camera_pos=camera_pos, cmap=cmap, clim=CLIM,
                             clr=colors, normal_clr=normal_clr, smooth_shade_on=smooth_shade_on, show_edges=show_edges,
                             lighting=lighting, opacity=Opacity, bar=cbar, slabel=slabel, label_color=labelC)
 
@@ -264,7 +266,7 @@ def add_mesh(p, v, f=None, n=None, strategy='spheres', grid_on=False, clr='light
              normal_clr='lightblue', title=None, smooth_shade_on=True, show_edges=False, cmap='rainbow',
              normal_scale=1, camera_pos=((0, 0, 5.5), (0, 0, 0), (0, 1.5, 0)), lines=None, opacity=1.0,
              point_size=None, lighting=None, eye_dome=False, bar=True, slabel='', label_color=None, clim=None):
-    # TODO - Clean this shit function up
+
     # Align arrays:
     cpu = torch.device("cpu")
     v = v.to(cpu).clone().detach().numpy() if torch.is_tensor(v) else v
@@ -272,6 +274,12 @@ def add_mesh(p, v, f=None, n=None, strategy='spheres', grid_on=False, clr='light
     n = n.to(cpu).clone().detach().numpy() if torch.is_tensor(n) else n
     clr = clr.to(cpu).clone().detach().numpy() if torch.is_tensor(clr) else clr
     normal_clr = normal_clr.to(cpu).clone().detach().numpy() if torch.is_tensor(normal_clr) else normal_clr
+
+    # check input validity
+    if v.shape[1] != 3:
+        raise ValueError("Vertices positions must have shape [n,3]")
+    if f.shape[1] != 3:
+        raise ValueError("faces must have shape [n,3]")
 
     # Align strategy
     style = 'surface'

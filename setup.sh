@@ -76,8 +76,12 @@ pip install seaborn
 
 # Utilities: 
 pip install networkx
+# some windows like this
 pip install numpy==1.18.5
 pip install scipy==1.5.0
+# some this
+# pip install numpy
+# pip install scipy
 pip install yagmail
 pip install meshio
 pip install openmesh
