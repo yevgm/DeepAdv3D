@@ -6,8 +6,7 @@ import inspect
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   DEVICE
 # ----------------------------------------------------------------------------------------------------------------------#
-# DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-DEVICE = torch.device("cpu")
+DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   PATH
 # ----------------------------------------------------------------------------------------------------------------------#
@@ -39,9 +38,9 @@ LR = 1e-3  # learning rate
 OPTIMIZER = 'AdamW' # 'Adam', 'AdamW'
 WEIGHT_DECAY = 0.5 # regularization
 SCHEDULER_STEP_SIZE = 250
-TRAIN_BATCH_SIZE = 2  # number of data examples in one batch
+TRAIN_BATCH_SIZE = 16  # number of data examples in one batch
 TEST_BATCH_SIZE = 20
-N_EPOCH = 2  # number of train epochs
+N_EPOCH = 100  # number of train epochs
 RECON_LOSS_CONST = 400  # ratio between reconstruction loss and missclasificaition loss
 TRAIN_DATA_AUG = True
 
@@ -88,3 +87,5 @@ MODEL_USE_BN = False
 MODEL_BATCH_NORM_USE_STATISTICS = False
 MODEL_BATCH_NORM_MOMENTUM = 0.5  # default is 0.1
 MODEL_STRICT_PARAM_LOADING = False  # strict = False for dropping running mean and var of train batchnorm
+# model dropout
+MODEL_USE_DROPOUT = False

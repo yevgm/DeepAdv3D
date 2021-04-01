@@ -141,13 +141,9 @@ if __name__ == '__main__':
 
     train_ins = trainer(train_data=trainLoader, test_data=testLoader,
                         model=model, classifier=classifier)
-<<<<<<< HEAD
-    train_ins.train()
-=======
 
     # train network
     train_ins.train()
     # evaluate network
->>>>>>> refs/remotes/origin/main
     # train_ins.evaluate(TEST_PARAMS_DIR)
 

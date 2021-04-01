@@ -271,7 +271,10 @@ class Decoder(nn.Module):
             self.bn1 = nn.Identity()
         self.relu = nn.ReLU()
         self.fc2 = nn.Linear(512, 256)  # 2048, 8192
-        self.dropout = nn.Dropout(p=0.3)
+        if MODEL_USE_DROPOUT:
+            self.dropout = nn.Dropout(p=0.3)
+        else:
+            self.dropout = nn.Identity()
         if MODEL_USE_BN:
             self.bn2 = nn.BatchNorm1d(256, momentum=MODEL_BATCH_NORM_MOMENTUM, track_running_stats=MODEL_BATCH_NORM_USE_STATISTICS)  # 8192
         else:

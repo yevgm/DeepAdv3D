@@ -12,6 +12,9 @@ from model1.loss import *
 from model1.utils import *
 from model1.tensor_board import *
 
+from utils.gradflow_check import *
+from vista.geom_vis import plot_mesh
+
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   Trainer Class
 # ----------------------------------------------------------------------------------------------------------------------#
@@ -41,7 +44,6 @@ from model1.tensor_board import *
 #             classification = self.classifier.forward(perturbed_pos)
 #
 #         return classification, v
-
 
 class trainer:
 
@@ -96,6 +98,7 @@ class trainer:
                 scheduler.step()
             for i, data in enumerate(self.train_data, 0):
                 orig_vertices, label, _, eigvecs, vertex_area, targets, faces, edges = data
+                # plot_mesh(orig_vertices[0], faces[0], grid_on=True)  # plot some mesh for debugging
                 cur_batch_len = orig_vertices.shape[0]
                 orig_vertices = orig_vertices.transpose(2, 1)
 
@@ -105,7 +108,10 @@ class trainer:
 
                 # adversarial example (smoothly perturbed)
                 adex = orig_vertices + torch.bmm(eigvecs, eigen_space_v).transpose(2, 1)
+
                 # DEBUG - visualize the adex
+                # if epoch == 30:  # plot first adex in a batch
+                    # plot_mesh(adex[0].transpose(0, 1), faces[0], grid_on=True)
                 if PLOT_TRAIN_IMAGES & (step_cntr > 0) & (step_cntr % SHOW_TRAIN_SAMPLE_EVERY == 0):
                     dump_adversarial_example_image(orig_vertices, adex, faces, step_cntr, tensor_log_dir)
 
@@ -113,12 +119,12 @@ class trainer:
                 perturbed_logits, _, _ = self.classifier(adex)
 
                 #debug
-                # logits, _, _ = self.classifier(orig_vertices)
-                # label = label[:, 0]
-                # pred_orig = logits.data.max(1)[1]
-                # pred_choice = perturbed_logits.data.max(1)[1]
-                # num_classified = pred_orig.eq(label).cpu().sum()
-                # num_misclassified = pred_choice.eq(targets).cpu().sum()
+                logits, _, _ = self.classifier(orig_vertices)
+                label = label[:, 0]
+                pred_orig = logits.data.max(1)[1]
+                pred_choice = perturbed_logits.data.max(1)[1]
+                num_classified = pred_orig.eq(label).cpu().sum()
+                num_misclassified = pred_choice.eq(targets).cpu().sum()
 
                 MisclassifyLoss = AdversarialLoss(perturbed_logits, targets)
                 if LOSS == 'l2':
@@ -133,12 +139,15 @@ class trainer:
 
                 # Back-propagation step
                 loss.backward()
+                # if epoch > 1:  # trying to draw the gradients flow, not working since our grads are None for some reason
+                #     plot_grad_flow_v2(self.model.named_parameters())
                 optimizer.step()
+
 
                 # Metrics
                 self.loss_values.append(loss.item())
                 pred_choice = perturbed_logits.data.max(1)[1]
-                num_misclassified = pred_choice.eq(targets).cpu().sum()
+                num_misclassified = pred_choice.eq(targets).sum().cpu()
 
                 # report to tensorboard
                 report_to_tensorboard(writer, i, step_cntr, cur_batch_len, epoch, self.num_batch, loss.item(),

@@ -54,9 +54,9 @@ def plotter(theme='document'):
 # ---------------------------------------------------------------------------------------------------------------------#
 # noinspection PyIncorrectDocstring
 def plot_mesh(v, f=None, n=None, strategy='mesh', grid_on=False, clr='lightcoral', normal_clr='lightblue',
-              label=None, smooth_shade_on=True, show_edges=False, clr_map='rainbow', normal_scale=1, point_size=None,
+              smooth_shade_on=True, show_edges=False, clr_map='rainbow', normal_scale=1, point_size=None,
               lighting=None, camera_pos=((0, 0, 5.5), (0, 0, 0), (0, 1.5, 0)), opacity=1.0, bar=True, slabel=''
-              ,screenshot=False):
+              , screenshot=False):  # label=None removed
     """
     :param v: tensor - A numpy or torch [nv x 3] vertex tensor
     :param f: tensor |  None - (optional) A numpy or torch [nf x 3] vertex tensor OR None
@@ -75,9 +75,9 @@ def plot_mesh(v, f=None, n=None, strategy='mesh', grid_on=False, clr='lightcoral
     # White background
     p = plotter()
     p, m = add_mesh(p, v=v, f=f, n=n, grid_on=grid_on, strategy=strategy, clr=clr, normal_clr=normal_clr,
-                    label=label, smooth_shade_on=smooth_shade_on, show_edges=show_edges, cmap=clr_map,
+                    smooth_shade_on=smooth_shade_on, show_edges=show_edges, cmap=clr_map,
                     normal_scale=normal_scale, point_size=point_size, lighting=lighting, camera_pos=camera_pos,
-                    opacity=opacity, bar=bar, slabel=slabel)
+                    opacity=opacity, bar=bar, slabel=slabel)  # label=label removed
     p.show()
     return p, m
 

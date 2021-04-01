@@ -27,11 +27,7 @@ class AdversarialLoss(LossFunction):
         # if perturbed_logits.shape[-1] != DATASET_CLASSES:
         #     raise ValueError("must have a shape [b,DATASET_CLASSES]")
 
-<<<<<<< HEAD
-        self.k = torch.tensor(k, device=DEVICE, dtype=torch.float32)
-=======
         # self.k = torch.tensor([k], device=DEVICE, dtype=torch.float32)
->>>>>>> refs/remotes/origin/main
         self.perturbed_logits = perturbed_logits
         self.target = target
 
@@ -39,23 +35,17 @@ class AdversarialLoss(LossFunction):
         batch_size = self.target.shape[0]
         Z = self.perturbed_logits
         values, index = torch.sort(Z, dim=1)
-        argmax = index[:, -1].clone()
+        argmax = index[:, -1]
 
         # if target equals the max of logits, take the second max. else do continue
         argmax[index[:, -1] == self.target] = index[index[:, -1] == self.target, -2]
 
         Ztarget, Zmax = Z[:, self.target].diag(), Z[:, argmax].diag()
-<<<<<<< HEAD
-        out = (Zmax - Ztarget)#.clone()
-        out[out <= -self.k] = 0
-        return out.sum() / batch_size  # batch average
-=======
-        out = (Zmax - Ztarget).clone()
+        out = (Zmax - Ztarget)
         # out[out <= -self.k] = 0
         out[out <= 0] = 0
         out = out.sum() / batch_size  # batch average
         return out
->>>>>>> refs/remotes/origin/main
 
 
 class L2Similarity(LossFunction):
