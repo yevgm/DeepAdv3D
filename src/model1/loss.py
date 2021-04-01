@@ -11,7 +11,7 @@ from utils.misc import kNN
 # ----------------------------------------------------------------------------------------------------------------------#
 
 
-class LossFunction(object):
+class LossFunction(object):  # TODO: make this more efficient after the bug's fixed
     def __init__(self, original_pos=0, perturbed_pos=0):    # 0 is default for adversarial example loss
         self.original_pos = original_pos
         self.perturbed_pos = perturbed_pos
@@ -21,13 +21,13 @@ class LossFunction(object):
 
 
 class AdversarialLoss(LossFunction):
-    def __init__(self, perturbed_logits, target, k: float = 0):
+    def __init__(self, perturbed_logits, target):
         super().__init__()
         # check input validity
-        if perturbed_logits.shape[-1] != DATASET_CLASSES:
-            raise ValueError("must have a shape [b,DATASET_CLASSES]")
+        # if perturbed_logits.shape[-1] != DATASET_CLASSES:
+        #     raise ValueError("must have a shape [b,DATASET_CLASSES]")
 
-        self.k = torch.tensor([k], device=DEVICE, dtype=torch.float32)
+        # self.k = torch.tensor([k], device=DEVICE, dtype=torch.float32)
         self.perturbed_logits = perturbed_logits
         self.target = target
 
@@ -42,8 +42,10 @@ class AdversarialLoss(LossFunction):
 
         Ztarget, Zmax = Z[:, self.target].diag(), Z[:, argmax].diag()
         out = (Zmax - Ztarget).clone()
-        out[out <= -self.k] = 0
-        return out.sum() / batch_size  # batch average
+        # out[out <= -self.k] = 0
+        out[out <= 0] = 0
+        out = out.sum() / batch_size  # batch average
+        return out
 
 
 class L2Similarity(LossFunction):
