@@ -86,15 +86,12 @@ def load_datasets(train_batch=8, test_batch=20):
 #     return H
 
 if __name__ == '__main__':
-    # data loading
-    # traindata = dataset.FaustDataset(FAUST, device=DEVICE, train=True, test=False, transform_data=True)
-    # testdata = dataset.FaustDataset(FAUST, device=DEVICE, train=False, test=True, transform_data=True)
-    # torch data, not geometric!
+    # Data Loading and pre-processing
     trainLoader, testLoader = load_datasets(train_batch=TRAIN_BATCH_SIZE, test_batch=TEST_BATCH_SIZE)
 
     # classifier and model definition
     classifier = PointNetCls(k=10, feature_transform=False, global_transform=False)
-    classifier.load_state_dict(torch.load(PARAMS_FILE, map_location=DEVICE), strict=True)  #strict = False for dropping running mean and var of train batchnorm
+    classifier.load_state_dict(torch.load(PARAMS_FILE, map_location=DEVICE), strict=CLS_STRICT_PARAM_LOADING)  #strict = False for dropping running mean and var of train batchnorm
     model = Regressor(numVertices=K)  # K - additive vector field (V) dimension in eigen-space
 
     # classifier = classifier.eval()
@@ -142,10 +139,15 @@ if __name__ == '__main__':
     #
     # print("accuracy is :", count / float(number_of_tests))
 
-
-    # train network
     train_ins = trainer(train_data=trainLoader, test_data=testLoader,
                         model=model, classifier=classifier)
+<<<<<<< HEAD
     train_ins.train()
+=======
+
+    # train network
+    train_ins.train()
+    # evaluate network
+>>>>>>> refs/remotes/origin/main
     # train_ins.evaluate(TEST_PARAMS_DIR)
 

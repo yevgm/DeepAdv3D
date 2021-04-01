@@ -145,7 +145,7 @@ class trainer:
                                       similarity_loss.item(), missloss.item(), num_misclassified)
 
                 step_cntr += 1
-
+            # TODO: validation
             if (step_cntr > 0) & (step_cntr % SAVE_PARAMS_EVERY == 0):
                 torch.save(self.model.state_dict(), save_weights_file)
 
@@ -160,7 +160,7 @@ class trainer:
         # pre-test preparations
         s_writer = SummaryWriter(test_param_dir, flush_secs=FLUSH_RESULTS)
         test_param_file = get_param_file(test_param_dir)
-        self.model.load_state_dict(torch.load(test_param_file, map_location=DEVICE))
+        self.model.load_state_dict(torch.load(test_param_file, map_location=DEVICE), strict=MODEL_STRICT_PARAM_LOADING)
         self.model = self.model.eval()  # set to test mode
 
         running_total_loss = 0.0

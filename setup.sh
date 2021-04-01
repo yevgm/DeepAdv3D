@@ -33,7 +33,6 @@
 export PATH=$PATH:"/c/Users/`whoami`/AppData/Local/Continuum/anaconda3"
 export PATH=$PATH:"/c/Users/`whoami`/AppData/Local/Continuum/anaconda3/Scripts"
 
-mkdir -p "./datasets/faust/raw"
 mkdir -p "../model_data"
 #---------------------------------------------------------------------------------------------#
 #                                       	
@@ -90,6 +89,11 @@ pip install plyfile
 pip install sklearn
 
 conda install -y -c open3d-admin open3d # Last due to problems
+
+#---------------------------------------------------------------------------------------------#
+#                            			Donwload Data
+#---------------------------------------------------------------------------------------------#
+python ./download_data.py
 
 #---------------------------------------------------------------------------------------------#
 #                            			Collaterals
