@@ -27,7 +27,7 @@ class AdversarialLoss(LossFunction):
         if perturbed_logits.shape[-1] != DATASET_CLASSES:
             raise ValueError("must have a shape [b,DATASET_CLASSES]")
 
-        self.k = torch.tensor([k], device=DEVICE, dtype=torch.float32)
+        self.k = torch.tensor(k, device=DEVICE, dtype=torch.float32)
         self.perturbed_logits = perturbed_logits
         self.target = target
 
@@ -41,7 +41,7 @@ class AdversarialLoss(LossFunction):
         argmax[index[:, -1] == self.target] = index[index[:, -1] == self.target, -2]
 
         Ztarget, Zmax = Z[:, self.target].diag(), Z[:, argmax].diag()
-        out = (Zmax - Ztarget).clone()
+        out = (Zmax - Ztarget)#.clone()
         out[out <= -self.k] = 0
         return out.sum() / batch_size  # batch average
 

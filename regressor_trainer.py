@@ -146,6 +146,6 @@ if __name__ == '__main__':
     # train network
     train_ins = trainer(train_data=trainLoader, test_data=testLoader,
                         model=model, classifier=classifier)
-    # train_ins.train()
-    train_ins.evaluate(TEST_PARAMS_DIR)
+    train_ins.train()
+    # train_ins.evaluate(TEST_PARAMS_DIR)
 
