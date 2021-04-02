@@ -13,10 +13,11 @@ import numpy as np
 from config import *
 
 # repository modules
-from models.Origin_pointnet import PointNetCls, Regressor
-from model1.loss import *
-from model1.utils import *
-from model1.tensor_board import *
+from models.pointnet import PointNet
+from models.deep_adv_3d_model1 import Regressor
+from deep_adv_3d.loss import *
+from deep_adv_3d.utils import *
+from deep_adv_3d.tensor_board import *
 
 def weights_init_normal(m):
         '''Takes in a module and initializes all linear layers with weight
