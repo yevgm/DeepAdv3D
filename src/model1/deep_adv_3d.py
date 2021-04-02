@@ -110,7 +110,7 @@ class trainer:
                 adex = orig_vertices + torch.bmm(eigvecs, eigen_space_v).transpose(2, 1)
 
                 # DEBUG - visualize the adex
-                # if epoch == 30:  # plot first adex in a batch
+                # if epoch == 10:  # plot the first adex in the batch
                     # plot_mesh(adex[0].transpose(0, 1), faces[0], grid_on=True)
                 if PLOT_TRAIN_IMAGES & (step_cntr > 0) & (step_cntr % SHOW_TRAIN_SAMPLE_EVERY == 0):
                     dump_adversarial_example_image(orig_vertices, adex, faces, step_cntr, tensor_log_dir)
