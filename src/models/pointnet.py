@@ -1,187 +1,212 @@
-import torch, time, os, sys, numpy as np
-from torch import nn, optim
-from torch.nn import functional as F
+from __future__ import print_function
+import torch.nn as nn
+import torch.nn.parallel
+import torch.utils.data
 from torch.autograd import Variable
-from torch import autograd
+import numpy as np
+import torch.nn.functional as F
 
- 
-class SimplePointNet(nn.Module):
-  '''
-  Simplified PointNet, without embedding transformer matrices.
-  Akin to the method in Achlioptas et al, Learning Representations and
-  Generative Models for 3D Point Clouds.
-
-  E.g.
-  s = SimplePointNet(100, 200, (25,50,100), (150,120))
-  // Goes: 3 -> 25 -> 50 -> 100 -> 200 -> 150 -> 120 -> 100
-  '''
-
-  def __init__(self,
-               latent_dimensionality : int,
-               convolutional_output_dim : int,
-               conv_layer_sizes,
-               fc_layer_sizes,
-               transformer_positions,
-               end_in_batchnorm=False):
-
-      super(SimplePointNet, self).__init__()
-      self.LD = latent_dimensionality
-      self.CD = convolutional_output_dim
-      self.transformer_positions = transformer_positions
-      self.num_transformers = len(self.transformer_positions)
-
-      assert self.CD % 2 == 0, "Input Conv dim must be even"
-    
-      # Basic order #
-      # B x N x 3 --Conv_layers--> B x C --Fc_layers--> B x L
-      # We divide the output by two in the conv layers because we are using
-      # both average and max pooling, which will be concatenated.
-      self._conv_sizes = [3] + [k for k in conv_layer_sizes] + [self.CD] #//2
-      self._fc_sizes = [self.CD] + [k for k in fc_layer_sizes]
-
-      ### Convolutional Layers ###
-      self.conv_layers = nn.ModuleList([
-            nn.Sequential(
-                nn.Conv1d(self._conv_sizes[i], self._conv_sizes[i+1], 1),
-                nn.BatchNorm1d(self._conv_sizes[i+1]),
-                nn.ReLU()
-            )
-            for i in range(len(self._conv_sizes)-1)
-      ])
-
-      ### Transformers ###
-      # These are run and applied to the input after the corresponding convolutional
-      # layer is run. Note that they never change the feature size (or indeed the 
-      # tensor shape in general).
-      # E.g. if 0 is given in the positions, a 3x3 matrix set will be applied.
-      self.transformers = nn.ModuleList([
-          SimpleTransformer(self._conv_sizes[jj]) 
-          for jj in self.transformer_positions
-      ])
-
-      ### Fully Connected Layers ###
-      end_in_batchnorm = True
-      self.fc_layers = nn.ModuleList([
-            nn.Sequential(
-                nn.Linear(self._fc_sizes[i], self._fc_sizes[i+1]),
-                nn.BatchNorm1d(self._fc_sizes[i+1]),
-                nn.ReLU()
-            )
-            for i in range(len(self._fc_sizes)-1)] 
-            +
-            ([ nn.Linear(self._fc_sizes[-1], self.LD), nn.Dropout(p=0.3), nn.BatchNorm1d(self.LD) ]
-             if end_in_batchnorm else
-             [ nn.Linear(self._fc_sizes[-1], self.LD) ])
-            ### Classifier
-            + [
-                nn.Sequential(
-                nn.ReLU(),
-                nn.Linear(self.LD, 10),
-            )]
-
-      )
-
-  def move_eye(self, device):
-      for t in self.transformers: t.move_eye(device)
-  
-  def forward(self, pos):
-      ''' 
-      Input: B x N x 3 point clouds (non-permuted)
-      Output: B x LD embedded shapes
-      '''
-      P = pos
-      num_in_dim = len(P.shape)
-      if num_in_dim==2:
-         P = P[None,...]
-            
-      P = P.permute(0,2,1)
-      assert P.shape[1] == 3, "Unexpected shape"
-        
-      # Now P is B x 3 x N
-      for i, layer in enumerate(self.conv_layers): 
-          if i in self.transformer_positions:
-                T = self.transformers[ self.transformer_positions.index(i) ](P)
-                P = layer( torch.bmm(T, P) )
-          else:
-              P = layer(P)
-      # Pool over the number of points.
-      # i.e. P: B x C_D x N --Pool--> B x C_D x 1
-      # Then, P: B x C_D x 1 --> B x C_D (after squeeze)
-      # Note: F.max_pool1d(input, kernel_size)
-      P = F.max_pool1d(P, P.shape[2]).squeeze(2)
-
-      for j, layer in enumerate(self.fc_layers): P = layer(P)
-        
-      if num_in_dim==2:  P = P[0]
-        
-      return P
+# variable definitions
+from config import *
+from models.deep_adv_3d_model1 import Regressor
 
 
-##############################################################################################
+class STN3d(nn.Module):
+    def __init__(self):
+        super(STN3d, self).__init__()
+        self.conv1 = torch.nn.Conv1d(3, 64, 1)
+        self.conv2 = torch.nn.Conv1d(64, 128, 1)
+        self.conv3 = torch.nn.Conv1d(128, 1024, 1)
+        self.fc1 = nn.Linear(1024, 512)
+        self.fc2 = nn.Linear(512, 256)
+        self.fc3 = nn.Linear(256, 9)
+        self.relu = nn.ReLU()
 
-
-class SimpleTransformer(nn.Module):
-    
-    def __init__(self, 
-                 input_dimensionality,
-                 convolutional_dimensions=(64, 128, 1024,),
-                 fc_dimensions=(1024, 512, 256)):
-
-        super(SimpleTransformer, self).__init__()
-        
-        # Setting network dimensions
-        self.input_feature_len = input_dimensionality
-        self.conv_dims = [self.input_feature_len] + [a for a in convolutional_dimensions]
-        self.fc_dims = [f for f in fc_dimensions] 
-
-        ### Convolutional Layers ###
-        self.conv_layers = nn.ModuleList([
-              nn.Sequential(
-                  nn.Conv1d(self.conv_dims[i], self.conv_dims[i+1], 1),
-                  nn.BatchNorm1d(self.conv_dims[i+1]),
-                  nn.ReLU()
-              )
-              for i in range(len(self.conv_dims)-1)
-        ])
-
-        ### Fully Connected Layers ###
-        self.fc_layers = nn.ModuleList([
-              nn.Sequential(
-                  nn.Linear(self.fc_dims[i], self.fc_dims[i+1]),
-                  nn.BatchNorm1d(self.fc_dims[i + 1]),
-                  nn.ReLU()
-              ) for i in range(len(self.fc_dims)-1) ]
-            + [ nn.Linear(self.fc_dims[-1], self.input_feature_len**2) ]
-        )
-        
-        ### Identity matrix added to the transformer at the end ###
-        self.eye = torch.eye(self.input_feature_len)
+        self.bn1 = nn.BatchNorm1d(64)
+        self.bn2 = nn.BatchNorm1d(128)
+        self.bn3 = nn.BatchNorm1d(1024)
+        self.bn4 = nn.BatchNorm1d(512)
+        self.bn5 = nn.BatchNorm1d(256)
 
 
     def forward(self, x):
-        '''
-        Input: B x F x N, e.g. F = 3 at the beginning
-            i.e. expects a permuted point cloud batch
-        Output: B x F x F set of transformation matrices
-        '''
-        SF = x.shape[1] # Size of the features per point
-        #assert SF == self.input_feature_len, "Untenable feature len"
+        batchsize = x.size()[0]
+        x = F.relu(self.bn1(self.conv1(x)))
+        x = F.relu(self.bn2(self.conv2(x)))
+        x = F.relu(self.bn3(self.conv3(x)))
+        x = torch.max(x, 2, keepdim=True)[0]
+        x = x.view(-1, 1024)
 
-        # Convolutional layers
-        for i, layer in enumerate(self.conv_layers): x = layer(x)
-        # Max pooling
-        x = F.max_pool1d(x, x.shape[2]).squeeze(2)
-        # Fully connected layers
-        for j, layer in enumerate(self.fc_layers): x = layer(x)
-        # Fold into list of matrices
-        #x = x.view(-1, SF, SF) + self.eye
-        x = x.view(-1, SF, SF) + self.eye.to(x.device)
-        #x += self.eye.to(device)
+        x = F.relu(self.bn4(self.fc1(x)))
+        x = F.relu(self.bn5(self.fc2(x)))
+        x = self.fc3(x)
+
+        iden = Variable(torch.from_numpy(np.array([1,0,0,0,1,0,0,0,1]).astype(np.float32))).view(1,9).repeat(batchsize,1)
+        iden = iden.to(x.device)
+        x = x + iden
+        x = x.view(-1, 3, 3)
         return x
 
-    def move_eye(self, device):
-        self.eye = self.eye.to(device)
+
+class STNkd(nn.Module):
+    def __init__(self, k=64):
+        super(STNkd, self).__init__()
+        self.conv1 = torch.nn.Conv1d(k, 64, 1)
+        self.conv2 = torch.nn.Conv1d(64, 128, 1)
+        self.conv3 = torch.nn.Conv1d(128, 1024, 1)
+        self.fc1 = nn.Linear(1024, 512)
+        self.fc2 = nn.Linear(512, 256)
+        self.fc3 = nn.Linear(256, k*k)
+        self.relu = nn.ReLU()
+
+        self.bn1 = nn.BatchNorm1d(64)
+        self.bn2 = nn.BatchNorm1d(128)
+        self.bn3 = nn.BatchNorm1d(1024)
+        self.bn4 = nn.BatchNorm1d(512)
+        self.bn5 = nn.BatchNorm1d(256)
+
+        self.k = k
+
+    def forward(self, x):
+        batchsize = x.size()[0]
+        x = F.relu(self.bn1(self.conv1(x)))
+        x = F.relu(self.bn2(self.conv2(x)))
+        x = F.relu(self.bn3(self.conv3(x)))
+        x = torch.max(x, 2, keepdim=True)[0]
+        x = x.view(-1, 1024)
+
+        x = F.relu(self.bn4(self.fc1(x)))
+        x = F.relu(self.bn5(self.fc2(x)))
+        x = self.fc3(x)
+
+        iden = Variable(torch.from_numpy(np.eye(self.k).flatten().astype(np.float32))).view(1, self.k*self.k).repeat(batchsize,1)
+        x = x + iden
+        x = x.view(-1, self.k, self.k)
+        return x
+
+class PointNetfeat(nn.Module):
+    def __init__(self, global_feat=True, feature_transform=False, global_transform=False):
+        super(PointNetfeat, self).__init__()
+        self.stn = STN3d()
+        self.conv1 = torch.nn.Conv1d(3, 64, 1)
+        self.conv2 = torch.nn.Conv1d(64, 128, 1)
+        self.conv3 = torch.nn.Conv1d(128, 1024, 1)
+        if CLS_USE_BN:
+            self.bn1 = nn.BatchNorm1d(64, momentum=CLS_BATCH_NORM_MOMENTUM, track_running_stats=CLS_BATCH_NORM_USE_STATISTICS)
+            self.bn2 = nn.BatchNorm1d(128, momentum=CLS_BATCH_NORM_MOMENTUM, track_running_stats=CLS_BATCH_NORM_USE_STATISTICS)
+            self.bn3 = nn.BatchNorm1d(1024, momentum=CLS_BATCH_NORM_MOMENTUM, track_running_stats=CLS_BATCH_NORM_USE_STATISTICS)
+        else:
+            self.bn1 = nn.Identity()
+            self.bn2 = nn.Identity()
+            self.bn3 = nn.Identity()
+
+        self.global_feat = global_feat
+        self.feature_transform = feature_transform
+        self.global_transform = global_transform
+        if self.feature_transform:
+            self.fstn = STNkd(k=64)
+
+    def forward(self, x):
+        if len(x.shape)<3:
+            x = torch.unsqueeze(x.T, 0) ## fix for geometric data loader
+
+        n_pts = x.size()[2]
+        if self.global_transform:  # do we use first tnet or not
+            trans = self.stn(x)
+            x = x.transpose(2, 1)
+            x = torch.bmm(x, trans)
+            x = x.transpose(2, 1)
+        else:
+            trans = None
+        x = F.relu(self.bn1(self.conv1(x)))  # the first MLP layer (mlp64,64 shared)
+
+        if self.feature_transform:
+            trans_feat = self.fstn(x)
+            x = x.transpose(2,1)
+            x = torch.bmm(x, trans_feat)
+            x = x.transpose(2,1)
+        else:
+            trans_feat = None
+
+        pointfeat = x
+        x = F.relu(self.bn2(self.conv2(x)))
+        x = self.bn3(self.conv3(x))
+        x = torch.max(x, 2, keepdim=True)[0]
+        x = x.view(-1, 1024)
+        if self.global_feat:
+            return x, trans, trans_feat
+        else:
+            x = x.view(-1, 1024, 1).repeat(1, 1, n_pts)
+            return torch.cat([x, pointfeat], 1), trans, trans_feat
+
+
+class PointNet(nn.Module):
+
+    def __init__(self, k=16, feature_transform=True,  global_transform=False):
+        super(PointNet, self).__init__()
+        self.classes = k
+        self.feature_transform = feature_transform
+        self.feat = PointNetfeat(global_transform=global_transform, feature_transform=feature_transform)
+        self.fc1 = nn.Linear(1024, 512)
+        if CLS_USE_BN:
+            self.bn1 = nn.BatchNorm1d(512, momentum=CLS_BATCH_NORM_MOMENTUM, track_running_stats=CLS_BATCH_NORM_USE_STATISTICS)
+        else:
+            self.bn1 = nn.Identity()
+        self.relu = nn.ReLU()
+        self.fc2 = nn.Linear(512, 256)
+        self.dropout = nn.Dropout(p=0.3)
+        if CLS_USE_BN:
+            self.bn2 = nn.BatchNorm1d(256, momentum=CLS_BATCH_NORM_MOMENTUM, track_running_stats=CLS_BATCH_NORM_USE_STATISTICS)
+        else:
+            self.bn2 = nn.Identity()
+        self.relu = nn.ReLU()
+        self.fc3 = nn.Linear(256, self.classes)
+
+    def forward(self, x):
+        x, trans, trans_feat = self.feat(x)  # x is 1024, trans is exit from TNET1, trans_Feat is exit from tnet2
+        x = F.relu(self.bn1(self.fc1(x)))
+        x = F.relu(self.bn2(self.dropout(self.fc2(x))))
+        x = self.fc3(x)
+        return x, trans, trans_feat
+
+
+def feature_transform_regularizer(trans):
+    d = trans.size()[1]
+    batchsize = trans.size()[0]
+    I = torch.eye(d)[None, :, :]
+    loss = torch.mean(torch.norm(torch.bmm(trans, trans.transpose(2,1)) - I, dim=(1,2)))
+    return loss
 
 
 if __name__ == '__main__':
-    pass
+    sim_data = Variable(torch.rand(32, 3, 6890))
+    # trans = STN3d()
+    # out = trans(sim_data)
+    # print('stn', out.size())
+    # print('loss', feature_transform_regularizer(out))
+    #
+    # sim_data_64d = Variable(torch.rand(32, 64, 2500))
+    # trans = STNkd(k=64)
+    # out = trans(sim_data_64d)
+    # print('stn64d', out.size())
+    # print('loss', feature_transform_regularizer(out))
+    #
+    # pointfeat = PointNetfeat(global_feat=True)
+    # out, _, _ = pointfeat(sim_data)
+    # print('global feat', out.size())
+    #
+    # pointfeat = PointNetfeat(global_feat=False)
+    # out, _, _ = pointfeat(sim_data)
+    # print('point feat', out.size())
+    #
+    cls = PointNet(k=10)
+    out, _, _ = cls(sim_data)
+    print('class', out.size())
+    #
+    # seg = PointNetDenseCls(k = 3)
+    # out, _, _ = seg(sim_data)
+    # print('seg', out.size())
+
+    model = Regressor(numVertices=6890)
+    out = model(sim_data)
+    print('Regressor', out.size())

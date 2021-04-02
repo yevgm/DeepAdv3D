@@ -27,7 +27,7 @@ import ntrain
 import dataset
 import utils
 from models.pointnet import SimplePointNet
-from models.Origin_pointnet import PointNetCls
+from models.pointnet import PointNet
 from dataset.data_loaders import FaustDataset
 import adversarial.carlini_wagner as cw
 from adversarial.carlini_wagner import CWBuilder, LowbandPerturbation
@@ -143,7 +143,7 @@ def find_perturbed_shape(to_class, testdata, model, params, max_dim=None, animat
 
 
 if __name__ == "__main__":
-    model = PointNetCls(k=10, feature_transform=False, global_transform=False)
+    model = PointNet(k=10, feature_transform=False, global_transform=False)
     model = model.to(DEVICE)
     trainLoader, testLoader, traindata, testdata = load_datasets(train_batch=8, test_batch=20)
 
