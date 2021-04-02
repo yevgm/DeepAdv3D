@@ -200,6 +200,7 @@ def write_off(pos:Tensor,faces:Tensor, file:str):
 
 #---------------------------------------
 # differentiable sorting in torch
+# for visualizations: https://www.desmos.com/calculator/rqjpdu6q54
 
 
 def sigmoid(x, k):
@@ -222,10 +223,25 @@ def compute_sigmoid_matrix(vec: torch.Tensor, k):
     return M
 
 
-def sigmoid_torch_sort(vec : torch.Tensor, k):
+def sigmoid_torch_sort(vec: torch.Tensor, k):
     M = compute_sigmoid_matrix(vec, k)
     ranks_vec = torch.sum(M, 1)
     return ranks_vec
+
+
+def gaussian(vec, center, var):
+    pi = torch.acos(torch.zeros(1)).item() * 2  # ugly way of computing torch.pi since it doesn't exist
+    const = torch.pow(torch.tensor([2*pi*var]), -0.5)
+    distance = torch.pow(vec - center, 2) / (2*var)
+    out = const * torch.exp(-distance)
+    out = out / const
+    return out
+
+
+def sample_by_rank(vec, ranks_vec, rank, var=0.05):
+    weights = gaussian(ranks_vec, rank, var=var)
+    out = torch.sum(weights * vec)
+    return out
 
 
 #---------------------------------------
