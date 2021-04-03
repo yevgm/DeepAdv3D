@@ -69,7 +69,8 @@ export PATH=$PATH:"`python tensor_board.py`"
 echo $PATH
 
 # Primary Visualizers:
-pip install pyvista     
+pip install pyvista    
+pip install vtk==8.1.2 
 pip install matplotlib
 pip install seaborn
 

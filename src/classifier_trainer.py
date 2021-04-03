@@ -48,7 +48,7 @@ def train(train_data,
 	classifier.apply(weights_init_normal)
 
 	# pre-train preparations
-	generate_data_output_dir()
+	create_data_output_dir()
 	now = datetime.now()
 	d = now.strftime("%b-%d-%Y_%H-%M-%S")
 	tensor_log_dir = generate_new_tensorboard_results_dir(d, model='classifier')

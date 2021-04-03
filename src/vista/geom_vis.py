@@ -48,7 +48,10 @@ def plotter(theme='document'):
     p = pv.Plotter()
     return p
 
-
+def vertex_mask_indicator(nv, vi):
+    indicator = np.zeros((nv,), dtype=bool)
+    indicator[vi] = 1
+    return indicator
 # ---------------------------------------------------------------------------------------------------------------------#
 #                                            Visualization Functions
 # ---------------------------------------------------------------------------------------------------------------------#
@@ -81,6 +84,71 @@ def plot_mesh(v, f=None, n=None, strategy='mesh', grid_on=False, clr='lightcoral
     p.show()
     return p, m
 
+def mesh_append(p, v, f=None, n=None, strategy='mesh', grid_on=False, clr='lightcoral',
+                normal_clr='lightblue', label=None, smooth_shade_on=False, show_edges=False, cmap=None,
+                normal_scale=1):
+    # Align arrays:
+    v = v.numpy() if torch.is_tensor(v) else v
+    f = f.numpy() if torch.is_tensor(f) else f
+    n = n.numpy() if torch.is_tensor(n) else n
+    clr = clr.numpy() if torch.is_tensor(clr) else clr
+    normal_clr = normal_clr.numpy() if torch.is_tensor(normal_clr) else normal_clr
+
+    # Align strategy
+    if strategy == 'mesh':
+        assert f is not None, "Must supply faces for mesh strategy"
+    else:
+        f = None  # Destroy the face information
+    spheres_on = (strategy == 'spheres')
+
+    # Create Data object:
+    if f is not None:
+        # Adjust f to the needed format
+        pnt_cloud = pv.PolyData(v, np.concatenate((np.full((f.shape[0], 1), 3), f), 1))
+    else:
+        pnt_cloud = pv.PolyData(v)
+
+    # Default size for spheres & pnt clouds
+    point_size = 6.0 if spheres_on else 2.0  # TODO - Dynamic computation of this, based on mesh volume
+
+    # Handle difference between color and scalars, to support RGB tensor
+    if isinstance(clr, str) or len(clr) == 3:
+        color = clr
+        scalars = None
+        clr_str = clr
+    else:
+        color = None
+        clr_str = 'w'
+        scalars = clr
+
+        # Add the meshes to the plotter:
+    p.add_mesh(pnt_cloud, smooth_shading=smooth_shade_on, scalars=scalars, color=color, cmap=cmap,
+               clim=CLIM, show_edges=show_edges,  # For full mesh visuals - ignored on point cloud plots
+               render_points_as_spheres=spheres_on, point_size=point_size)  # For sphere visuals - ignored on full mesh
+
+    p.camera_position = [(0, 0, 4.5), (0, 0, 0), (0, 1, 0)]
+    if n is not None:  # Face normals or vertex normals
+        if not n.shape[0] == v.shape[0]:  # Face normals
+            assert f is not None and n.shape[0] == f.shape[0]  # Faces are required for lightning
+            # pnt_cloud = pv.PolyData(face_barycenters(v, f))
+        pnt_cloud['normals'] = n
+        # noinspection PyTypeChecker
+        arrows = pnt_cloud.glyph(orient='normals', scale=False, factor=0.03 * normal_scale)
+        # TODO - Dynamic computation of normal_scale
+        if isinstance(normal_clr, str) or len(normal_clr) == 3:
+            color = normal_clr
+            scalars = None
+        else:
+            color = None
+            scalars = normal_clr
+        p.add_mesh(arrows, color=color, scalars=scalars)
+
+    # Book-keeping:
+    if label is not None and label:
+        siz = 0.25
+        p.add_legend(labels=[(label, clr_str)], size=[siz, siz / 3])
+    if grid_on:
+        p.show_grid()
 
 # noinspection PyIncorrectDocstring
 def plot_mesh_montage(vb, fb=None, nb=None, strategy='mesh', labelb=None, grid_on=False, clrb='lightcoral',

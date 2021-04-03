@@ -7,7 +7,7 @@ from vista.adv_plotter import labels
 from vista.geom_vis import plot_mesh, plot_mesh_montage
 
 
-def generate_data_output_dir():
+def create_data_output_dir():
 
     if not os.path.isdir(MODEL_DATA_DIR):
         try:

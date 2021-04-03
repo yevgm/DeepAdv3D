@@ -2,10 +2,92 @@
 from config import *
 
 from shutil import copyfile
+from multiprocessing import Process
+import os
+import logging
+import psutil
+import signal
+
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   Auxiliary
 # ----------------------------------------------------------------------------------------------------------------------#
+class TensorboardSupervisor:
 
+    def __init__(self, log_dp=None, mode=3):
+        # 'Mode: 0 - Does nothing. 1 - Opens up only server. 2 - Opens up only chrome. 3- Opens up both '
+        super().__init__()
+        self.mode = mode
+        if mode not in [1, 2, 3]:
+            raise ValueError(f'Invalid mode: {mode}')
+        if log_dp is None:
+            from config import TENSOR_LOG_DIR
+            log_dp = TENSOR_LOG_DIR
+        if mode != 2:
+            self.server = TensorboardServer(log_dp)
+            self.server.start()
+            logging.info("Started Tensorboard Server")
+        if mode != 1:
+            self.chrome = ChromeProcess()
+            self.chrome.start()
+            logging.info("Opened Chrome Tab")
+
+def finalize_tensorboard():
+    logging.info('Killing Tensorboard Server')
+    list_of_proccesses = findProcessIdByName('tensorboard.main')
+    for process in list_of_proccesses:
+        os.kill(process['pid'], signal.SIGTERM)
+
+
+class TensorboardServer(Process):
+    def __init__(self, log_dp):
+        super().__init__()
+        self.os_name = os.name
+        self.log_dp = str(log_dp)
+        self.daemon = True
+
+    def run(self):
+        if self.os_name == 'nt':  # Windows
+            os.system(f'{sys.executable} -m tensorboard.main --logdir "{self.log_dp}" --port=6006 2> NUL')
+        elif self.os_name == 'posix':  # Linux
+            os.system(f'{sys.executable} -m tensorboard.main --logdir "{self.log_dp}" --port=6006 >/dev/null 2>&1')
+        else:
+            raise NotImplementedError(f'No support for OS : {self.os_name}')
+
+
+class ChromeProcess(Process):
+    def __init__(self):
+        super().__init__()
+        self.os_name = os.name
+        self.daemon = True
+
+    def run(self):
+        if self.os_name == 'nt':  # Windows
+            os.system(f'start chrome  http://localhost:6006/')
+        elif self.os_name == 'posix':  # Linux
+            # os.system(f'google-chrome http://localhost:6006/')
+            # start firefox instead
+            os.system(f'firefox http://localhost:6006/')
+        else:
+            raise NotImplementedError(f'No support for OS : {self.os_name}')
+
+def findProcessIdByName(processName):
+    '''
+    Get a list of all the PIDs of a all the running process whose name contains
+    the given string processName
+    '''
+    listOfProcessObjects = []
+    #Iterate over the all the running process
+    for proc in psutil.process_iter():
+       try:
+           pinfo_pid = proc.as_dict(attrs=['pid'])
+           pinfo_cmd = " ".join(proc.cmdline())
+           # Check if process name contains the given name string.
+           if pinfo_cmd is not None:
+               if processName.lower() in pinfo_cmd.lower() :
+                   listOfProcessObjects.append(pinfo_pid)
+       except (psutil.NoSuchProcess, psutil.AccessDenied , psutil.ZombieProcess):
+           pass
+    return listOfProcessObjects
 
 def generate_new_tensorboard_results_dir(date, mode="train", model='adv3d'):
 
@@ -99,3 +181,8 @@ def classifier_report_test_to_tensorboard(tensor_obj, total_loss, num_classified
                           total_loss, 1)
     tensor_obj.add_scalar('Accuracy/Test_classified_targets',
                           num_classified / float(number_of_test_samples), 1)
+
+
+if __name__ == '__main__':
+    list = findProcessIdByName('firefox')
+    a=1

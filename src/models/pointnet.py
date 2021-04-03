@@ -8,7 +8,8 @@ import torch.nn.functional as F
 
 # variable definitions
 from config import *
-from models.deep_adv_3d_model1 import Regressor
+
+from utils.torch.nn import *
 
 
 class STN3d(nn.Module):

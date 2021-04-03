@@ -1,3 +1,6 @@
+import timeit
+from datetime import timedelta
+from functools import wraps
 from typing import Tuple
 import networkx as nx
 import numpy as np
@@ -103,37 +106,37 @@ def tri_areas(pos, faces):
     v2 = v2 - v3
     return torch.norm(torch.cross(v1, v2, dim=1), dim=1) * .5
 
-def pos_areas(pos, faces):
-  check_data(pos=pos, faces=faces)
-  n = pos.shape[0]
-  m = faces.shape[0]
-  triareas = tri_areas(pos, faces)/3
-  posareas = torch.zeros(size=[n], device=triareas.device, dtype=triareas.dtype)
-  for i in range(3):
-    tmp = tscatter.scatter_add(triareas, faces[:,i], dim_size=n)
-    posareas += tmp
-  return posareas
+# def pos_areas(pos, faces):
+#   check_data(pos=pos, faces=faces)
+#   n = pos.shape[0]
+#   m = faces.shape[0]
+#   triareas = tri_areas(pos, faces)/3
+#   posareas = torch.zeros(size=[n], device=triareas.device, dtype=triareas.dtype)
+#   for i in range(3):
+#     tmp = tscatter.scatter_add(triareas, faces[:,i], dim_size=n)
+#     posareas += tmp
+#   return posareas
 
 #------------------------------------------------------------------------------
-def tri_normals(pos, faces):
-    check_data(pos=pos, faces=faces)
-    v1 = pos[faces[:, 0], :]
-    v2 = pos[faces[:, 1], :]
-    v3 = pos[faces[:, 2], :]
-    v1 = v1 - v3
-    v2 = v2 - v3
-    normals =  torch.cross(v1, v2, dim=1)
-    return normals/normals.norm(p=2,dim=1,keepdim=True)
-
-def pos_normals(pos, faces):
-  check_data(pos=pos, faces=faces)
-  n, m = pos.shape[0], faces.shape[0] 
-  trinormals = tri_normals(pos, faces)
-  posnormals = torch.zeros(size=[n, 3], device=trinormals.device, dtype=trinormals.dtype)
-  for i in range(3):
-    for j in range(3):
-      posnormals[:,j] +=  tscatter.scatter_add(trinormals[:,j], faces[:,i], dim_size=n)
-  return posnormals/posnormals.norm(p=2,dim=1,keepdim=True)
+# def tri_normals(pos, faces):
+#     check_data(pos=pos, faces=faces)
+#     v1 = pos[faces[:, 0], :]
+#     v2 = pos[faces[:, 1], :]
+#     v3 = pos[faces[:, 2], :]
+#     v1 = v1 - v3
+#     v2 = v2 - v3
+#     normals =  torch.cross(v1, v2, dim=1)
+#     return normals/normals.norm(p=2,dim=1,keepdim=True)
+#
+# def pos_normals(pos, faces):
+#   check_data(pos=pos, faces=faces)
+#   n, m = pos.shape[0], faces.shape[0]
+#   trinormals = tri_normals(pos, faces)
+#   posnormals = torch.zeros(size=[n, 3], device=trinormals.device, dtype=trinormals.dtype)
+#   for i in range(3):
+#     for j in range(3):
+#       posnormals[:,j] +=  tscatter.scatter_add(trinormals[:,j], faces[:,i], dim_size=n)
+#   return posnormals/posnormals.norm(p=2,dim=1,keepdim=True)
 
 # -----------------------------------------------------------------------------
 
@@ -146,23 +149,23 @@ def edges_from_faces(f: np.array, unique=True, return_index=False, return_invers
 
 
 # -----------------------------------------------------------------------------
-def l2_distance(pos, ppos, faces, normalize=False):
-    check_data(pos=pos, faces=faces)
-    check_data(pos=ppos)
-    diff = pos - ppos
-    areas = pos_areas(pos, faces)
-    weight_diff = diff*torch.sqrt(areas.view(-1,1))
-    L2 = weight_diff.norm(p="fro")
-    if normalize: L2 = L2/areas.sum().sqrt()
-    return L2
+# def l2_distance(pos, ppos, faces, normalize=False):
+#     check_data(pos=pos, faces=faces)
+#     check_data(pos=ppos)
+#     diff = pos - ppos
+#     areas = pos_areas(pos, faces)
+#     weight_diff = diff*torch.sqrt(areas.view(-1,1))
+#     L2 = weight_diff.norm(p="fro")
+#     if normalize: L2 = L2/areas.sum().sqrt()
+#     return L2
 
-#------------------------------------------------------------------------------
-def least_square_meshes(pos:Tensor, edges:LongTensor) -> Tensor:
-    check_data(pos=pos, edges=edges)
-    laplacian = torch_geometric.utils.get_laplacian(edges.t(), normalization="rw")
-    n = pos.shape[2]
-    tmp = tsparse.spmm(*laplacian, n, n, pos) #Least square Meshes problem 
-    return (tmp**2).sum()
+# #------------------------------------------------------------------------------
+# def least_square_meshes(pos:Tensor, edges:LongTensor) -> Tensor:
+#     check_data(pos=pos, edges=edges)
+#     laplacian = torch_geometric.utils.get_laplacian(edges.t(), normalization="rw")
+#     n = pos.shape[2]
+#     tmp = tsparse.spmm(*laplacian, n, n, pos) #Least square Meshes problem
+#     return (tmp**2).sum()
 
 #--------------------------------------------------------------------------------
 def write_obj(pos:Tensor,faces:Tensor, file:str):
@@ -230,3 +233,24 @@ try:
 
 except ImportError as e:
     pass
+
+
+def time_me(func):
+    @wraps(func)
+    def timed(*args, **kw):
+        ts = timeit.default_timer()
+        result = func(*args, **kw)
+        te = timeit.default_timer()
+        # This snippet here allows extraction of the timing:
+        # Snippet:
+        # if 'log_time' in kw:
+        #     name = kw.get('log_name', method.__name__.upper()) # Key defaults to method name
+        #     kw['log_time'][name] = int((te - ts) * 1000)
+        # Usage:
+        # logtime_data = {}
+        # ret_val = some_func_with_decorator(log_time=logtime_data)
+        # else:
+        print(f'{func.__name__} compute time :: {str(timedelta(seconds=te - ts))}')
+        return result
+
+    return timed

@@ -227,6 +227,7 @@ class FaustDataset(data.Dataset):
 
         # self.set_targets()
 
+
     def __getitem__(self, index):
         if index < 10 :
             fn = 'tr_reg_00'+str(index)+'.ply'
@@ -357,6 +358,7 @@ class FaustDatasetInMemory(data.Dataset):
             else:
                 edges = 0
             self.edges.append(edges)
+        self.num_vertices = self.v[0].shape[0]  # check this one
 
 
     def __getitem__(self, index):

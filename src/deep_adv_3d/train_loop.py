@@ -10,7 +10,7 @@ from config import *
 from deep_adv_3d.loss import *
 from deep_adv_3d.utils import *
 from deep_adv_3d.tensor_board import *
-
+from vista.subprocess_plotter import AdversarialPlotter
 from utils.gradflow_check import *
 from vista.geom_vis import plot_mesh
 
@@ -22,9 +22,9 @@ class Trainer:
                        model: nn.Module,
                        classifier: nn.Module):
 
-
         self.train_data = train_data
         self.test_data = test_data
+        self.num_vertices = train_data.dataset.num_vertices
         self.batch_size = TRAIN_BATCH_SIZE
         self.num_batch = len(self.train_data)
         self.test_num_batch = len(self.test_data)
@@ -44,9 +44,11 @@ class Trainer:
         self.loss_values = []
 
     def train(self):
-
+        #TODO: move this
+        # plotter init
+        plt = AdversarialPlotter(n_verts=self.num_vertices)
         # pre-train preparations
-        generate_data_output_dir()
+        create_data_output_dir()
         now = datetime.now()
         d = now.strftime("%b-%d-%Y_%H-%M-%S")
         tensor_log_dir = generate_new_tensorboard_results_dir(d)
@@ -61,6 +63,9 @@ class Trainer:
 
         self.model = self.model.train()  # set to train mode
         step_cntr = 0
+        orig_vertices = None
+        adex = None
+        faces = None
         for epoch in range(self.n_epoch):
             if epoch != 0:
                 scheduler.step()
@@ -122,6 +127,13 @@ class Trainer:
                                       similarity_loss.item(), missloss.item(), num_misclassified)
 
                 step_cntr += 1
+
+            # push to visualizer every epoch - last batch
+            data_dict = plt.prepare_plotter_dict(orig_vertices[:VIS_N_MESH_SETS, :, :],
+                                                 adex[:VIS_N_MESH_SETS, :, :],
+                                                 faces[:VIS_N_MESH_SETS, :, :])
+            plt.push(new_epoch=epoch, new_data=data_dict)
+
             # TODO: validation
             if (step_cntr > 0) & (step_cntr % SAVE_PARAMS_EVERY == 0):
                 torch.save(self.model.state_dict(), save_weights_file)

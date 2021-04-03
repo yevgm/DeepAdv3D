@@ -14,6 +14,7 @@ from models.pointnet import PointNet
 from models.deep_adv_3d_model1 import Regressor
 from deep_adv_3d.train_loop import *
 from dataset.data_loaders import FaustDataset, FaustDatasetInMemory
+from utils.torch.nn import *
 
 
 def load_datasets(train_batch=8, test_batch=20):
@@ -52,6 +53,14 @@ def load_datasets(train_batch=8, test_batch=20):
 
 
 if __name__ == '__main__':
+    # close tensorboard process and exit
+    if TERMINATE_TB:
+        finalize_tensorboard()
+        exit()
+
+    # set seed for all platforms
+    set_determinsitic_run()
+
     # Data Loading and pre-processing
     trainLoader, testLoader = load_datasets(train_batch=TRAIN_BATCH_SIZE, test_batch=TEST_BATCH_SIZE)
 
@@ -61,10 +70,17 @@ if __name__ == '__main__':
     model = Regressor(numVertices=K)  # K - additive vector field (V) dimension in eigen-space
     train_ins = Trainer(train_data=trainLoader, test_data=testLoader,
                         model=model, classifier=classifier)
+    # open tensorboard process if it's not already open
+    if RUN_TB:
+        tensor_board_sub_proccess_handler = TensorboardSupervisor(mode= RUN_TB + 2 * RUN_BROWSER)  # opens tensor at port 6006 if available
 
     # train network
     train_ins.train()
 
     # evaluate network
     # train_ins.evaluate(TEST_PARAMS_DIR)
+
+
+
+
 
