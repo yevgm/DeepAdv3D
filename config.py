@@ -27,7 +27,7 @@ SAVE_PARAMS_EVERY = 300  # steps
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   TENSORBOARD
 # ----------------------------------------------------------------------------------------------------------------------#
-RUN_TB = False  # run tensorboard server 
+RUN_TB = True  # run tensorboard server 
 RUN_BROWSER = False
 TERMINATE_TB = False
 TENSOR_LOG_DIR = os.path.abspath(os.path.join(REPO_ROOT, "..", "tensor_board_logs"))
@@ -36,14 +36,14 @@ FLUSH_RESULTS = 5  # in seconds
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   TRAIN HYPERPARAMETERS
 # ----------------------------------------------------------------------------------------------------------------------#
-UNIVERSAL_RAND_SEED = 145
+UNIVERSAL_RAND_SEED = 146
 
 TRAINING_CLASSIFIER = False  # turn on to switch between classifier train and model train
 LR = 1e-3  # learning rate
 OPTIMIZER = 'AdamW' # 'Adam', 'AdamW'
 WEIGHT_DECAY = 0.5 # regularization
 SCHEDULER_STEP_SIZE = 250
-TRAIN_BATCH_SIZE = 8  # number of data examples in one batch
+TRAIN_BATCH_SIZE = 32  # number of data examples in one batch
 TEST_BATCH_SIZE = 20
 N_EPOCH = 100  # number of train epochs
 RECON_LOSS_CONST = 400  # ratio between reconstruction loss and missclasificaition loss
@@ -103,4 +103,4 @@ MODEL_BATCH_NORM_USE_STATISTICS = False
 MODEL_BATCH_NORM_MOMENTUM = 0.5  # default is 0.1
 MODEL_STRICT_PARAM_LOADING = False  # strict = False for dropping running mean and var of train batchnorm
 # model dropout
-MODEL_USE_DROPOUT = True
+MODEL_USE_DROPOUT = False

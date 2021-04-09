@@ -151,10 +151,6 @@ class AdversarialPlotter(ParallelPlotterBase):
         dict = {'orig_vertices': orig_vertices.detach().cpu().numpy()[:max_b_idx, :, :],
                 'adexs': adexs.detach().cpu().numpy()[:max_b_idx, :, :],
                 'faces': faces.detach().cpu().numpy()[:max_b_idx]}
-        # if self.VIS_SHOW_NORMALS:
-        #     dict['gtr_vnb'] = network_output['completion_vnb'].detach().cpu().numpy()[:max_b_idx, :, :]
-        #     dict['gt_vnb'] = b['gt'].detach().cpu().numpy()[:max_b_idx, :, 3:6]
-        #     dict['gtrb_vnb_is_valid'] = network_output['completion_vnb'].detach().cpu().numpy()[:max_b_idx, :,:]
         return dict
 
     # def plot_data(self):
@@ -213,7 +209,7 @@ class AdversarialPlotter(ParallelPlotterBase):
 
         # if self.last_plotted_epoch == 0:
         # p.link_views()
-        p.show()
+        p.show(auto_close=False)
         # elif self.last_plotted_epoch > 0:
         #     p.update(force_redraw=True)
         # if self.last_plotted_epoch > 0:

@@ -92,24 +92,33 @@ class Trainer:
                 perturbed_logits, _, _ = self.classifier(adex)
 
                 #debug
-                logits, _, _ = self.classifier(orig_vertices)
-                label = label[:, 0]
-                pred_orig = logits.data.max(1)[1]
-                pred_choice = perturbed_logits.data.max(1)[1]
-                num_classified = pred_orig.eq(label).cpu().sum()
-                num_misclassified = pred_choice.eq(targets).cpu().sum()
+                # logits, _, _ = self.classifier(orig_vertices)
+                # label = label[:, 0]
+                # pred_orig = logits.data.max(1)[1]
+                # pred_choice = perturbed_logits.data.max(1)[1]
+                # num_classified = pred_orig.eq(label).cpu().sum()
+                # num_misclassified = pred_choice.eq(targets).cpu().sum()
 
-                MisclassifyLoss = AdversarialLoss(perturbed_logits, targets)
+                MisclassifyLoss = AdversarialLoss()
                 if LOSS == 'l2':
                     Similarity_loss = L2Similarity(orig_vertices, adex, vertex_area)
                 else:
                     Similarity_loss = LocalEuclideanSimilarity(orig_vertices.transpose(2, 1), adex.transpose(2, 1), edges)
 
 
-                missloss = MisclassifyLoss()
+                missloss = MisclassifyLoss(perturbed_logits, targets)
                 similarity_loss = Similarity_loss()
                 loss = missloss + RECON_LOSS_CONST * similarity_loss
 
+                # compare batch loss vs single loss
+                # single_batch_adv_loss = AdversarialLoss_single_batch()
+                # loss_sum = 0
+                # for k in range(adex.shape[0]):
+                #     one_batch_loss = single_batch_adv_loss(perturbed_logits[k], targets[k])
+                #     loss_sum += one_batch_loss
+                # debug_loss = loss_sum / adex.shape[0]
+                # print('diff {}'.format(missloss - loss_sum / adex.shape[0]))
+                # a=1
                 # Back-propagation step
                 loss.backward()
                 # if epoch > 1:  # trying to draw the gradients flow, not working since our grads are None for some reason
@@ -125,7 +134,8 @@ class Trainer:
                 # report to tensorboard
                 report_to_tensorboard(writer, i, step_cntr, cur_batch_len, epoch, self.num_batch, loss.item(),
                                       similarity_loss.item(), missloss.item(), num_misclassified)
-
+                # report_to_tensorboard(writer, i, step_cntr, cur_batch_len, epoch, self.num_batch, debug_loss,
+                #                       0, debug_loss, num_misclassified)
                 step_cntr += 1
 
             # push to visualizer every epoch - last batch

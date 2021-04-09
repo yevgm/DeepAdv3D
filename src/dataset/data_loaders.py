@@ -226,6 +226,7 @@ class FaustDataset(data.Dataset):
             self.fns = self.fns[80:]
 
         # self.set_targets()
+        self.num_vertices = 6890  # hardcoded for now
 
 
     def __getitem__(self, index):
@@ -358,7 +359,7 @@ class FaustDatasetInMemory(data.Dataset):
             else:
                 edges = 0
             self.edges.append(edges)
-        self.num_vertices = self.v[0].shape[0]  # check this one
+        self.num_vertices = self.v[0].shape[0]
 
 
     def __getitem__(self, index):

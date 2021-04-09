@@ -20,29 +20,39 @@ class LossFunction(object):  # TODO: make this more efficient after the bug's fi
         raise NotImplementedError
 
 
-class AdversarialLoss(LossFunction):
-    def __init__(self, perturbed_logits, target):
+class AdversarialLoss_single_batch(LossFunction):
+    def __init__(self):
+        super().__init__()
+
+    def __call__(self, perturbed_logits, target) -> torch.Tensor:
+        Z = perturbed_logits
+        values, index = torch.sort(Z)
+        # index = index[-1]
+        argmax = index[-1] if index[-1] != target else index[-2]  # max{Z(i): i != target}
+        # Z = Z[-1]
+        Ztarget, Zmax = Z[target], Z[argmax]
+        return torch.nn.functional.relu(Zmax - Ztarget)
+
+class AdversarialLoss(torch.nn.Module):
+    def __init__(self):
         super().__init__()
         # check input validity
         # if perturbed_logits.shape[-1] != DATASET_CLASSES:
         #     raise ValueError("must have a shape [b,DATASET_CLASSES]")
 
         # self.k = torch.tensor([k], device=DEVICE, dtype=torch.float32)
-        self.perturbed_logits = perturbed_logits
-        self.target = target
 
-    def __call__(self) -> torch.Tensor:
-        batch_size = self.target.shape[0]
-        Z = self.perturbed_logits
+    def forward(self, perturbed_logits, target) -> torch.Tensor:
+        batch_size = target.shape[0]
+        Z = perturbed_logits
         values, index = torch.sort(Z, dim=1)
         argmax = index[:, -1]
 
         # if target equals the max of logits, take the second max. else do continue
-        argmax[index[:, -1] == self.target] = index[index[:, -1] == self.target, -2]
+        argmax[index[:, -1] == target] = index[index[:, -1] == target, -2]
 
-        Ztarget, Zmax = Z[:, self.target].diag(), Z[:, argmax].diag()
+        Ztarget, Zmax = Z[:, target].diag(), Z[:, argmax].diag()
         out = (Zmax - Ztarget)
-        # out[out <= -self.k] = 0
         out[out <= 0] = 0
         out = out.sum() / batch_size  # batch average
         return out
