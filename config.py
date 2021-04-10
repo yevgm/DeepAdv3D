@@ -14,12 +14,13 @@ REPO_ROOT = os.path.dirname(os.path.realpath(__file__))
 MODEL_DATA_DIR = os.path.abspath(os.path.join(REPO_ROOT, "..", "model_data"))
 SRC_DIR = os.path.join(REPO_ROOT, "src")
 FAUST = os.path.join(REPO_ROOT, "datasets", "faust")
+SHREC14 = os.path.join(REPO_ROOT, "datasets", "shrec14")
 sys.path.insert(0, SRC_DIR)
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   MODEL
 # ----------------------------------------------------------------------------------------------------------------------#
 # classifier:
-PARAMS_FILE = os.path.join(MODEL_DATA_DIR, "momentum_03.pt")  # FAUST10_pointnet_rot_b128.pt
+PARAMS_FILE = os.path.join(MODEL_DATA_DIR, "momentum_05.pt")  # FAUST10_pointnet_rot_b128.pt
 # model1:
 # MODEL1_PARAMS_DIR = os.path.join(MODEL_DATA_DIR, "model1_params") # .pt will be added in the code
 PARAM_FILE_NAME = "model_params.pt"
@@ -38,12 +39,12 @@ FLUSH_RESULTS = 5  # in seconds
 # ----------------------------------------------------------------------------------------------------------------------#
 UNIVERSAL_RAND_SEED = 146
 
-TRAINING_CLASSIFIER = False  # turn on to switch between classifier train and model train
+TRAINING_CLASSIFIER = True  # turn on to switch between classifier train and model train
 LR = 1e-3  # learning rate
 OPTIMIZER = 'AdamW' # 'Adam', 'AdamW'
 WEIGHT_DECAY = 0.5 # regularization
 SCHEDULER_STEP_SIZE = 250
-TRAIN_BATCH_SIZE = 32  # number of data examples in one batch
+TRAIN_BATCH_SIZE = 4  # number of data examples in one batch
 TEST_BATCH_SIZE = 20
 N_EPOCH = 100  # number of train epochs
 RECON_LOSS_CONST = 400  # ratio between reconstruction loss and missclasificaition loss
@@ -70,7 +71,7 @@ TEST_EPOCHS = 1  # valid use only with "TEST_DATA_AUG = True"
 # ----------------------------------------------------------------------------------------------------------------------#
 NUM_WORKERS = 0
 DATASET_CLASSES = 10
-DATASET_NAME = "Faust"
+DATASET_NAME = "Shrec14" # 'Faust', 'Shrec14'
 EPS = 1e-9  # for numerical stability - used in calculating eigenvectors
 LOAD_WHOLE_DATA_TO_MEMORY = True  # use InMemory of Not in dataset loader stage
 # ----------------------------------------------------------------------------------------------------------------------#
@@ -98,9 +99,9 @@ CLS_BATCH_NORM_USE_STATISTICS = True
 CLS_BATCH_NORM_MOMENTUM = 0.5  # default is 0.1
 CLS_STRICT_PARAM_LOADING = True  # strict = False for dropping running mean and var of train batchnorm
 # model bn
-MODEL_USE_BN = False
-MODEL_BATCH_NORM_USE_STATISTICS = False
+MODEL_USE_BN = True
+MODEL_BATCH_NORM_USE_STATISTICS = True
 MODEL_BATCH_NORM_MOMENTUM = 0.5  # default is 0.1
 MODEL_STRICT_PARAM_LOADING = False  # strict = False for dropping running mean and var of train batchnorm
 # model dropout
-MODEL_USE_DROPOUT = False
+MODEL_USE_DROPOUT = True

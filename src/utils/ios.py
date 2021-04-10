@@ -12,19 +12,29 @@ def read_npz_mask(fp):
     return np.load(fp)["mask"]
 
 
-def read_obj_verts(fp, nv=6890):
+def read_obj_verts(fp, nv, nf):
+    f = np.zeros((nf, 3))
     v = np.zeros((nv, 3))
-    v_count = 0
+    v_count, f_count = 0, 0
     with open(fp, 'r') as handle:
-        for l in handle:
+        for idx, l in enumerate(handle):
             words = [w for w in l.split(' ') if w != '']
+
             if words[0] == 'v':
                 v[v_count, 0], v[v_count, 1], v[v_count, 2] = float(words[1]), float(words[2]), float(words[3])
                 v_count += 1
             elif words[0] == 'f':
-                break
-    assert v_count == nv, f'Found {v_count} vert. Expected: {nv} verts'
-    return v
+                f[f_count, 0], f[f_count, 1], f[f_count, 2] = float(words[1]), float(words[2]), float(words[3])
+                f_count += 1
+    # duplicate last v \ f to the maximum size
+    while v_count < nv:
+        v[v_count] = v[np.random.randint(0, v_count-1)]
+        v_count += 1
+    while f_count < nf:
+        f[f_count] = f[np.random.randint(0, f_count-1)]
+        f_count += 1
+    f = f - 1  # first index is 0
+    return v, f
 
 
 def read_off_verts(fp):

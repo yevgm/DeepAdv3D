@@ -14,7 +14,7 @@ class ParallelPlotterBase(Process, ABC):
     from config import VIS_CMAP, VIS_STRATEGY, VIS_SHOW_EDGES, VIS_SMOOTH_SHADING, \
         VIS_N_MESH_SETS, VIS_SHOW_GRID
 
-    def __init__(self, n_verts):
+    def __init__(self):
         super().__init__()
         self.sd = Manager().dict()  # shared data between processes (vertices, faces .. )
         # self.lock = Manager().Lock()
@@ -22,10 +22,8 @@ class ParallelPlotterBase(Process, ABC):
         self.sd['epoch'] = -1
         self.sd['poison'] = False
 
-        self.n_v = n_verts
         self.last_plotted_epoch = -1
         self.train_d, self.val_d, self.data_cache, self.plt_title = None, None, None, None
-
 
         self.kwargs = {'smooth_shade_on': self.VIS_SMOOTH_SHADING, 'show_edges': self.VIS_SHOW_EDGES,
                        'strategy': self.VIS_STRATEGY, 'cmap': self.VIS_CMAP,
@@ -73,7 +71,6 @@ class ParallelPlotterBase(Process, ABC):
 
     # Meant to be called by the producer ( the train loop )
     def push(self, new_epoch, new_data):
-        # new_data = (train_dict,vald_dict)
         old_epoch = self.sd['epoch']
         assert new_epoch != old_epoch
 
@@ -104,45 +101,6 @@ class ParallelPlotterBase(Process, ABC):
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                               Parallel Plot suite
 # ----------------------------------------------------------------------------------------------------------------------#
-# class DenoisingPlotter(ParallelPlotterBase):
-#     def prepare_plotter_dict(self, b, network_output):
-#         # TODO - Generalize this
-#         gtrb = network_output['completion_xyz']
-#         max_b_idx = self.VIS_N_MESH_SETS
-#         dict = {'gt': b['gt'].detach().cpu().numpy()[:max_b_idx, :, :3],
-#                 'gt_noise': b['gt_noise'].detach().cpu().numpy()[:max_b_idx, :, :3],
-#                 'tp': b['tp'].detach().cpu().numpy()[:max_b_idx, :, :3],
-#                 'gtrb': gtrb.detach().cpu().numpy()[:max_b_idx],
-#                 'gt_hi': b['gt_hi'][:max_b_idx],
-#                 'tp_hi': b['tp_hi'][:max_b_idx]}
-#         # if self.VIS_SHOW_NORMALS: # TODO
-#         #     dict['gtr_vnb'] = network_output['completion_vnb'].detach().cpu().numpy()[:max_b_idx, :, :]
-#         #     dict['gt_vnb'] = b['gt'].detach().cpu().numpy()[:max_b_idx, :, 3:6]
-#         #     # dict['gtrb_vnb_is_valid'] = network_output['completion_vnb'].detach().cpu().numpy()[:max_b_idx, :,:]
-#         return dict
-#
-#     def plot_data(self):
-#         # TODO - Generalize this
-#         p = pv.Plotter(shape=(2 * self.VIS_N_MESH_SETS, 4), title=self.plt_title)
-#         for di, (d, set_name) in enumerate(zip([self.train_d, self.val_d], ['Train', 'Vald'])):
-#             for i in range(self.VIS_N_MESH_SETS):
-#                 subplt_row_id = i + di * self.VIS_N_MESH_SETS
-#                 gtrb = d['gtrb'][i].squeeze()
-#                 gt_noise = d['gt_noise'][i].squeeze()
-#                 gt = d['gt'][i].squeeze()
-#                 tp = d['tp'][i].squeeze()
-#
-#                 p.subplot(subplt_row_id, 0)  # GT Reconstructed
-#                 mesh_append(p, v=gtrb, f=self.f, label=f'{set_name} Reconstruction {i}', **self.kwargs)
-#                 p.subplot(subplt_row_id, 1)  # GT
-#                 mesh_append(p, v=gt, f=self.f,label=f'{set_name} GT {i}', **self.kwargs)
-#                 p.subplot(subplt_row_id, 2)  # GT + Noise
-#                 mesh_append(p, v=gt_noise, f=self.f,label=f'{set_name} Noisy GT {i}', **self.kwargs)
-#                 p.subplot(subplt_row_id, 3)  # TP with colored mask
-#                 mesh_append(p, v=tp, f=self.f, label=f'{set_name} TP {i}', **self.kwargs)
-#         # p.link_views()
-#         p.show()
-
 
 class AdversarialPlotter(ParallelPlotterBase):
     def prepare_plotter_dict(self, orig_vertices, adexs, faces):

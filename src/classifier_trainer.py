@@ -32,20 +32,12 @@ def weights_init_normal(m):
         # m.bias.data should be 0
             m.bias.data.fill_(0)
 
-def train(train_data,
-			test_data,
-			classifier:torch.nn.Module,
-			batchSize:int,
-			parameters_file:str,
-			epoch_number:int = 1,
-			learning_rate:float=1e-3,
-		  	train:bool=True):
-
+def train(train_data, test_data, classifier:torch.nn.Module):
 	# load parameters:
 	# classifier.load_state_dict(torch.load(PARAMS_FILE, map_location=DEVICE))
 
 	# initialize weights with normal distribution
-	classifier.apply(weights_init_normal)
+	# classifier.apply(weights_init_normal)
 
 	# pre-train preparations
 	create_data_output_dir()
@@ -66,7 +58,7 @@ def train(train_data,
 
 	step_cntr = 0
 	if train:
-		for epoch in range(epoch_number):
+		for epoch in range(N_EPOCH):
 			if epoch != 0:
 				scheduler.step()
 			for i, data in enumerate(train_data, 0):

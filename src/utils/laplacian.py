@@ -46,8 +46,8 @@ def laplacebeltrami_FEM(vertices, faces):
         b = torch.fmod(torch.as_tensor(i), torch.as_tensor(3.)).long()
         c = torch.fmod(torch.as_tensor(i + 1), torch.as_tensor(3.)).long()
 
-        ab = vertices[faces[:, b], :] - vertices[faces[:, a], :];
-        ac = vertices[faces[:, c], :] - vertices[faces[:, a], :];
+        ab = vertices[faces[:, b], :] - vertices[faces[:, a], :]
+        ac = vertices[faces[:, c], :] - vertices[faces[:, a], :]
 
         ab = torch.nn.functional.normalize(ab, p=2, dim=1)
         ac = torch.nn.functional.normalize(ac, p=2, dim=1)

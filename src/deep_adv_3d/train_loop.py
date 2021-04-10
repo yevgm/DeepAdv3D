@@ -24,7 +24,6 @@ class Trainer:
 
         self.train_data = train_data
         self.test_data = test_data
-        self.num_vertices = train_data.dataset.num_vertices
         self.batch_size = TRAIN_BATCH_SIZE
         self.num_batch = len(self.train_data)
         self.test_num_batch = len(self.test_data)
@@ -42,11 +41,10 @@ class Trainer:
         self.model.to(DEVICE)
 
         self.loss_values = []
+        # plotter init
+        self.plt = AdversarialPlotter()
 
     def train(self):
-        #TODO: move this
-        # plotter init
-        plt = AdversarialPlotter(n_verts=self.num_vertices)
         # pre-train preparations
         create_data_output_dir()
         now = datetime.now()
@@ -71,44 +69,32 @@ class Trainer:
                 scheduler.step()
             for i, data in enumerate(self.train_data, 0):
                 orig_vertices, label, _, eigvecs, vertex_area, targets, faces, edges = data
-                # plot_mesh(orig_vertices[0], faces[0], grid_on=True)  # plot some mesh for debugging
+                # plot_mesh(orig_vertices[0], faces[0], grid_on=True, strategy='cloud')  # plot some mesh for debugging
                 cur_batch_len = orig_vertices.shape[0]
                 orig_vertices = orig_vertices.transpose(2, 1)
 
-                optimizer.zero_grad()
+
                 # get Eigenspace vector field
                 eigen_space_v = self.model(orig_vertices).transpose(2, 1)
-
-                # adversarial example (smoothly perturbed)
+                # create the adversarial example (smoothly perturbed)
                 adex = orig_vertices + torch.bmm(eigvecs, eigen_space_v).transpose(2, 1)
+                perturbed_logits, _, _ = self.classifier(adex) # no grad is already implemented in the constructor
 
                 # DEBUG - visualize the adex
                 # if epoch == 30:  # plot first adex in a batch
                     # plot_mesh(adex[0].transpose(0, 1), faces[0], grid_on=True)
-                if PLOT_TRAIN_IMAGES & (step_cntr > 0) & (step_cntr % SHOW_TRAIN_SAMPLE_EVERY == 0):
-                    dump_adversarial_example_image(orig_vertices, adex, faces, step_cntr, tensor_log_dir)
-
-                # no grad is already implemented in the constructor
-                perturbed_logits, _, _ = self.classifier(adex)
+                dump_adversarial_example_image(orig_vertices, adex, faces, step_cntr, tensor_log_dir)
 
                 #debug
-                # logits, _, _ = self.classifier(orig_vertices)
-                # label = label[:, 0]
-                # pred_orig = logits.data.max(1)[1]
-                # pred_choice = perturbed_logits.data.max(1)[1]
-                # num_classified = pred_orig.eq(label).cpu().sum()
-                # num_misclassified = pred_choice.eq(targets).cpu().sum()
+                logits, _, _ = self.classifier(orig_vertices)
+                label = label[:, 0]
+                pred_orig = logits.data.max(1)[1]
+                pred_choice = perturbed_logits.data.max(1)[1]
+                num_classified = pred_orig.eq(label).cpu().sum()
+                num_misclassified = pred_choice.eq(targets).cpu().sum()
 
-                MisclassifyLoss = AdversarialLoss()
-                if LOSS == 'l2':
-                    Similarity_loss = L2Similarity(orig_vertices, adex, vertex_area)
-                else:
-                    Similarity_loss = LocalEuclideanSimilarity(orig_vertices.transpose(2, 1), adex.transpose(2, 1), edges)
-
-
-                missloss = MisclassifyLoss(perturbed_logits, targets)
-                similarity_loss = Similarity_loss()
-                loss = missloss + RECON_LOSS_CONST * similarity_loss
+                loss, missloss, similarity_loss = self.calculate_loss(orig_vertices, adex, vertex_area,
+                                                                      perturbed_logits, targets, edges)
 
                 # compare batch loss vs single loss
                 # single_batch_adv_loss = AdversarialLoss_single_batch()
@@ -120,11 +106,11 @@ class Trainer:
                 # print('diff {}'.format(missloss - loss_sum / adex.shape[0]))
                 # a=1
                 # Back-propagation step
+                optimizer.zero_grad()
                 loss.backward()
                 # if epoch > 1:  # trying to draw the gradients flow, not working since our grads are None for some reason
                 #     plot_grad_flow_v2(self.model.named_parameters())
                 optimizer.step()
-
 
                 # Metrics
                 self.loss_values.append(loss.item())
@@ -134,15 +120,11 @@ class Trainer:
                 # report to tensorboard
                 report_to_tensorboard(writer, i, step_cntr, cur_batch_len, epoch, self.num_batch, loss.item(),
                                       similarity_loss.item(), missloss.item(), num_misclassified)
-                # report_to_tensorboard(writer, i, step_cntr, cur_batch_len, epoch, self.num_batch, debug_loss,
-                #                       0, debug_loss, num_misclassified)
+
                 step_cntr += 1
 
             # push to visualizer every epoch - last batch
-            data_dict = plt.prepare_plotter_dict(orig_vertices[:VIS_N_MESH_SETS, :, :],
-                                                 adex[:VIS_N_MESH_SETS, :, :],
-                                                 faces[:VIS_N_MESH_SETS, :, :])
-            plt.push(new_epoch=epoch, new_data=data_dict)
+            self.push_data_to_plotter(orig_vertices, adex, faces, epoch)
 
             # TODO: validation
             if (step_cntr > 0) & (step_cntr % SAVE_PARAMS_EVERY == 0):
@@ -151,11 +133,34 @@ class Trainer:
         # save at the end also
         torch.save(self.model.state_dict(), save_weights_file)
 
-        # evaluate the model
+        # evaluate the model at the end of training
         self.evaluate(tensor_log_dir)
 
 
-    def evaluate(self, test_param_dir=TEST_PARAMS_DIR):
+    def push_data_to_plotter(self, orig_vertices, adex, faces, epoch):
+        data_dict = self.plt.prepare_plotter_dict(orig_vertices[:VIS_N_MESH_SETS, :, :],
+                                                  adex[:VIS_N_MESH_SETS, :, :],
+                                                  faces[:VIS_N_MESH_SETS, :, :])
+        self.plt.push(new_epoch=epoch, new_data=data_dict)
+
+
+    def calculate_loss(self, orig_vertices, adex, vertex_area,
+                       perturbed_logits, targets, edges):
+
+        MisclassifyLoss = AdversarialLoss()
+        if LOSS == 'l2':
+            Similarity_loss = L2Similarity(orig_vertices, adex, vertex_area)
+        else:
+            Similarity_loss = LocalEuclideanSimilarity(orig_vertices.transpose(2, 1), adex.transpose(2, 1), edges)
+
+        missloss = MisclassifyLoss(perturbed_logits, targets)
+        similarity_loss = Similarity_loss()
+        loss = missloss + RECON_LOSS_CONST * similarity_loss
+
+        return loss, missloss, similarity_loss
+
+
+    def evaluate(self, test_param_dir=TEST_PARAMS_DIR): # TODO - fix this when train loop is finished
         # pre-test preparations
         s_writer = SummaryWriter(test_param_dir, flush_secs=FLUSH_RESULTS)
         test_param_file = get_param_file(test_param_dir)
@@ -196,15 +201,8 @@ class Trainer:
                 pred_choice = perturbed_logits.data.max(1)[1]
                 num_misclassified += pred_choice.eq(targets).cpu().sum()
 
-                MisclassifyLoss = AdversarialLoss(perturbed_logits, targets)
-                if LOSS == 'l2':
-                    Similarity_loss = L2Similarity(orig_vertices, adex, vertex_area)
-                else:
-                    Similarity_loss = LocalEuclideanSimilarity(orig_vertices.transpose(2, 1), adex.transpose(2, 1), edges)
-
-                missloss = MisclassifyLoss()
-                similarity_loss = Similarity_loss()
-                loss = missloss + RECON_LOSS_CONST * similarity_loss
+                loss, missloss, similarity_loss = self.calculate_loss(orig_vertices, adex, vertex_area,
+                                                                      perturbed_logits, targets, edges)
 
                 running_total_loss += loss
                 running_reconstruction_loss += RECON_LOSS_CONST * similarity_loss

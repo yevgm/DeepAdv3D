@@ -26,57 +26,11 @@ import adversarial.output_handler as op
 import vista.animation
 from vista.animation import animate, multianimate
 
-
-import models
 import classifier_trainer
-import ntrain
-import geometric_train
-import dataset
-import utils
-from models.pointnet import SimplePointNet
 from models.pointnet import PointNet
-from dataset.data_loaders import FaustDataset, FaustDatasetInMemory
+from model_trainer_main import load_datasets
+from utils.torch.nn import *
 # from dataset.faust import FaustDataset as FaustData
-
-
-def load_datasets(train_batch=8, test_batch=20):
-    # here we use FaustDataset class that inherits from torch.utils.data.Dataloader. it's a map-style dataset.
-    if LOAD_WHOLE_DATA_TO_MEMORY:
-        train_dataset = FaustDatasetInMemory(
-            root=os.path.join(FAUST, r'raw'),
-            split='train',
-            data_augmentation=TRAIN_DATA_AUG)
-
-        test_dataset = FaustDatasetInMemory(
-            root=os.path.join(FAUST, r'raw'),
-            split='test',
-            data_augmentation=TEST_DATA_AUG)
-    else:
-        train_dataset = FaustDataset(
-            root=os.path.join(FAUST, r'raw'),
-            split='train',
-            data_augmentation=TRAIN_DATA_AUG)
-
-        test_dataset = FaustDataset(
-            root=os.path.join(FAUST, r'raw'),
-            split='test',
-            data_augmentation=TEST_DATA_AUG)
-
-    trainLoader = torch.utils.data.DataLoader(train_dataset,
-                                               batch_size=train_batch,
-                                               shuffle=True,
-                                               num_workers=NUM_WORKERS)
-    testLoader = torch.utils.data.DataLoader(test_dataset,
-                                               batch_size=test_batch,
-                                               shuffle=False,
-                                               num_workers=NUM_WORKERS)
-
-    return trainLoader, testLoader
-
-    # load data in different format for Adversarial code
-    # it uses carlini's FaustDataset class that inherits from torch_geometric.data.InMemoryDataset
-    # traindata = FaustData(FAUST, device=DEVICE, train=True, test=False, transform_data=True)
-    # testdata = FaustData(FAUST, device=DEVICE, train=False, test=True, transform_data=True)
 
 def random_uniform_rotation(dim=3):
     H = np.eye(dim)
@@ -125,35 +79,20 @@ def rotation_z(angle, degrees=True):
                      [-sz, cz, 0],
                      [0, 0, 1]])
 
-def show_model_accuracy(PARAMS_FILE, model):
-    loss_values, test_mean_loss, test_accuracy = classifier_trainer.train(
-        train_data=trainLoader,
-        test_data=testLoader,
-        classifier=model,
-        batchSize=20,
-        parameters_file=PARAMS_FILE,
-        learning_rate=1e-3,
-        train=False)
-
-    print('test mean loss:', test_mean_loss, ' test_accuracy:', test_accuracy)
-
 
 if __name__ == "__main__":
 
     model = PointNet(k=10, feature_transform=False, global_transform=False)
     model = model.to(DEVICE)
 
-    trainLoader, testLoader = load_datasets(train_batch=TRAIN_BATCH_SIZE, test_batch=TEST_BATCH_SIZE)
+    # set seed for all platforms
+    set_determinsitic_run()
 
-    classifier_trainer.train(
-                            train_data=trainLoader,
-                            test_data=testLoader,
-                            classifier=model,
-                            batchSize=TRAIN_BATCH_SIZE,
-                            parameters_file=PARAMS_FILE,
-                            epoch_number=N_EPOCH,
-                            learning_rate=LR,
-                            train=True)
+    # Data Loading and pre-processing
+    trainLoader, testLoader = load_datasets(dataset=DATASET_NAME, train_batch=TRAIN_BATCH_SIZE,
+                                            test_batch=TEST_BATCH_SIZE)
+
+    classifier_trainer.train(train_data=trainLoader, test_data=testLoader, classifier=model)
 
 
     # classifier_trainer.evaluate(testLoader, classifier)
@@ -170,7 +109,6 @@ if __name__ == "__main__":
 
     # model.load_state_dict(torch.load(PARAMS_FILE, map_location=DEVICE))
     # model.eval()
-    # # show_model_accuracy(PARAMS_FILE, model)
     #
     # count = 0
     # number_of_tests = 100

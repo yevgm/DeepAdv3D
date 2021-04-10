@@ -13,32 +13,34 @@ from config import *
 from models.pointnet import PointNet
 from models.deep_adv_3d_model1 import Regressor
 from deep_adv_3d.train_loop import *
-from dataset.data_loaders import FaustDataset, FaustDatasetInMemory
+from dataset.data_loaders import *
 from utils.torch.nn import *
 
 
-def load_datasets(train_batch=8, test_batch=20):
-    # here we use FaustDataset class that inherits from torch.utils.data.Dataloader. it's a map-style dataset.
-    if LOAD_WHOLE_DATA_TO_MEMORY:
-        train_dataset = FaustDatasetInMemory(
-            root=os.path.join(FAUST, r'raw'),
-            split='train',
-            data_augmentation=TRAIN_DATA_AUG)
+def load_datasets(dataset, train_batch=8, test_batch=20):
+    if dataset == 'Faust':
+        dataset_path = FAUST
+        if LOAD_WHOLE_DATA_TO_MEMORY:
+            class_inst = FaustDatasetInMemory
+        else:
+            class_inst = FaustDataset
+    elif dataset == 'Shrec14':
+        dataset_path = SHREC14
+        if LOAD_WHOLE_DATA_TO_MEMORY:
+            class_inst = Shrec14DatasetInMemory
+            pass
+        else:
+            class_inst = Shrec14Dataset
 
-        test_dataset = FaustDatasetInMemory(
-            root=os.path.join(FAUST, r'raw'),
-            split='test',
-            data_augmentation=TEST_DATA_AUG)
-    else:
-        train_dataset = FaustDataset(
-            root=os.path.join(FAUST, r'raw'),
-            split='train',
-            data_augmentation=TRAIN_DATA_AUG)
+    train_dataset = class_inst(
+        root=os.path.join(dataset_path, r'raw'),
+        split='train',
+        data_augmentation=TRAIN_DATA_AUG)
 
-        test_dataset = FaustDataset(
-            root=os.path.join(FAUST, r'raw'),
-            split='test',
-            data_augmentation=TEST_DATA_AUG)
+    test_dataset = class_inst(
+        root=os.path.join(dataset_path, r'raw'),
+        split='test',
+        data_augmentation=TEST_DATA_AUG)
 
     trainLoader = torch.utils.data.DataLoader(train_dataset,
                                                batch_size=train_batch,
@@ -62,7 +64,7 @@ if __name__ == '__main__':
     set_determinsitic_run()
 
     # Data Loading and pre-processing
-    trainLoader, testLoader = load_datasets(train_batch=TRAIN_BATCH_SIZE, test_batch=TEST_BATCH_SIZE)
+    trainLoader, testLoader = load_datasets(dataset=DATASET_NAME, train_batch=TRAIN_BATCH_SIZE, test_batch=TEST_BATCH_SIZE)
 
     # classifier and model definition
     classifier = PointNet(k=10, feature_transform=False, global_transform=False)

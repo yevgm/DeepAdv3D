@@ -36,10 +36,10 @@ def get_param_file(dir_name):
 
 
 def dump_adversarial_example_image(orig_vertices, adex, faces, step_num, file_path):
-
-    p, _ = plot_mesh_montage([orig_vertices[0].T, adex[0].T], [faces[0], faces[0]], screenshot=True)
-    path = os.path.join(file_path, "step_" + str(step_num) + ".png")
-    p.show(screenshot=path, full_screen=True)
+    if PLOT_TRAIN_IMAGES & (step_num > 0) & (step_num % SHOW_TRAIN_SAMPLE_EVERY == 0):
+        p, _ = plot_mesh_montage([orig_vertices[0].T, adex[0].T], [faces[0], faces[0]], screenshot=True)
+        path = os.path.join(file_path, "step_" + str(step_num) + ".png")
+        p.show(screenshot=path, full_screen=True)
 
 def dump_adversarial_example_image_batch(orig_vertices, adex, faces, orig_class, targets, logits, perturbed_logits, file_path):
     # orig_v_list = []
