@@ -86,12 +86,12 @@ class Trainer:
                 dump_adversarial_example_image(orig_vertices, adex, faces, step_cntr, tensor_log_dir)
 
                 #debug
-                logits, _, _ = self.classifier(orig_vertices)
-                label = label[:, 0]
-                pred_orig = logits.data.max(1)[1]
-                pred_choice = perturbed_logits.data.max(1)[1]
-                num_classified = pred_orig.eq(label).cpu().sum()
-                num_misclassified = pred_choice.eq(targets).cpu().sum()
+                # logits, _, _ = self.classifier(orig_vertices)
+                # label = label[:, 0]
+                # pred_orig = logits.data.max(1)[1]
+                # pred_choice = perturbed_logits.data.max(1)[1]
+                # num_classified = pred_orig.eq(label).cpu().sum()
+                # num_misclassified = pred_choice.eq(targets).cpu().sum()
 
                 loss, missloss, similarity_loss = self.calculate_loss(orig_vertices, adex, vertex_area,
                                                                       perturbed_logits, targets, edges)

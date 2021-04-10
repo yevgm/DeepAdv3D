@@ -20,7 +20,7 @@ sys.path.insert(0, SRC_DIR)
 #                                                   MODEL
 # ----------------------------------------------------------------------------------------------------------------------#
 # classifier:
-PARAMS_FILE = os.path.join(MODEL_DATA_DIR, "momentum_05.pt")  # FAUST10_pointnet_rot_b128.pt
+PARAMS_FILE = os.path.join(MODEL_DATA_DIR, "shrec14_71percent_acc_momentum05.pt")  # FAUST10_pointnet_rot_b128.pt, momentum_05.pt, shrec14_71percent_acc_momentum05.pt
 # model1:
 # MODEL1_PARAMS_DIR = os.path.join(MODEL_DATA_DIR, "model1_params") # .pt will be added in the code
 PARAM_FILE_NAME = "model_params.pt"
@@ -39,14 +39,14 @@ FLUSH_RESULTS = 5  # in seconds
 # ----------------------------------------------------------------------------------------------------------------------#
 UNIVERSAL_RAND_SEED = 146
 
-TRAINING_CLASSIFIER = True  # turn on to switch between classifier train and model train
-LR = 1e-3  # learning rate
+TRAINING_CLASSIFIER = False  # turn on to switch between classifier train and model train
+LR = 4e-3  # learning rate
 OPTIMIZER = 'AdamW' # 'Adam', 'AdamW'
 WEIGHT_DECAY = 0.5 # regularization
 SCHEDULER_STEP_SIZE = 250
-TRAIN_BATCH_SIZE = 4  # number of data examples in one batch
+TRAIN_BATCH_SIZE = 32  # number of data examples in one batch
 TEST_BATCH_SIZE = 20
-N_EPOCH = 100  # number of train epochs
+N_EPOCH = 200  # number of train epochs
 RECON_LOSS_CONST = 400  # ratio between reconstruction loss and missclasificaition loss
 TRAIN_DATA_AUG = True
 
@@ -73,7 +73,7 @@ NUM_WORKERS = 0
 DATASET_CLASSES = 10
 DATASET_NAME = "Shrec14" # 'Faust', 'Shrec14'
 EPS = 1e-9  # for numerical stability - used in calculating eigenvectors
-LOAD_WHOLE_DATA_TO_MEMORY = True  # use InMemory of Not in dataset loader stage
+LOAD_WHOLE_DATA_TO_MEMORY = False  # use InMemory of Not in dataset loader stage
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   VISTA
 # ----------------------------------------------------------------------------------------------------------------------#
