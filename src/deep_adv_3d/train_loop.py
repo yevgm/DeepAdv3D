@@ -61,7 +61,7 @@ class Trainer:
 
         self.optimizer, self.scheduler = self.define_optimizer()
         self.model = self.model.train()  # set to train mode
-
+        val_loss = 0
         for epoch in range(self.n_epoch):
             # train step
             self.one_epoch_step(epoch=epoch, split='train')
@@ -79,7 +79,7 @@ class Trainer:
                     self.plt.finalize()
                     exit()
 
-            self.scheduler.step()
+            self.scheduler.step(val_loss)
 
 
         # evaluate the model at the end of training
