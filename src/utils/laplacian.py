@@ -89,7 +89,8 @@ def laplacebeltrami_FEM(vertices, faces):
                                           device=device,
                                           size=(n, n)).coalesce()
 
-    lumped_mass = torch.sparse.sum(mass, dim=1).to_dense()
+    # lumped_mass = torch.sparse.sum(mass, dim=1).to_dense()  # not required
+    lumped_mass = 0
     return stiff, mass, lumped_mass
 
 

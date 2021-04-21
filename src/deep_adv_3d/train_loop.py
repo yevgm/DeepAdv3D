@@ -118,6 +118,7 @@ class Trainer:
                 num_misclassified = pred_choice.eq(targets).sum().cpu()
 
                 # report to tensorboard
+                print(pred_choice)
                 report_to_tensorboard(writer, i, step_cntr, cur_batch_len, epoch, self.num_batch, loss.item(),
                                       similarity_loss.item(), missloss.item(), num_misclassified)
 

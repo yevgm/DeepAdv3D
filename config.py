@@ -20,7 +20,7 @@ sys.path.insert(0, SRC_DIR)
 #                                                   MODEL
 # ----------------------------------------------------------------------------------------------------------------------#
 # classifier:
-PARAMS_FILE = os.path.join(MODEL_DATA_DIR, "shrec14_71percent_acc_momentum05.pt")  # FAUST10_pointnet_rot_b128.pt, momentum_05.pt, shrec14_71percent_acc_momentum05.pt
+PARAMS_FILE = os.path.join(MODEL_DATA_DIR, "FAUST10_pointnet_rot_b128.pt")  # FAUST10_pointnet_rot_b128.pt, momentum_05.pt, shrec14_71percent_acc_momentum05.pt
 # model1:
 # MODEL1_PARAMS_DIR = os.path.join(MODEL_DATA_DIR, "model1_params") # .pt will be added in the code
 PARAM_FILE_NAME = "model_params.pt"
@@ -44,7 +44,7 @@ LR = 4e-3  # learning rate
 OPTIMIZER = 'AdamW' # 'Adam', 'AdamW'
 WEIGHT_DECAY = 0.5 # regularization
 SCHEDULER_STEP_SIZE = 250
-TRAIN_BATCH_SIZE = 32  # number of data examples in one batch
+TRAIN_BATCH_SIZE = 16  # number of data examples in one batch
 TEST_BATCH_SIZE = 20
 N_EPOCH = 200  # number of train epochs
 RECON_LOSS_CONST = 400  # ratio between reconstruction loss and missclasificaition loss
@@ -71,9 +71,9 @@ TEST_EPOCHS = 1  # valid use only with "TEST_DATA_AUG = True"
 # ----------------------------------------------------------------------------------------------------------------------#
 NUM_WORKERS = 0
 DATASET_CLASSES = 10
-DATASET_NAME = "Shrec14" # 'Faust', 'Shrec14'
+DATASET_NAME = "Faust" # 'Faust', 'Shrec14'
 EPS = 1e-9  # for numerical stability - used in calculating eigenvectors
-LOAD_WHOLE_DATA_TO_MEMORY = False  # use InMemory of Not in dataset loader stage
+LOAD_WHOLE_DATA_TO_MEMORY = True  # use InMemory of Not in dataset loader stage
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   VISTA
 # ----------------------------------------------------------------------------------------------------------------------#
@@ -95,9 +95,9 @@ PLOT_TRAIN_IMAGES = True
 SHOW_TRAIN_SAMPLE_EVERY = 100  # plot vista / save image to folder every SHOW_TRAIN_SAMPLE_EVERY gradient steps
 # classifier bn
 CLS_USE_BN = True
-CLS_BATCH_NORM_USE_STATISTICS = True
+CLS_BATCH_NORM_USE_STATISTICS = False
 CLS_BATCH_NORM_MOMENTUM = 0.5  # default is 0.1
-CLS_STRICT_PARAM_LOADING = True  # strict = False for dropping running mean and var of train batchnorm
+CLS_STRICT_PARAM_LOADING = False  # strict = False for dropping running mean and var of train batchnorm
 # model bn
 MODEL_USE_BN = True
 MODEL_BATCH_NORM_USE_STATISTICS = True
