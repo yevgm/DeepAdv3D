@@ -81,7 +81,7 @@ class Trainer:
                 perturbed_logits, _, _ = self.classifier(adex) # no grad is already implemented in the constructor
 
                 # DEBUG - visualize the adex
-                # if epoch == 30:  # plot first adex in a batch
+                # if epoch == 10:  # plot the first adex in the batch
                     # plot_mesh(adex[0].transpose(0, 1), faces[0], grid_on=True)
                 dump_adversarial_example_image(orig_vertices, adex, faces, step_cntr, tensor_log_dir)
 
