@@ -53,8 +53,7 @@ class ParallelPlotterBase(Process, ABC):
         current_epoch = self.sd['epoch']
         if current_epoch != self.last_plotted_epoch:
             self.last_plotted_epoch = current_epoch
-            self.train_d = deepcopy(self.sd['data'])
-            self.val_d = None # for future use
+            self.train_d, self.val_d = deepcopy(self.sd['data'])
         if final:
             self.plt_title = f'Final visualization before closing for Epoch {self.last_plotted_epoch}'
         else:
@@ -111,45 +110,12 @@ class AdversarialPlotter(ParallelPlotterBase):
                 'faces': faces.detach().cpu().numpy()[:max_b_idx]}
         return dict
 
-    # def plot_data(self):
-    #     # TODO - with validation
-    #     gtr_vnb = None
-    #     gt_vnb = None
-    #     p = pv.Plotter(shape=(2 * self.VIS_N_MESH_SETS, 4), title=self.plt_title)
-    #     for di, (d, set_name) in enumerate(zip([self.train_d, self.val_d], ['Train', 'Vald'])):
-    #         for i in range(self.VIS_N_MESH_SETS):
-    #             subplt_row_id = i + di * self.VIS_N_MESH_SETS
-    #             mask_ind = vertex_mask_indicator(self.n_v, d['gt_mask'][i])
-    #             gtrb = d['gtrb'][i].squeeze()
-    #             gt = d['gt'][i].squeeze()
-    #             tp = d['tp'][i].squeeze()
-    #             if self.VIS_SHOW_NORMALS:
-    #                 gtr_vnb = d['gtr_vnb'][i].squeeze()
-    #                 gt_vnb = d['gt_vnb'][i].squeeze()
-    #
-    #             # TODO - Add support for normals & P2P
-    #             # TODO - Check why in mesh method + tensor colors, colors are interpolated onto the faces.
-    #             p.subplot(subplt_row_id, 0)  # GT Reconstructed with colored mask
-    #             mesh_append(p, v=gtrb, f=self.f, n=gtr_vnb,
-    #                         clr=mask_ind, label=f'{set_name} Reconstruction {i}', **self.kwargs)
-    #             p.subplot(subplt_row_id, 1)  # GT with colored mask
-    #             mesh_append(p, v=gt, f=self.f, n=gt_vnb,
-    #                         clr=mask_ind, label=f'{set_name} GT {i}', **self.kwargs)
-    #             p.subplot(subplt_row_id, 2)  # TP with colored mask
-    #             mesh_append(p, v=tp, f=self.f, clr=mask_ind, label=f'{set_name} TP {i}', **self.kwargs)
-    #             p.subplot(subplt_row_id, 3)  # GT Reconstructed + Part
-    #             mesh_append(p, v=gtrb, f=self.f, clr=mask_ind, **self.kwargs)
-    #             # TODO - Remove hard coded 'r'. Do we want to enable part as mesh?
-    #             mesh_append(p, v=gt[mask_ind, :], f=None, clr='r', label=f'{set_name} Part + Recon {i}', **self.kwargs)
-    #
-    #     # p.link_views()
-    #     p.show()
     def plot_data(self):
-        # TODO - without validation
-        p = pv.Plotter(shape=(self.VIS_N_MESH_SETS, 2), title=self.plt_title)
-        for di, (d, set_name) in enumerate(zip([self.train_d], ['Train'])):
+
+        p = pv.Plotter(shape=(2 * self.VIS_N_MESH_SETS, 2), title=self.plt_title)
+        for di, (d, set_name) in enumerate(zip([self.train_d, self.val_d], ['Train', 'Vald'])):
             for i in range(self.VIS_N_MESH_SETS):
-                subplt_row_id = i
+                subplt_row_id = i + di * self.VIS_N_MESH_SETS
                 orig_vertices = d['orig_vertices'][i].squeeze().transpose()
                 adex = d['adexs'][i].squeeze().transpose()
                 faces = d['faces'][i].squeeze()

@@ -44,7 +44,7 @@ LR = 4e-3  # learning rate
 OPTIMIZER = 'AdamW' # 'Adam', 'AdamW'
 WEIGHT_DECAY = 0.5 # regularization
 SCHEDULER_STEP_SIZE = 250
-TRAIN_BATCH_SIZE = 32  # number of data examples in one batch
+TRAIN_BATCH_SIZE = 8  # number of data examples in one batch
 TEST_BATCH_SIZE = 20
 N_EPOCH = 200  # number of train epochs
 RECON_LOSS_CONST = 400  # ratio between reconstruction loss and missclasificaition loss
@@ -66,6 +66,11 @@ TARGET_CLASS = 5  # the attack target - still not used\
 TEST_DATA_AUG = True
 PLOT_TEST_SAMPLE = True
 TEST_EPOCHS = 1  # valid use only with "TEST_DATA_AUG = True"
+# validation set: 
+VAL_BATCH_SIZE = 20
+SHUFFLE_VAL_DATA = True
+VAL_STEP_EVERY = 1  # epochs
+VAL_DATA_AUG = False
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   DATA
 # ----------------------------------------------------------------------------------------------------------------------#
@@ -73,7 +78,7 @@ NUM_WORKERS = 0
 DATASET_CLASSES = 10
 DATASET_NAME = "Faust" # 'Faust', 'Shrec14'
 EPS = 1e-9  # for numerical stability - used in calculating eigenvectors
-LOAD_WHOLE_DATA_TO_MEMORY = True  # use InMemory of Not in dataset loader stage
+LOAD_WHOLE_DATA_TO_MEMORY = False  # use InMemory of Not in dataset loader stage
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   VISTA
 # ----------------------------------------------------------------------------------------------------------------------#
@@ -85,9 +90,9 @@ VIS_N_MESH_SETS = 2  # Parallel plot will plot 8 meshes for each mesh set - 4 fr
 VIS_STRATEGY = 'mesh'  # spheres,cloud,mesh  - Choose how to display the meshes
 VIS_CMAP = 'OrRd'  # https://matplotlib.org/3.1.0/tutorials/colors/colormaps.html
 # We use two colors: one for the mask verts [Right end of the spectrum] and one for the rest [Left end of the spectrum].
-VIS_SHOW_GRID = False  # Visualzie with grid?
 VIS_SMOOTH_SHADING = False  # Smooth out the mesh before visualization?  Applicable only for 'mesh' method
 VIS_SHOW_EDGES = False  # Visualize with edges? Applicable only for 'mesh' method
+VIS_SHOW_GRID = True
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   DEBUG
 # ----------------------------------------------------------------------------------------------------------------------#

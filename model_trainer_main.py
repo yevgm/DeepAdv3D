@@ -17,7 +17,7 @@ from dataset.data_loaders import *
 from utils.torch.nn import *
 
 
-def load_datasets(dataset, train_batch=8, test_batch=20):
+def load_datasets(dataset, train_batch=8, test_batch=20, val_batch=20):
     if dataset == 'Faust':
         dataset_path = FAUST
         if LOAD_WHOLE_DATA_TO_MEMORY:
@@ -37,6 +37,11 @@ def load_datasets(dataset, train_batch=8, test_batch=20):
         split='train',
         data_augmentation=TRAIN_DATA_AUG)
 
+    validation_dataset = class_inst(
+        root=os.path.join(dataset_path, r'raw'),
+        split='validation',
+        data_augmentation=VAL_DATA_AUG)
+
     test_dataset = class_inst(
         root=os.path.join(dataset_path, r'raw'),
         split='test',
@@ -46,12 +51,16 @@ def load_datasets(dataset, train_batch=8, test_batch=20):
                                                batch_size=train_batch,
                                                shuffle=True,
                                                num_workers=NUM_WORKERS)
+    validationLoader = torch.utils.data.DataLoader(validation_dataset,
+                                               batch_size=val_batch,
+                                               shuffle=SHUFFLE_VAL_DATA,
+                                               num_workers=NUM_WORKERS)
     testLoader = torch.utils.data.DataLoader(test_dataset,
                                                batch_size=test_batch,
                                                shuffle=SHUFFLE_TEST_DATA,
                                                num_workers=NUM_WORKERS)
 
-    return trainLoader, testLoader
+    return trainLoader, validationLoader, testLoader
 
 
 if __name__ == '__main__':
@@ -64,13 +73,14 @@ if __name__ == '__main__':
     set_determinsitic_run()
 
     # Data Loading and pre-processing
-    trainLoader, testLoader = load_datasets(dataset=DATASET_NAME, train_batch=TRAIN_BATCH_SIZE, test_batch=TEST_BATCH_SIZE)
+    trainLoader, validationLoader, testLoader = load_datasets(dataset=DATASET_NAME, train_batch=TRAIN_BATCH_SIZE,
+                                                              test_batch=TEST_BATCH_SIZE, val_batch=VAL_BATCH_SIZE)
 
     # classifier and model definition
     classifier = PointNet(k=10, feature_transform=False, global_transform=False)
     classifier.load_state_dict(torch.load(PARAMS_FILE, map_location=DEVICE), strict=CLS_STRICT_PARAM_LOADING)  # strict = False for dropping running mean and var of train batchnorm
     model = Regressor(numVertices=K)  # K - additive vector field (V) dimension in eigen-space
-    train_ins = Trainer(train_data=trainLoader, test_data=testLoader,
+    train_ins = Trainer(train_data=trainLoader, validation_data=validationLoader, test_data=testLoader,
                         model=model, classifier=classifier)
     # open tensorboard process if it's not already open
     if RUN_TB:

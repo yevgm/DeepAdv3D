@@ -222,9 +222,11 @@ class FaustDataset(data.Dataset):
 
         # split tran\test
         if self.split == 'train':
-            self.fns = self.fns[0:80]
+            self.fns = self.fns[0:70]
+        elif self.split == 'validation':
+            self.fns = self.fns[70:85]
         else:
-            self.fns = self.fns[80:]
+            self.fns = self.fns[85:]
 
         # self.set_targets()
         # self.num_vertices = 6890  # hardcoded for now
@@ -332,9 +334,11 @@ class FaustDatasetInMemory(data.Dataset):
 
         # split tran\test
         if self.split == 'train':
-            self.fns = self.fns[0:80]
+            self.fns = self.fns[0:70]
+        elif self.split == 'validation':
+            self.fns = self.fns[70:85]
         else:
-            self.fns = self.fns[80:]
+            self.fns = self.fns[85:]
 
         # load all dataset to memory
         self.v = []
@@ -435,8 +439,10 @@ class Shrec14Dataset(data.Dataset):
         # split tran\test
         if self.split == 'train':
             self.fns = self.fns[0:320]
+        elif self.split == 'validation':
+            self.fns = self.fns[320:360]
         else:
-            self.fns = self.fns[320:]
+            self.fns = self.fns[360:]
 
 
     def __getitem__(self, index):
@@ -520,8 +526,10 @@ class Shrec14DatasetInMemory(data.Dataset):
         # split tran\test
         if self.split == 'train':
             self.fns = self.fns[0:320]
+        elif self.split == 'validation':
+            self.fns = self.fns[320:360]
         else:
-            self.fns = self.fns[320:]
+            self.fns = self.fns[360:]
 
         # load all dataset to memory
         self.v = []
