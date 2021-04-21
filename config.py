@@ -38,12 +38,14 @@ FLUSH_RESULTS = 5  # in seconds
 #                                                   TRAIN HYPERPARAMETERS
 # ----------------------------------------------------------------------------------------------------------------------#
 UNIVERSAL_RAND_SEED = 146
+EARLY_STOP_WAIT = 15  # epochs
+LR_SCHEDULER_WAIT =  7 # epochs
+SCHEDULER_STEP_SIZE = 250
+OPTIMIZER = 'AdamW' # 'Adam', 'AdamW'
 
 TRAINING_CLASSIFIER = False  # turn on to switch between classifier train and model train
 LR = 4e-3  # learning rate
-OPTIMIZER = 'AdamW' # 'Adam', 'AdamW'
 WEIGHT_DECAY = 0.5 # regularization
-SCHEDULER_STEP_SIZE = 250
 TRAIN_BATCH_SIZE = 8  # number of data examples in one batch
 TEST_BATCH_SIZE = 20
 N_EPOCH = 200  # number of train epochs
