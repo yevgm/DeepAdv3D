@@ -33,30 +33,95 @@ class AdversarialLoss_single_batch(LossFunction):
         Ztarget, Zmax = Z[target], Z[argmax]
         return torch.nn.functional.relu(Zmax - Ztarget)
 
-class AdversarialLoss(torch.nn.Module):
+class AdversarialLoss(LossFunction):
     def __init__(self):
+        '''
+        t = target
+        i = index of maximum value (that is not the target)
+        Z(x) - logits of a classifier
+
+        Loss function: f(x) = max{0, max{Z(i)-Z(t): i!=t}}
+
+        The function models the difference between the maximum value of Z to the value of Z at the target
+        When the diff is negative - that means the target has been reached
+        '''
         super().__init__()
-        # check input validity
-        # if perturbed_logits.shape[-1] != DATASET_CLASSES:
-        #     raise ValueError("must have a shape [b,DATASET_CLASSES]")
 
-        # self.k = torch.tensor([k], device=DEVICE, dtype=torch.float32)
 
-    def forward(self, perturbed_logits, target) -> torch.Tensor:
+    def __call__(self, perturbed_logits, target) -> torch.Tensor:
         batch_size = target.shape[0]
         Z = perturbed_logits
-        values, index = torch.sort(Z, dim=1)
-        argmax = index[:, -1]
+        _, Zsorted_idx = torch.sort(Z, dim=1)
+        Z_max_index = Zsorted_idx[:, -1]
 
         # if target equals the max of logits, take the second max. else do continue
-        argmax[index[:, -1] == target] = index[index[:, -1] == target, -2]
+        max_logit_equals_target_idx = Z_max_index == target
+        second_max_value = Zsorted_idx[max_logit_equals_target_idx, -2]
+        Z_max_index[max_logit_equals_target_idx] = second_max_value
 
-        Ztarget, Zmax = Z[:, target].diag(), Z[:, argmax].diag()
+        Ztarget = Z.gather(1, target.unsqueeze(1)).squeeze()
+        Zmax = Z.gather(1, Z_max_index.unsqueeze(1)).squeeze()
         out = (Zmax - Ztarget)
-        out[out <= 0] = 0
+        out = torch.nn.functional.relu(out)
         out = out.sum() / batch_size  # batch average
         return out
 
+class AdversarialLoss2(torch.nn.Module):
+    def __init__(self):
+        '''
+        t = target
+        F(x) - probabilities of a classifier
+
+        Loss function: f(x) = max{0, 0.5 - F(t)}
+
+        '''
+        super().__init__()
+
+
+    def forward(self, perturbed_logits, target) -> torch.Tensor:
+        batch_size = target.shape[0]
+        softmax = torch.nn.Softmax(dim=1)
+        F = softmax(perturbed_logits)
+        F_target = F.gather(1, target.unsqueeze(1)).squeeze()
+        out = torch.nn.functional.relu(0.5 - F_target)
+        out = out.sum() / batch_size  # batch average
+        return out
+
+# class AdversarialLoss(LossFunction):
+#     def __init__(self):
+#         '''
+#         t = target
+#         i = index of maximum value (that is not the target)
+#         Z(x) - logits of a classifier
+#
+#         Loss function: f(x) = max{0, max{Z(i)-Z(t): i!=t}}
+#
+#         The function models the difference between the maximum value of Z to the value of Z at the target
+#         When the diff is negative - that means the target has been reached
+#         '''
+#         super().__init__()
+#
+#
+#     def __call__(self, perturbed_logits, target) -> torch.Tensor:
+#         batch_size = target.shape[0]
+#         Z = perturbed_logits
+#         _, Zsorted_idx = torch.sort(Z, dim=1)
+#         Z_max_index = Zsorted_idx[:, -1]
+#
+#         # if target equals the max of logits, take the second max. else do continue
+#         max_logit_equals_target_idx = Z_max_index == target
+#         second_max_value = Zsorted_idx[max_logit_equals_target_idx, -2]
+#         Z_max_index[max_logit_equals_target_idx] = second_max_value
+#
+#         # Ztarget = Z[:, target].diag()
+#         # Zmax = Z[:, Z_max_index].diag()
+#         Ztarget = Z.gather(1, target.unsqueeze(1)).squeeze()
+#         Zmax = Z.gather(1, Z_max_index.unsqueeze(1)).squeeze()
+#         out = (Zmax - Ztarget)
+#         # out[out <= 0] = 0
+#         out = torch.nn.functional.relu(out)
+#         out = out.sum() / batch_size  # batch average
+#         return out
 
 class L2Similarity(LossFunction):
     def __init__(self, original_pos: torch.Tensor,
@@ -106,7 +171,7 @@ class LocalEuclideanSimilarity(LossFunction):
         self.kNN = torch.cat(out)
 
     def __call__(self) -> torch.Tensor:
-        n = self.original_pos.shape[1] # vertex count
+        n = self.original_pos.shape[1]  # vertex count
         pos = self.original_pos
         ppos = self.perturbed_pos
 

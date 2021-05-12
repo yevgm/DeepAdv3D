@@ -23,8 +23,8 @@ sys.path.insert(0, SRC_DIR)
 PARAMS_FILE = os.path.join(MODEL_DATA_DIR, "FAUST10_pointnet_rot_b128.pt")  # FAUST10_pointnet_rot_b128.pt, momentum_05.pt, shrec14_71percent_acc_momentum05.pt
 # model1:
 # MODEL1_PARAMS_DIR = os.path.join(MODEL_DATA_DIR, "model1_params") # .pt will be added in the code
-PARAM_FILE_NAME = "model_params.pt"
-SAVE_PARAMS_EVERY = 300  # steps
+# PARAM_FILE_NAME = "model_params.pt"
+# SAVE_PARAMS_EVERY = 300  # steps
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   TENSORBOARD
 # ----------------------------------------------------------------------------------------------------------------------#
@@ -37,16 +37,16 @@ FLUSH_RESULTS = 5  # in seconds
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   TRAIN HYPERPARAMETERS
 # ----------------------------------------------------------------------------------------------------------------------#
-UNIVERSAL_RAND_SEED = 146
+UNIVERSAL_RAND_SEED = 143
 EARLY_STOP_WAIT = 15  # epochs
 LR_SCHEDULER_WAIT =  7 # epochs
 SCHEDULER_STEP_SIZE = 250
-OPTIMIZER = 'AdamW' # 'Adam', 'AdamW'
+OPTIMIZER = 'AdamW' # 'Adam', 'AdamW', 'sgd'
 
 TRAINING_CLASSIFIER = False  # turn on to switch between classifier train and model train
-LR = 4e-3  # learning rate
+LR = 4e-3 # learning rate
 WEIGHT_DECAY = 0.5 # regularization
-TRAIN_BATCH_SIZE = 8  # number of data examples in one batch
+TRAIN_BATCH_SIZE = 10  # number of data examples in one batch
 TEST_BATCH_SIZE = 20
 N_EPOCH = 200  # number of train epochs
 RECON_LOSS_CONST = 400  # ratio between reconstruction loss and missclasificaition loss

@@ -481,7 +481,7 @@ class Shrec14Dataset(data.Dataset):
             targets = 0
         else:
             eigvals, eigvecs, vertex_area = eigenpairs(v, faces, K, double_precision=True)
-            eigvals = eigvals.to(DEVICE)
+            # eigvals = eigvals.to(DEVICE)
             eigvecs = eigvecs.to(DEVICE)
             vertex_area = vertex_area.to(DEVICE)
 
@@ -583,7 +583,7 @@ class Shrec14DatasetInMemory(data.Dataset):
             targets = 0
         else:
             eigvals, eigvecs, vertex_area = eigenpairs(v, self.faces[index], K, double_precision=True)
-            eigvals = eigvals.to(DEVICE)
+            # eigvals = eigvals.to(DEVICE)
             eigvecs = eigvecs.to(DEVICE)
             vertex_area = vertex_area.to(DEVICE)
 

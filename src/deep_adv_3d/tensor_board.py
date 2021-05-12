@@ -143,7 +143,10 @@ def classifier_report_to_tensorboard(tensor_obj, batch_idx, step_cntr, cur_batch
                                num_classified / float(cur_batch_len), step_cntr)
 
 def report_to_tensorboard(split, tensor_obj, batch_idx, step_cntr, cur_batch_len, epoch, n_batches, total_loss,
-                          recon_loss, missclassify_loss, num_misclassified):
+                          recon_loss, missclassify_loss, perturbed_logits, targets):
+    # Metrics
+    pred_choice = perturbed_logits.data.max(1)[1]
+    num_misclassified = pred_choice.eq(targets).sum().cpu()
     if split == 'train':
         if step_cntr % SHOW_LOSS_EVERY == SHOW_LOSS_EVERY - 1:  # every SHOW_LOSS_EVERY mini-batches
             # old stdout prints

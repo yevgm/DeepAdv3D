@@ -77,7 +77,7 @@ if __name__ == '__main__':
                                                               test_batch=TEST_BATCH_SIZE, val_batch=VAL_BATCH_SIZE)
 
     # classifier and model definition
-    classifier = PointNet(k=10, feature_transform=False, global_transform=False)
+    classifier = PointNet(k=10)
     classifier.load_state_dict(torch.load(PARAMS_FILE, map_location=DEVICE), strict=CLS_STRICT_PARAM_LOADING)  # strict = False for dropping running mean and var of train batchnorm
     model = Regressor(numVertices=K)  # K - additive vector field (V) dimension in eigen-space
     train_ins = Trainer(train_data=trainLoader, validation_data=validationLoader, test_data=testLoader,
