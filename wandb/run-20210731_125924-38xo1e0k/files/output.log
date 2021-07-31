@@ -1,0 +1,11 @@
+tlab dim:  torch.Size([32, 10])
+peturbed logits dim:  torch.Size([32, 10])
+loss:  tensor(30.8666, device='cuda:0', grad_fn=<MeanBackward0>)
+Traceback (most recent call last):
+  File "C:/Users/ido.igip1/Anaconda3/DeepAdv3D/model_trainer_main.py", line 109, in <module>
+    train_ins.train()
+  File "C:\Users\ido.igip1\Anaconda3\DeepAdv3D\src\deep_adv_3d\train_loop.py", line 85, in train
+    self.one_epoch_step(epoch=epoch, split='train')
+  File "C:\Users\ido.igip1\Anaconda3\DeepAdv3D\src\deep_adv_3d\train_loop.py", line 158, in one_epoch_step
+    report_to_tensorboard(split, self.writer, i, step_cntr, cur_batch_len, epoch, self.num_batch, loss.item(),
+AttributeError: 'Trainer' object has no attribute 'writer'

@@ -1,0 +1,170 @@
+C:/Users/ido.igip1/Anaconda3/DeepAdv3D/model_trainer_main.py:82: UserWarning: nn.init.xavier_uniform is now deprecated in favor of nn.init.xavier_uniform_.
+  nn.init.xavier_uniform(m.weight.data)
+C:/Users/ido.igip1/Anaconda3/DeepAdv3D/model_trainer_main.py:89: UserWarning: nn.init.xavier_uniform is now deprecated in favor of nn.init.xavier_uniform_.
+  nn.init.xavier_uniform(m.weight.data)
+tlab dim:  torch.Size([32, 10])
+peturbed logits dim:  torch.Size([32, 10])
+loss:  tensor(27.0435, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #0: Batch 3/0] Train loss: 27.043468, Misclassified: [32/5]
+tlab dim:  torch.Size([32, 10])
+peturbed logits dim:  torch.Size([32, 10])
+loss:  tensor(88.0420, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #0: Batch 3/1] Train loss: 88.042046, Misclassified: [32/3]
+tlab dim:  torch.Size([6, 10])
+peturbed logits dim:  torch.Size([6, 10])
+loss:  tensor(34.3470, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #0: Batch 3/2] Train loss: 34.347046, Misclassified: [6/0]
+tlab dim:  torch.Size([15, 10])
+peturbed logits dim:  torch.Size([15, 10])
+loss:  tensor(28.3541, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #0: Batch 3/0] Validation loss: 28.354111, Misclassified: [15/2]
+tlab dim:  torch.Size([32, 10])
+peturbed logits dim:  torch.Size([32, 10])
+loss:  tensor(31.4253, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #1: Batch 3/0] Train loss: 31.425276, Misclassified: [32/0]
+tlab dim:  torch.Size([32, 10])
+peturbed logits dim:  torch.Size([32, 10])
+loss:  tensor(27.3598, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #1: Batch 3/1] Train loss: 27.359829, Misclassified: [32/4]
+tlab dim:  torch.Size([6, 10])
+peturbed logits dim:  torch.Size([6, 10])
+loss:  tensor(35.9836, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #1: Batch 3/2] Train loss: 35.983562, Misclassified: [6/0]
+tlab dim:  torch.Size([15, 10])
+peturbed logits dim:  torch.Size([15, 10])
+loss:  tensor(18.2517, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #1: Batch 3/0] Validation loss: 18.251719, Misclassified: [15/4]
+tlab dim:  torch.Size([32, 10])
+peturbed logits dim:  torch.Size([32, 10])
+loss:  tensor(33.4877, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #2: Batch 3/0] Train loss: 33.487740, Misclassified: [32/1]
+tlab dim:  torch.Size([32, 10])
+peturbed logits dim:  torch.Size([32, 10])
+loss:  tensor(25.8736, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #2: Batch 3/1] Train loss: 25.873629, Misclassified: [32/4]
+tlab dim:  torch.Size([6, 10])
+peturbed logits dim:  torch.Size([6, 10])
+loss:  tensor(24.7988, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #2: Batch 3/2] Train loss: 24.798834, Misclassified: [6/1]
+tlab dim:  torch.Size([15, 10])
+peturbed logits dim:  torch.Size([15, 10])
+loss:  tensor(43.9123, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #2: Batch 3/0] Validation loss: 43.912334, Misclassified: [15/0]
+tlab dim:  torch.Size([32, 10])
+peturbed logits dim:  torch.Size([32, 10])
+loss:  tensor(27.9140, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #3: Batch 3/0] Train loss: 27.913956, Misclassified: [32/4]
+tlab dim:  torch.Size([32, 10])
+peturbed logits dim:  torch.Size([32, 10])
+loss:  tensor(26.9250, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #3: Batch 3/1] Train loss: 26.925022, Misclassified: [32/7]
+tlab dim:  torch.Size([6, 10])
+peturbed logits dim:  torch.Size([6, 10])
+loss:  tensor(25.9547, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #3: Batch 3/2] Train loss: 25.954723, Misclassified: [6/0]
+tlab dim:  torch.Size([15, 10])
+peturbed logits dim:  torch.Size([15, 10])
+loss:  tensor(30.9673, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #3: Batch 3/0] Validation loss: 30.967279, Misclassified: [15/1]
+tlab dim:  torch.Size([32, 10])
+peturbed logits dim:  torch.Size([32, 10])
+loss:  tensor(29.3877, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #4: Batch 3/0] Train loss: 29.387722, Misclassified: [32/4]
+tlab dim:  torch.Size([32, 10])
+peturbed logits dim:  torch.Size([32, 10])
+loss:  tensor(31.8220, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #4: Batch 3/1] Train loss: 31.822023, Misclassified: [32/2]
+tlab dim:  torch.Size([6, 10])
+peturbed logits dim:  torch.Size([6, 10])
+loss:  tensor(35.1322, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #4: Batch 3/2] Train loss: 35.132195, Misclassified: [6/0]
+tlab dim:  torch.Size([15, 10])
+peturbed logits dim:  torch.Size([15, 10])
+loss:  tensor(33.3311, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #4: Batch 3/0] Validation loss: 33.331135, Misclassified: [15/0]
+tlab dim:  torch.Size([32, 10])
+peturbed logits dim:  torch.Size([32, 10])
+loss:  tensor(23.1883, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #5: Batch 3/0] Train loss: 23.188293, Misclassified: [32/3]
+tlab dim:  torch.Size([32, 10])
+peturbed logits dim:  torch.Size([32, 10])
+loss:  tensor(25.3830, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #5: Batch 3/1] Train loss: 25.382957, Misclassified: [32/8]
+tlab dim:  torch.Size([6, 10])
+peturbed logits dim:  torch.Size([6, 10])
+loss:  tensor(29.6958, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #5: Batch 3/2] Train loss: 29.695799, Misclassified: [6/0]
+tlab dim:  torch.Size([15, 10])
+peturbed logits dim:  torch.Size([15, 10])
+loss:  tensor(27.5040, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #5: Batch 3/0] Validation loss: 27.504005, Misclassified: [15/3]
+tlab dim:  torch.Size([32, 10])
+peturbed logits dim:  torch.Size([32, 10])
+loss:  tensor(22.9561, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #6: Batch 3/0] Train loss: 22.956089, Misclassified: [32/3]
+tlab dim:  torch.Size([32, 10])
+peturbed logits dim:  torch.Size([32, 10])
+loss:  tensor(27.2712, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #6: Batch 3/1] Train loss: 27.271175, Misclassified: [32/1]
+tlab dim:  torch.Size([6, 10])
+peturbed logits dim:  torch.Size([6, 10])
+loss:  tensor(20.1831, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #6: Batch 3/2] Train loss: 20.183136, Misclassified: [6/1]
+tlab dim:  torch.Size([15, 10])
+peturbed logits dim:  torch.Size([15, 10])
+loss:  tensor(23.5550, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #6: Batch 3/0] Validation loss: 23.554985, Misclassified: [15/1]
+tlab dim:  torch.Size([32, 10])
+peturbed logits dim:  torch.Size([32, 10])
+loss:  tensor(25.7765, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #7: Batch 3/0] Train loss: 25.776541, Misclassified: [32/4]
+tlab dim:  torch.Size([32, 10])
+peturbed logits dim:  torch.Size([32, 10])
+loss:  tensor(21.5408, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #7: Batch 3/1] Train loss: 21.540810, Misclassified: [32/6]
+tlab dim:  torch.Size([6, 10])
+peturbed logits dim:  torch.Size([6, 10])
+loss:  tensor(31.8275, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #7: Batch 3/2] Train loss: 31.827522, Misclassified: [6/1]
+tlab dim:  torch.Size([15, 10])
+peturbed logits dim:  torch.Size([15, 10])
+loss:  tensor(24.3866, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #7: Batch 3/0] Validation loss: 24.386646, Misclassified: [15/1]
+tlab dim:  torch.Size([32, 10])
+peturbed logits dim:  torch.Size([32, 10])
+loss:  tensor(27.2219, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #8: Batch 3/0] Train loss: 27.221933, Misclassified: [32/1]
+tlab dim:  torch.Size([32, 10])
+peturbed logits dim:  torch.Size([32, 10])
+loss:  tensor(28.3930, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #8: Batch 3/1] Train loss: 28.392960, Misclassified: [32/3]
+tlab dim:  torch.Size([6, 10])
+peturbed logits dim:  torch.Size([6, 10])
+loss:  tensor(23.8845, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #8: Batch 3/2] Train loss: 23.884518, Misclassified: [6/2]
+tlab dim:  torch.Size([15, 10])
+peturbed logits dim:  torch.Size([15, 10])
+loss:  tensor(27.2086, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #8: Batch 3/0] Validation loss: 27.208563, Misclassified: [15/2]
+tlab dim:  torch.Size([32, 10])
+peturbed logits dim:  torch.Size([32, 10])
+loss:  tensor(28.5819, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #9: Batch 3/0] Train loss: 28.581877, Misclassified: [32/2]
+tlab dim:  torch.Size([32, 10])
+peturbed logits dim:  torch.Size([32, 10])
+loss:  tensor(29.1984, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #9: Batch 3/1] Train loss: 29.198357, Misclassified: [32/2]
+tlab dim:  torch.Size([6, 10])
+peturbed logits dim:  torch.Size([6, 10])
+loss:  tensor(35.9524, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #9: Batch 3/2] Train loss: 35.952377, Misclassified: [6/0]
+tlab dim:  torch.Size([15, 10])
+peturbed logits dim:  torch.Size([15, 10])
+loss:  tensor(22.3168, device='cuda:0', grad_fn=<MeanBackward0>)
+[Epoch #9: Batch 3/0] Validation loss: 22.316843, Misclassified: [15/3]
+Traceback (most recent call last):
+  File "C:/Users/ido.igip1/Anaconda3/DeepAdv3D/model_trainer_main.py", line 125, in <module>
+    train_ins.train()
+  File "C:\Users\ido.igip1\Anaconda3\DeepAdv3D\src\deep_adv_3d\train_loop.py", line 103, in train
+    self.evaluate(self.tensor_log_dir)
+AttributeError: 'Trainer' object has no attribute 'evaluate'

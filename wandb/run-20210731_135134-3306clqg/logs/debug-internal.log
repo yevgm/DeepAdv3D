@@ -1,0 +1,388 @@
+2021-07-31 13:51:36,288 INFO    MainThread:18772 [internal.py:wandb_internal():91] W&B internal server running at pid: 18772, started at: 2021-07-31 13:51:36.280772
+2021-07-31 13:51:36,288 INFO    WriterThread:18772 [datastore.py:open_for_write():80] open: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\run-3306clqg.wandb
+2021-07-31 13:51:36,288 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: check_version
+2021-07-31 13:51:36,760 DEBUG   SenderThread:18772 [sender.py:send():179] send: header
+2021-07-31 13:51:36,760 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: check_version
+2021-07-31 13:51:37,096 DEBUG   SenderThread:18772 [sender.py:send():179] send: run
+2021-07-31 13:51:37,632 INFO    SenderThread:18772 [dir_watcher.py:__init__():168] watching files in: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files
+2021-07-31 13:51:37,632 INFO    SenderThread:18772 [sender.py:_start_run_threads():719] run started: 3306clqg with start time 1627728695
+2021-07-31 13:51:37,632 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:51:37,640 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: run_start
+2021-07-31 13:51:37,640 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:51:37,648 DEBUG   HandlerThread:18772 [meta.py:__init__():34] meta init
+2021-07-31 13:51:37,648 DEBUG   HandlerThread:18772 [meta.py:__init__():48] meta init done
+2021-07-31 13:51:37,648 DEBUG   HandlerThread:18772 [meta.py:probe():205] probe
+2021-07-31 13:51:37,656 DEBUG   HandlerThread:18772 [meta.py:_setup_git():195] setup git
+2021-07-31 13:51:37,760 DEBUG   HandlerThread:18772 [meta.py:_setup_git():202] setup git done
+2021-07-31 13:51:37,760 DEBUG   HandlerThread:18772 [meta.py:_save_pip():52] save pip
+2021-07-31 13:51:37,760 DEBUG   HandlerThread:18772 [meta.py:_save_pip():66] save pip done
+2021-07-31 13:51:37,760 DEBUG   HandlerThread:18772 [meta.py:_save_conda():73] save conda
+2021-07-31 13:51:38,632 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_created():216] file/dir created: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\conda-environment.yaml
+2021-07-31 13:51:38,632 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_created():216] file/dir created: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\requirements.txt
+2021-07-31 13:51:38,632 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_created():216] file/dir created: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:51:41,976 DEBUG   HandlerThread:18772 [meta.py:_save_conda():81] save conda done
+2021-07-31 13:51:41,976 DEBUG   HandlerThread:18772 [meta.py:probe():247] probe done
+2021-07-31 13:51:42,040 DEBUG   SenderThread:18772 [sender.py:send():179] send: files
+2021-07-31 13:51:42,040 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-metadata.json with policy now
+2021-07-31 13:51:42,048 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: stop_status
+2021-07-31 13:51:42,048 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: stop_status
+2021-07-31 13:51:42,656 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\conda-environment.yaml
+2021-07-31 13:51:42,656 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_created():216] file/dir created: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\output.log
+2021-07-31 13:51:42,656 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_created():216] file/dir created: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-metadata.json
+2021-07-31 13:51:42,816 INFO    Thread-19 :18772 [upload_job.py:push():137] Uploaded file C:\Users\IDO~1.IGI\AppData\Local\Temp\tmp_pr7hrzgwandb\10gr53v2-wandb-metadata.json
+2021-07-31 13:51:57,448 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: stop_status
+2021-07-31 13:51:57,448 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: stop_status
+2021-07-31 13:52:06,720 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:52:06,728 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:52:06,728 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:52:06,736 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:52:07,496 DEBUG   SenderThread:18772 [sender.py:send():179] send: stats
+2021-07-31 13:52:12,632 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: stop_status
+2021-07-31 13:52:12,632 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: stop_status
+2021-07-31 13:52:23,848 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:52:23,848 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:52:23,856 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:52:24,816 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:52:27,192 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:52:27,200 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:52:27,208 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:52:27,824 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: stop_status
+2021-07-31 13:52:27,824 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: stop_status
+2021-07-31 13:52:27,832 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:52:35,344 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:52:35,352 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:52:35,352 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:52:35,872 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:52:39,424 DEBUG   SenderThread:18772 [sender.py:send():179] send: stats
+2021-07-31 13:52:43,016 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: stop_status
+2021-07-31 13:52:43,016 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: stop_status
+2021-07-31 13:52:52,720 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:52:52,728 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:52:52,736 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:52:52,944 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:52:58,208 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: stop_status
+2021-07-31 13:52:58,208 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: stop_status
+2021-07-31 13:53:09,623 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:53:09,631 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:53:09,639 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:53:10,015 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:53:11,279 DEBUG   SenderThread:18772 [sender.py:send():179] send: stats
+2021-07-31 13:53:12,847 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:53:12,855 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:53:12,863 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:53:13,031 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:53:13,415 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: stop_status
+2021-07-31 13:53:13,415 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: stop_status
+2021-07-31 13:53:20,807 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:53:20,815 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:53:20,815 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:53:21,087 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:53:28,591 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: stop_status
+2021-07-31 13:53:28,591 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: stop_status
+2021-07-31 13:53:37,711 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:53:37,719 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:53:37,719 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:53:38,143 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:53:43,119 DEBUG   SenderThread:18772 [sender.py:send():179] send: stats
+2021-07-31 13:53:43,775 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: stop_status
+2021-07-31 13:53:43,775 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: stop_status
+2021-07-31 13:53:54,527 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:53:54,535 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:53:54,543 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:53:55,215 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:53:57,743 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:53:57,751 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:53:57,751 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:53:58,231 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:53:58,959 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: stop_status
+2021-07-31 13:53:58,959 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: stop_status
+2021-07-31 13:54:05,719 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:54:05,727 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:54:05,735 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:54:06,271 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:54:14,151 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: stop_status
+2021-07-31 13:54:14,151 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: stop_status
+2021-07-31 13:54:15,055 DEBUG   SenderThread:18772 [sender.py:send():179] send: stats
+2021-07-31 13:54:22,567 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:54:22,567 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:54:22,583 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:54:23,343 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:54:29,327 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: stop_status
+2021-07-31 13:54:29,327 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: stop_status
+2021-07-31 13:54:39,487 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:54:39,495 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:54:39,495 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:54:40,431 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:54:42,719 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:54:42,719 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:54:42,727 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:54:43,439 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:54:44,511 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: stop_status
+2021-07-31 13:54:44,511 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: stop_status
+2021-07-31 13:54:46,887 DEBUG   SenderThread:18772 [sender.py:send():179] send: stats
+2021-07-31 13:54:50,663 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:54:50,671 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:54:50,679 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:54:51,471 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:54:59,703 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: stop_status
+2021-07-31 13:54:59,703 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: stop_status
+2021-07-31 13:55:07,519 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:55:07,527 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:55:07,527 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:55:07,535 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:55:14,894 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: stop_status
+2021-07-31 13:55:14,894 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: stop_status
+2021-07-31 13:55:18,782 DEBUG   SenderThread:18772 [sender.py:send():179] send: stats
+2021-07-31 13:55:24,374 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:55:24,382 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:55:24,390 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:55:24,622 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:55:27,574 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:55:27,582 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:55:27,590 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:55:27,646 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:55:29,654 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\output.log
+2021-07-31 13:55:30,070 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: stop_status
+2021-07-31 13:55:30,070 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: stop_status
+2021-07-31 13:55:35,478 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:55:35,478 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:55:35,486 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:55:35,678 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:55:45,254 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: stop_status
+2021-07-31 13:55:45,254 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: stop_status
+2021-07-31 13:55:50,670 DEBUG   SenderThread:18772 [sender.py:send():179] send: stats
+2021-07-31 13:55:52,398 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:55:52,406 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:55:52,414 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:55:52,750 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:56:00,446 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: stop_status
+2021-07-31 13:56:00,446 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: stop_status
+2021-07-31 13:56:09,294 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:56:09,294 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:56:09,302 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:56:09,830 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:56:12,462 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:56:12,470 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:56:12,470 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:56:12,854 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:56:15,638 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: stop_status
+2021-07-31 13:56:15,638 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: stop_status
+2021-07-31 13:56:20,382 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:56:20,390 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:56:20,390 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:56:20,886 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:56:22,502 DEBUG   SenderThread:18772 [sender.py:send():179] send: stats
+2021-07-31 13:56:30,830 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: stop_status
+2021-07-31 13:56:30,830 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: stop_status
+2021-07-31 13:56:37,230 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:56:37,230 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:56:37,238 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:56:37,966 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:56:46,022 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: stop_status
+2021-07-31 13:56:46,022 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: stop_status
+2021-07-31 13:56:54,070 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:56:54,078 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:56:54,078 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:56:54,382 DEBUG   SenderThread:18772 [sender.py:send():179] send: stats
+2021-07-31 13:56:55,046 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:56:57,294 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:56:57,302 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:56:57,302 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:56:58,062 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:57:01,214 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: stop_status
+2021-07-31 13:57:01,214 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: stop_status
+2021-07-31 13:57:05,214 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:57:05,222 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:57:05,230 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:57:06,086 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:57:16,405 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: stop_status
+2021-07-31 13:57:16,405 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: stop_status
+2021-07-31 13:57:22,093 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:57:22,093 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:57:22,101 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:57:22,197 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:57:26,253 DEBUG   SenderThread:18772 [sender.py:send():179] send: stats
+2021-07-31 13:57:31,597 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: stop_status
+2021-07-31 13:57:31,597 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: stop_status
+2021-07-31 13:57:39,029 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:57:39,037 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:57:39,037 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:57:39,269 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:57:42,229 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:57:42,229 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:57:42,237 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:57:42,285 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:57:46,789 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: stop_status
+2021-07-31 13:57:46,789 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: stop_status
+2021-07-31 13:57:50,173 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:57:50,181 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:57:50,189 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:57:50,309 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:57:58,085 DEBUG   SenderThread:18772 [sender.py:send():179] send: stats
+2021-07-31 13:58:01,997 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: stop_status
+2021-07-31 13:58:01,997 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: stop_status
+2021-07-31 13:58:07,117 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:58:07,117 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:58:07,125 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:58:07,365 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:58:17,181 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: stop_status
+2021-07-31 13:58:17,181 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: stop_status
+2021-07-31 13:58:24,045 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:58:24,045 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:58:24,053 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:58:24,437 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:58:27,293 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:58:27,293 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:58:27,301 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:58:27,445 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:58:29,941 DEBUG   SenderThread:18772 [sender.py:send():179] send: stats
+2021-07-31 13:58:32,365 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: stop_status
+2021-07-31 13:58:32,365 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: stop_status
+2021-07-31 13:58:35,197 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:58:35,197 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:58:35,205 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:58:35,477 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:58:47,557 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: stop_status
+2021-07-31 13:58:47,557 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: stop_status
+2021-07-31 13:58:51,981 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:58:51,981 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:58:51,989 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:58:52,557 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:59:01,805 DEBUG   SenderThread:18772 [sender.py:send():179] send: stats
+2021-07-31 13:59:02,757 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: stop_status
+2021-07-31 13:59:02,757 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: stop_status
+2021-07-31 13:59:08,837 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:59:08,845 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:59:08,853 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:59:09,613 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:59:12,108 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:59:12,116 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:59:12,116 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:59:12,621 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:59:17,956 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: stop_status
+2021-07-31 13:59:17,956 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: stop_status
+2021-07-31 13:59:20,028 DEBUG   SenderThread:18772 [sender.py:send():179] send: history
+2021-07-31 13:59:20,036 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:59:20,036 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:59:20,580 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: poll_exit
+2021-07-31 13:59:20,580 DEBUG   SenderThread:18772 [sender.py:send():179] send: telemetry
+2021-07-31 13:59:20,580 DEBUG   SenderThread:18772 [sender.py:send():179] send: exit
+2021-07-31 13:59:20,580 INFO    SenderThread:18772 [sender.py:send_exit():287] handling exit code: 1
+2021-07-31 13:59:20,580 INFO    SenderThread:18772 [sender.py:send_exit():295] send defer
+2021-07-31 13:59:20,580 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: poll_exit
+2021-07-31 13:59:20,580 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: defer
+2021-07-31 13:59:20,580 INFO    HandlerThread:18772 [handler.py:handle_request_defer():141] handle defer: 0
+2021-07-31 13:59:20,580 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: defer
+2021-07-31 13:59:20,580 INFO    SenderThread:18772 [sender.py:send_request_defer():304] handle sender defer: 0
+2021-07-31 13:59:20,580 INFO    SenderThread:18772 [sender.py:transition_state():308] send defer: 1
+2021-07-31 13:59:20,580 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: defer
+2021-07-31 13:59:20,580 INFO    HandlerThread:18772 [handler.py:handle_request_defer():141] handle defer: 1
+2021-07-31 13:59:20,676 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\output.log
+2021-07-31 13:59:20,676 INFO    Thread-14 :18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:59:20,684 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: poll_exit
+2021-07-31 13:59:20,684 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: defer
+2021-07-31 13:59:20,684 INFO    SenderThread:18772 [sender.py:send_request_defer():304] handle sender defer: 1
+2021-07-31 13:59:20,684 INFO    SenderThread:18772 [sender.py:transition_state():308] send defer: 2
+2021-07-31 13:59:20,684 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: poll_exit
+2021-07-31 13:59:20,684 DEBUG   SenderThread:18772 [sender.py:send():179] send: stats
+2021-07-31 13:59:20,684 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: defer
+2021-07-31 13:59:20,684 INFO    HandlerThread:18772 [handler.py:handle_request_defer():141] handle defer: 2
+2021-07-31 13:59:20,684 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: defer
+2021-07-31 13:59:20,684 INFO    SenderThread:18772 [sender.py:send_request_defer():304] handle sender defer: 2
+2021-07-31 13:59:20,684 INFO    SenderThread:18772 [sender.py:transition_state():308] send defer: 3
+2021-07-31 13:59:20,692 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: defer
+2021-07-31 13:59:20,692 INFO    HandlerThread:18772 [handler.py:handle_request_defer():141] handle defer: 3
+2021-07-31 13:59:20,692 DEBUG   SenderThread:18772 [sender.py:send():179] send: summary
+2021-07-31 13:59:20,692 INFO    SenderThread:18772 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 13:59:20,692 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: defer
+2021-07-31 13:59:20,692 INFO    SenderThread:18772 [sender.py:send_request_defer():304] handle sender defer: 3
+2021-07-31 13:59:20,692 INFO    SenderThread:18772 [sender.py:transition_state():308] send defer: 4
+2021-07-31 13:59:20,700 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: defer
+2021-07-31 13:59:20,700 INFO    HandlerThread:18772 [handler.py:handle_request_defer():141] handle defer: 4
+2021-07-31 13:59:20,700 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: defer
+2021-07-31 13:59:20,700 INFO    SenderThread:18772 [sender.py:send_request_defer():304] handle sender defer: 4
+2021-07-31 13:59:20,788 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: poll_exit
+2021-07-31 13:59:21,060 INFO    SenderThread:18772 [sender.py:transition_state():308] send defer: 5
+2021-07-31 13:59:21,060 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: poll_exit
+2021-07-31 13:59:21,068 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: defer
+2021-07-31 13:59:21,068 INFO    HandlerThread:18772 [handler.py:handle_request_defer():141] handle defer: 5
+2021-07-31 13:59:21,068 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: defer
+2021-07-31 13:59:21,068 INFO    SenderThread:18772 [sender.py:send_request_defer():304] handle sender defer: 5
+2021-07-31 13:59:21,068 INFO    SenderThread:18772 [dir_watcher.py:finish():282] shutting down directory watcher
+2021-07-31 13:59:21,172 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: poll_exit
+2021-07-31 13:59:21,676 INFO    SenderThread:18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\config.yaml
+2021-07-31 13:59:21,676 INFO    SenderThread:18772 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:59:21,676 INFO    SenderThread:18772 [dir_watcher.py:finish():312] scan: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files
+2021-07-31 13:59:21,676 INFO    SenderThread:18772 [dir_watcher.py:finish():318] scan save: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\conda-environment.yaml conda-environment.yaml
+2021-07-31 13:59:21,676 INFO    SenderThread:18772 [dir_watcher.py:finish():318] scan save: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\config.yaml config.yaml
+2021-07-31 13:59:21,676 INFO    SenderThread:18772 [dir_watcher.py:finish():318] scan save: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\output.log output.log
+2021-07-31 13:59:21,676 INFO    SenderThread:18772 [dir_watcher.py:finish():318] scan save: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\requirements.txt requirements.txt
+2021-07-31 13:59:21,684 INFO    SenderThread:18772 [dir_watcher.py:finish():318] scan save: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-metadata.json wandb-metadata.json
+2021-07-31 13:59:21,684 INFO    SenderThread:18772 [dir_watcher.py:finish():318] scan save: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json wandb-summary.json
+2021-07-31 13:59:21,684 INFO    SenderThread:18772 [sender.py:transition_state():308] send defer: 6
+2021-07-31 13:59:21,692 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: poll_exit
+2021-07-31 13:59:21,692 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: defer
+2021-07-31 13:59:21,692 INFO    HandlerThread:18772 [handler.py:handle_request_defer():141] handle defer: 6
+2021-07-31 13:59:21,692 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: defer
+2021-07-31 13:59:21,692 INFO    SenderThread:18772 [sender.py:send_request_defer():304] handle sender defer: 6
+2021-07-31 13:59:21,692 INFO    SenderThread:18772 [file_pusher.py:finish():177] shutting down file pusher
+2021-07-31 13:59:21,796 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: poll_exit
+2021-07-31 13:59:21,796 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: poll_exit
+2021-07-31 13:59:21,900 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: poll_exit
+2021-07-31 13:59:21,900 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: poll_exit
+2021-07-31 13:59:22,004 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: poll_exit
+2021-07-31 13:59:22,004 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: poll_exit
+2021-07-31 13:59:22,108 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: poll_exit
+2021-07-31 13:59:22,108 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: poll_exit
+2021-07-31 13:59:22,212 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: poll_exit
+2021-07-31 13:59:22,212 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: poll_exit
+2021-07-31 13:59:22,316 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: poll_exit
+2021-07-31 13:59:22,316 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: poll_exit
+2021-07-31 13:59:22,420 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: poll_exit
+2021-07-31 13:59:22,420 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: poll_exit
+2021-07-31 13:59:22,460 INFO    Thread-20 :18772 [upload_job.py:push():137] Uploaded file C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\conda-environment.yaml
+2021-07-31 13:59:22,524 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: poll_exit
+2021-07-31 13:59:22,524 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: poll_exit
+2021-07-31 13:59:22,628 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: poll_exit
+2021-07-31 13:59:22,628 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: poll_exit
+2021-07-31 13:59:22,684 INFO    Thread-23 :18772 [upload_job.py:push():137] Uploaded file C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\requirements.txt
+2021-07-31 13:59:22,684 INFO    Thread-21 :18772 [upload_job.py:push():137] Uploaded file C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\config.yaml
+2021-07-31 13:59:22,732 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: poll_exit
+2021-07-31 13:59:22,732 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: poll_exit
+2021-07-31 13:59:22,764 INFO    Thread-22 :18772 [upload_job.py:push():137] Uploaded file C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\output.log
+2021-07-31 13:59:22,812 INFO    Thread-24 :18772 [upload_job.py:push():137] Uploaded file C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\files\wandb-summary.json
+2021-07-31 13:59:22,836 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: poll_exit
+2021-07-31 13:59:22,836 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: poll_exit
+2021-07-31 13:59:22,940 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: poll_exit
+2021-07-31 13:59:22,940 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: poll_exit
+2021-07-31 13:59:23,020 INFO    Thread-13 :18772 [sender.py:transition_state():308] send defer: 7
+2021-07-31 13:59:23,020 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: defer
+2021-07-31 13:59:23,020 INFO    HandlerThread:18772 [handler.py:handle_request_defer():141] handle defer: 7
+2021-07-31 13:59:23,020 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: defer
+2021-07-31 13:59:23,020 INFO    SenderThread:18772 [sender.py:send_request_defer():304] handle sender defer: 7
+2021-07-31 13:59:23,044 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: poll_exit
+2021-07-31 13:59:23,940 INFO    SenderThread:18772 [sender.py:transition_state():308] send defer: 8
+2021-07-31 13:59:23,940 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: poll_exit
+2021-07-31 13:59:23,940 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: defer
+2021-07-31 13:59:23,940 INFO    HandlerThread:18772 [handler.py:handle_request_defer():141] handle defer: 8
+2021-07-31 13:59:23,940 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: defer
+2021-07-31 13:59:23,940 INFO    SenderThread:18772 [sender.py:send_request_defer():304] handle sender defer: 8
+2021-07-31 13:59:23,940 INFO    SenderThread:18772 [sender.py:transition_state():308] send defer: 9
+2021-07-31 13:59:23,940 DEBUG   SenderThread:18772 [sender.py:send():179] send: final
+2021-07-31 13:59:23,940 DEBUG   SenderThread:18772 [sender.py:send():179] send: footer
+2021-07-31 13:59:23,940 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: defer
+2021-07-31 13:59:23,940 INFO    HandlerThread:18772 [handler.py:handle_request_defer():141] handle defer: 9
+2021-07-31 13:59:23,940 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: defer
+2021-07-31 13:59:23,940 INFO    SenderThread:18772 [sender.py:send_request_defer():304] handle sender defer: 9
+2021-07-31 13:59:24,044 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: poll_exit
+2021-07-31 13:59:24,044 DEBUG   SenderThread:18772 [sender.py:send_request():193] send_request: poll_exit
+2021-07-31 13:59:24,044 INFO    SenderThread:18772 [file_pusher.py:join():182] waiting for file pusher
+2021-07-31 13:59:24,044 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: get_summary
+2021-07-31 13:59:24,044 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: sampled_history
+2021-07-31 13:59:24,052 DEBUG   HandlerThread:18772 [handler.py:handle_request():124] handle_request: shutdown
+2021-07-31 13:59:24,052 INFO    HandlerThread:18772 [handler.py:finish():658] shutting down handler
+2021-07-31 13:59:24,940 INFO    WriterThread:18772 [datastore.py:close():288] close: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_135134-3306clqg\run-3306clqg.wandb
+2021-07-31 13:59:25,052 INFO    SenderThread:18772 [sender.py:finish():947] shutting down sender
+2021-07-31 13:59:25,052 INFO    SenderThread:18772 [file_pusher.py:finish():177] shutting down file pusher
+2021-07-31 13:59:25,052 INFO    SenderThread:18772 [file_pusher.py:join():182] waiting for file pusher
+2021-07-31 13:59:25,052 INFO    MainThread:18772 [internal.py:handle_exit():78] Internal process exited

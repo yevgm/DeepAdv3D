@@ -1,0 +1,161 @@
+2021-07-31 12:59:25,574 INFO    MainThread:26136 [internal.py:wandb_internal():91] W&B internal server running at pid: 26136, started at: 2021-07-31 12:59:25.558113
+2021-07-31 12:59:25,574 INFO    WriterThread:26136 [datastore.py:open_for_write():80] open: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_125924-38xo1e0k\run-38xo1e0k.wandb
+2021-07-31 12:59:25,574 DEBUG   HandlerThread:26136 [handler.py:handle_request():124] handle_request: check_version
+2021-07-31 12:59:26,038 DEBUG   SenderThread:26136 [sender.py:send():179] send: header
+2021-07-31 12:59:26,038 DEBUG   SenderThread:26136 [sender.py:send_request():193] send_request: check_version
+2021-07-31 12:59:26,374 DEBUG   SenderThread:26136 [sender.py:send():179] send: run
+2021-07-31 12:59:26,918 INFO    SenderThread:26136 [dir_watcher.py:__init__():168] watching files in: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_125924-38xo1e0k\files
+2021-07-31 12:59:26,918 INFO    SenderThread:26136 [sender.py:_start_run_threads():719] run started: 38xo1e0k with start time 1627725564
+2021-07-31 12:59:26,918 DEBUG   SenderThread:26136 [sender.py:send():179] send: summary
+2021-07-31 12:59:26,918 DEBUG   HandlerThread:26136 [handler.py:handle_request():124] handle_request: run_start
+2021-07-31 12:59:26,918 INFO    SenderThread:26136 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 12:59:26,926 DEBUG   HandlerThread:26136 [meta.py:__init__():34] meta init
+2021-07-31 12:59:26,926 DEBUG   HandlerThread:26136 [meta.py:__init__():48] meta init done
+2021-07-31 12:59:26,926 DEBUG   HandlerThread:26136 [meta.py:probe():205] probe
+2021-07-31 12:59:26,942 DEBUG   HandlerThread:26136 [meta.py:_setup_git():195] setup git
+2021-07-31 12:59:27,038 DEBUG   HandlerThread:26136 [meta.py:_setup_git():202] setup git done
+2021-07-31 12:59:27,038 DEBUG   HandlerThread:26136 [meta.py:_save_pip():52] save pip
+2021-07-31 12:59:27,038 DEBUG   HandlerThread:26136 [meta.py:_save_pip():66] save pip done
+2021-07-31 12:59:27,038 DEBUG   HandlerThread:26136 [meta.py:_save_conda():73] save conda
+2021-07-31 12:59:27,926 INFO    Thread-14 :26136 [dir_watcher.py:_on_file_created():216] file/dir created: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_125924-38xo1e0k\files\conda-environment.yaml
+2021-07-31 12:59:27,926 INFO    Thread-14 :26136 [dir_watcher.py:_on_file_created():216] file/dir created: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_125924-38xo1e0k\files\requirements.txt
+2021-07-31 12:59:27,926 INFO    Thread-14 :26136 [dir_watcher.py:_on_file_created():216] file/dir created: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_125924-38xo1e0k\files\wandb-summary.json
+2021-07-31 12:59:31,078 DEBUG   HandlerThread:26136 [meta.py:_save_conda():81] save conda done
+2021-07-31 12:59:31,078 DEBUG   HandlerThread:26136 [meta.py:probe():247] probe done
+2021-07-31 12:59:31,142 DEBUG   SenderThread:26136 [sender.py:send():179] send: files
+2021-07-31 12:59:31,142 INFO    SenderThread:26136 [sender.py:_save_file():841] saving file wandb-metadata.json with policy now
+2021-07-31 12:59:31,150 DEBUG   HandlerThread:26136 [handler.py:handle_request():124] handle_request: stop_status
+2021-07-31 12:59:31,150 DEBUG   SenderThread:26136 [sender.py:send_request():193] send_request: stop_status
+2021-07-31 12:59:31,934 INFO    Thread-14 :26136 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_125924-38xo1e0k\files\conda-environment.yaml
+2021-07-31 12:59:31,934 INFO    Thread-14 :26136 [dir_watcher.py:_on_file_created():216] file/dir created: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_125924-38xo1e0k\files\output.log
+2021-07-31 12:59:31,934 INFO    Thread-14 :26136 [dir_watcher.py:_on_file_created():216] file/dir created: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_125924-38xo1e0k\files\wandb-metadata.json
+2021-07-31 12:59:31,966 INFO    Thread-19 :26136 [upload_job.py:push():137] Uploaded file C:\Users\IDO~1.IGI\AppData\Local\Temp\tmpus2z3ukwwandb\3nwav445-wandb-metadata.json
+2021-07-31 12:59:46,565 DEBUG   HandlerThread:26136 [handler.py:handle_request():124] handle_request: stop_status
+2021-07-31 12:59:46,565 DEBUG   SenderThread:26136 [sender.py:send_request():193] send_request: stop_status
+2021-07-31 12:59:55,405 DEBUG   SenderThread:26136 [sender.py:send():179] send: history
+2021-07-31 12:59:55,405 DEBUG   SenderThread:26136 [sender.py:send():179] send: summary
+2021-07-31 12:59:55,413 INFO    SenderThread:26136 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 12:59:56,035 INFO    Thread-14 :26136 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_125924-38xo1e0k\files\wandb-summary.json
+2021-07-31 12:59:56,363 DEBUG   SenderThread:26136 [sender.py:send():179] send: telemetry
+2021-07-31 12:59:56,363 DEBUG   SenderThread:26136 [sender.py:send():179] send: exit
+2021-07-31 12:59:56,363 INFO    SenderThread:26136 [sender.py:send_exit():287] handling exit code: 1
+2021-07-31 12:59:56,363 DEBUG   HandlerThread:26136 [handler.py:handle_request():124] handle_request: poll_exit
+2021-07-31 12:59:56,363 INFO    SenderThread:26136 [sender.py:send_exit():295] send defer
+2021-07-31 12:59:56,363 DEBUG   SenderThread:26136 [sender.py:send_request():193] send_request: poll_exit
+2021-07-31 12:59:56,363 DEBUG   HandlerThread:26136 [handler.py:handle_request():124] handle_request: defer
+2021-07-31 12:59:56,363 INFO    HandlerThread:26136 [handler.py:handle_request_defer():141] handle defer: 0
+2021-07-31 12:59:56,363 DEBUG   SenderThread:26136 [sender.py:send_request():193] send_request: defer
+2021-07-31 12:59:56,363 INFO    SenderThread:26136 [sender.py:send_request_defer():304] handle sender defer: 0
+2021-07-31 12:59:56,363 INFO    SenderThread:26136 [sender.py:transition_state():308] send defer: 1
+2021-07-31 12:59:56,363 DEBUG   HandlerThread:26136 [handler.py:handle_request():124] handle_request: defer
+2021-07-31 12:59:56,363 INFO    HandlerThread:26136 [handler.py:handle_request_defer():141] handle defer: 1
+2021-07-31 12:59:56,499 DEBUG   SenderThread:26136 [sender.py:send_request():193] send_request: defer
+2021-07-31 12:59:56,499 DEBUG   HandlerThread:26136 [handler.py:handle_request():124] handle_request: poll_exit
+2021-07-31 12:59:56,499 INFO    SenderThread:26136 [sender.py:send_request_defer():304] handle sender defer: 1
+2021-07-31 12:59:56,499 INFO    SenderThread:26136 [sender.py:transition_state():308] send defer: 2
+2021-07-31 12:59:56,499 DEBUG   SenderThread:26136 [sender.py:send_request():193] send_request: poll_exit
+2021-07-31 12:59:56,499 DEBUG   SenderThread:26136 [sender.py:send():179] send: stats
+2021-07-31 12:59:56,499 DEBUG   HandlerThread:26136 [handler.py:handle_request():124] handle_request: defer
+2021-07-31 12:59:56,499 INFO    HandlerThread:26136 [handler.py:handle_request_defer():141] handle defer: 2
+2021-07-31 12:59:56,507 DEBUG   SenderThread:26136 [sender.py:send_request():193] send_request: defer
+2021-07-31 12:59:56,507 INFO    SenderThread:26136 [sender.py:send_request_defer():304] handle sender defer: 2
+2021-07-31 12:59:56,507 INFO    SenderThread:26136 [sender.py:transition_state():308] send defer: 3
+2021-07-31 12:59:56,507 DEBUG   HandlerThread:26136 [handler.py:handle_request():124] handle_request: defer
+2021-07-31 12:59:56,507 INFO    HandlerThread:26136 [handler.py:handle_request_defer():141] handle defer: 3
+2021-07-31 12:59:56,507 DEBUG   SenderThread:26136 [sender.py:send():179] send: summary
+2021-07-31 12:59:56,515 INFO    SenderThread:26136 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-07-31 12:59:56,515 DEBUG   SenderThread:26136 [sender.py:send_request():193] send_request: defer
+2021-07-31 12:59:56,515 INFO    SenderThread:26136 [sender.py:send_request_defer():304] handle sender defer: 3
+2021-07-31 12:59:56,515 INFO    SenderThread:26136 [sender.py:transition_state():308] send defer: 4
+2021-07-31 12:59:56,515 DEBUG   HandlerThread:26136 [handler.py:handle_request():124] handle_request: defer
+2021-07-31 12:59:56,515 INFO    HandlerThread:26136 [handler.py:handle_request_defer():141] handle defer: 4
+2021-07-31 12:59:56,515 DEBUG   SenderThread:26136 [sender.py:send_request():193] send_request: defer
+2021-07-31 12:59:56,515 INFO    SenderThread:26136 [sender.py:send_request_defer():304] handle sender defer: 4
+2021-07-31 12:59:56,603 DEBUG   HandlerThread:26136 [handler.py:handle_request():124] handle_request: poll_exit
+2021-07-31 12:59:56,715 INFO    SenderThread:26136 [sender.py:transition_state():308] send defer: 5
+2021-07-31 12:59:56,715 DEBUG   SenderThread:26136 [sender.py:send_request():193] send_request: poll_exit
+2021-07-31 12:59:56,715 DEBUG   HandlerThread:26136 [handler.py:handle_request():124] handle_request: defer
+2021-07-31 12:59:56,715 INFO    HandlerThread:26136 [handler.py:handle_request_defer():141] handle defer: 5
+2021-07-31 12:59:56,715 DEBUG   SenderThread:26136 [sender.py:send_request():193] send_request: defer
+2021-07-31 12:59:56,715 INFO    SenderThread:26136 [sender.py:send_request_defer():304] handle sender defer: 5
+2021-07-31 12:59:56,715 INFO    SenderThread:26136 [dir_watcher.py:finish():282] shutting down directory watcher
+2021-07-31 12:59:56,819 DEBUG   HandlerThread:26136 [handler.py:handle_request():124] handle_request: poll_exit
+2021-07-31 12:59:57,043 INFO    SenderThread:26136 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_125924-38xo1e0k\files\wandb-summary.json
+2021-07-31 12:59:57,043 INFO    SenderThread:26136 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_125924-38xo1e0k\files\config.yaml
+2021-07-31 12:59:57,043 INFO    SenderThread:26136 [dir_watcher.py:_on_file_modified():229] file/dir modified: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_125924-38xo1e0k\files\output.log
+2021-07-31 12:59:57,043 INFO    SenderThread:26136 [dir_watcher.py:finish():312] scan: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_125924-38xo1e0k\files
+2021-07-31 12:59:57,043 INFO    SenderThread:26136 [dir_watcher.py:finish():318] scan save: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_125924-38xo1e0k\files\conda-environment.yaml conda-environment.yaml
+2021-07-31 12:59:57,043 INFO    SenderThread:26136 [dir_watcher.py:finish():318] scan save: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_125924-38xo1e0k\files\config.yaml config.yaml
+2021-07-31 12:59:57,043 INFO    SenderThread:26136 [dir_watcher.py:finish():318] scan save: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_125924-38xo1e0k\files\output.log output.log
+2021-07-31 12:59:57,043 INFO    SenderThread:26136 [dir_watcher.py:finish():318] scan save: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_125924-38xo1e0k\files\requirements.txt requirements.txt
+2021-07-31 12:59:57,051 INFO    SenderThread:26136 [dir_watcher.py:finish():318] scan save: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_125924-38xo1e0k\files\wandb-metadata.json wandb-metadata.json
+2021-07-31 12:59:57,051 INFO    SenderThread:26136 [dir_watcher.py:finish():318] scan save: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_125924-38xo1e0k\files\wandb-summary.json wandb-summary.json
+2021-07-31 12:59:57,051 INFO    SenderThread:26136 [sender.py:transition_state():308] send defer: 6
+2021-07-31 12:59:57,051 DEBUG   SenderThread:26136 [sender.py:send_request():193] send_request: poll_exit
+2021-07-31 12:59:57,059 DEBUG   HandlerThread:26136 [handler.py:handle_request():124] handle_request: defer
+2021-07-31 12:59:57,059 INFO    HandlerThread:26136 [handler.py:handle_request_defer():141] handle defer: 6
+2021-07-31 12:59:57,059 DEBUG   SenderThread:26136 [sender.py:send_request():193] send_request: defer
+2021-07-31 12:59:57,059 INFO    SenderThread:26136 [sender.py:send_request_defer():304] handle sender defer: 6
+2021-07-31 12:59:57,059 INFO    SenderThread:26136 [file_pusher.py:finish():177] shutting down file pusher
+2021-07-31 12:59:57,163 DEBUG   HandlerThread:26136 [handler.py:handle_request():124] handle_request: poll_exit
+2021-07-31 12:59:57,163 DEBUG   SenderThread:26136 [sender.py:send_request():193] send_request: poll_exit
+2021-07-31 12:59:57,267 DEBUG   HandlerThread:26136 [handler.py:handle_request():124] handle_request: poll_exit
+2021-07-31 12:59:57,267 DEBUG   SenderThread:26136 [sender.py:send_request():193] send_request: poll_exit
+2021-07-31 12:59:57,371 DEBUG   HandlerThread:26136 [handler.py:handle_request():124] handle_request: poll_exit
+2021-07-31 12:59:57,371 DEBUG   SenderThread:26136 [sender.py:send_request():193] send_request: poll_exit
+2021-07-31 12:59:57,475 DEBUG   HandlerThread:26136 [handler.py:handle_request():124] handle_request: poll_exit
+2021-07-31 12:59:57,475 DEBUG   SenderThread:26136 [sender.py:send_request():193] send_request: poll_exit
+2021-07-31 12:59:57,579 DEBUG   HandlerThread:26136 [handler.py:handle_request():124] handle_request: poll_exit
+2021-07-31 12:59:57,579 DEBUG   SenderThread:26136 [sender.py:send_request():193] send_request: poll_exit
+2021-07-31 12:59:57,683 DEBUG   HandlerThread:26136 [handler.py:handle_request():124] handle_request: poll_exit
+2021-07-31 12:59:57,683 DEBUG   SenderThread:26136 [sender.py:send_request():193] send_request: poll_exit
+2021-07-31 12:59:57,787 DEBUG   HandlerThread:26136 [handler.py:handle_request():124] handle_request: poll_exit
+2021-07-31 12:59:57,787 DEBUG   SenderThread:26136 [sender.py:send_request():193] send_request: poll_exit
+2021-07-31 12:59:57,811 INFO    Thread-21 :26136 [upload_job.py:push():137] Uploaded file C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_125924-38xo1e0k\files\config.yaml
+2021-07-31 12:59:57,867 INFO    Thread-20 :26136 [upload_job.py:push():137] Uploaded file C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_125924-38xo1e0k\files\conda-environment.yaml
+2021-07-31 12:59:57,891 DEBUG   HandlerThread:26136 [handler.py:handle_request():124] handle_request: poll_exit
+2021-07-31 12:59:57,891 DEBUG   SenderThread:26136 [sender.py:send_request():193] send_request: poll_exit
+2021-07-31 12:59:57,995 DEBUG   HandlerThread:26136 [handler.py:handle_request():124] handle_request: poll_exit
+2021-07-31 12:59:57,995 DEBUG   SenderThread:26136 [sender.py:send_request():193] send_request: poll_exit
+2021-07-31 12:59:58,043 INFO    Thread-23 :26136 [upload_job.py:push():137] Uploaded file C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_125924-38xo1e0k\files\requirements.txt
+2021-07-31 12:59:58,043 INFO    Thread-22 :26136 [upload_job.py:push():137] Uploaded file C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_125924-38xo1e0k\files\output.log
+2021-07-31 12:59:58,099 DEBUG   HandlerThread:26136 [handler.py:handle_request():124] handle_request: poll_exit
+2021-07-31 12:59:58,099 DEBUG   SenderThread:26136 [sender.py:send_request():193] send_request: poll_exit
+2021-07-31 12:59:58,203 DEBUG   HandlerThread:26136 [handler.py:handle_request():124] handle_request: poll_exit
+2021-07-31 12:59:58,203 DEBUG   SenderThread:26136 [sender.py:send_request():193] send_request: poll_exit
+2021-07-31 12:59:58,267 INFO    Thread-24 :26136 [upload_job.py:push():137] Uploaded file C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_125924-38xo1e0k\files\wandb-summary.json
+2021-07-31 12:59:58,307 DEBUG   HandlerThread:26136 [handler.py:handle_request():124] handle_request: poll_exit
+2021-07-31 12:59:58,307 DEBUG   SenderThread:26136 [sender.py:send_request():193] send_request: poll_exit
+2021-07-31 12:59:58,411 DEBUG   HandlerThread:26136 [handler.py:handle_request():124] handle_request: poll_exit
+2021-07-31 12:59:58,411 DEBUG   SenderThread:26136 [sender.py:send_request():193] send_request: poll_exit
+2021-07-31 12:59:58,475 INFO    Thread-13 :26136 [sender.py:transition_state():308] send defer: 7
+2021-07-31 12:59:58,475 DEBUG   HandlerThread:26136 [handler.py:handle_request():124] handle_request: defer
+2021-07-31 12:59:58,475 INFO    HandlerThread:26136 [handler.py:handle_request_defer():141] handle defer: 7
+2021-07-31 12:59:58,475 DEBUG   SenderThread:26136 [sender.py:send_request():193] send_request: defer
+2021-07-31 12:59:58,475 INFO    SenderThread:26136 [sender.py:send_request_defer():304] handle sender defer: 7
+2021-07-31 12:59:58,515 DEBUG   HandlerThread:26136 [handler.py:handle_request():124] handle_request: poll_exit
+2021-07-31 12:59:58,667 INFO    SenderThread:26136 [sender.py:transition_state():308] send defer: 8
+2021-07-31 12:59:58,667 DEBUG   SenderThread:26136 [sender.py:send_request():193] send_request: poll_exit
+2021-07-31 12:59:58,675 DEBUG   HandlerThread:26136 [handler.py:handle_request():124] handle_request: defer
+2021-07-31 12:59:58,675 INFO    HandlerThread:26136 [handler.py:handle_request_defer():141] handle defer: 8
+2021-07-31 12:59:58,675 DEBUG   SenderThread:26136 [sender.py:send_request():193] send_request: defer
+2021-07-31 12:59:58,675 INFO    SenderThread:26136 [sender.py:send_request_defer():304] handle sender defer: 8
+2021-07-31 12:59:58,675 INFO    SenderThread:26136 [sender.py:transition_state():308] send defer: 9
+2021-07-31 12:59:58,675 DEBUG   SenderThread:26136 [sender.py:send():179] send: final
+2021-07-31 12:59:58,675 DEBUG   SenderThread:26136 [sender.py:send():179] send: footer
+2021-07-31 12:59:58,675 DEBUG   HandlerThread:26136 [handler.py:handle_request():124] handle_request: defer
+2021-07-31 12:59:58,675 INFO    HandlerThread:26136 [handler.py:handle_request_defer():141] handle defer: 9
+2021-07-31 12:59:58,675 DEBUG   SenderThread:26136 [sender.py:send_request():193] send_request: defer
+2021-07-31 12:59:58,675 INFO    SenderThread:26136 [sender.py:send_request_defer():304] handle sender defer: 9
+2021-07-31 12:59:58,779 DEBUG   HandlerThread:26136 [handler.py:handle_request():124] handle_request: poll_exit
+2021-07-31 12:59:58,779 DEBUG   SenderThread:26136 [sender.py:send_request():193] send_request: poll_exit
+2021-07-31 12:59:58,779 INFO    SenderThread:26136 [file_pusher.py:join():182] waiting for file pusher
+2021-07-31 12:59:58,779 DEBUG   HandlerThread:26136 [handler.py:handle_request():124] handle_request: get_summary
+2021-07-31 12:59:58,779 DEBUG   HandlerThread:26136 [handler.py:handle_request():124] handle_request: sampled_history
+2021-07-31 12:59:58,787 DEBUG   HandlerThread:26136 [handler.py:handle_request():124] handle_request: shutdown
+2021-07-31 12:59:58,787 INFO    HandlerThread:26136 [handler.py:finish():658] shutting down handler
+2021-07-31 12:59:59,675 INFO    WriterThread:26136 [datastore.py:close():288] close: C:\Users\ido.igip1\Anaconda3\DeepAdv3D\wandb\run-20210731_125924-38xo1e0k\run-38xo1e0k.wandb
+2021-07-31 12:59:59,787 INFO    SenderThread:26136 [sender.py:finish():947] shutting down sender
+2021-07-31 12:59:59,787 INFO    SenderThread:26136 [file_pusher.py:finish():177] shutting down file pusher
+2021-07-31 12:59:59,787 INFO    SenderThread:26136 [file_pusher.py:join():182] waiting for file pusher
+2021-07-31 12:59:59,787 INFO    MainThread:26136 [internal.py:handle_exit():78] Internal process exited

@@ -1,0 +1,86 @@
+CE:  tensor(311.6543, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #0: Batch 3/0] Train loss: 373.314465, Misclassified: [32/4]
+CE:  tensor(386.6117, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #0: Batch 3/1] Train loss: 424.038307, Misclassified: [32/3]
+CE:  tensor(286.7480, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #0: Batch 3/2] Train loss: 1025.348634, Misclassified: [6/0]
+CE:  tensor(137.5123, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #0: Batch 3/0] Validation loss: 304.253353, Misclassified: [15/2]
+CE:  tensor(110.3065, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #1: Batch 3/0] Train loss: 97.725303, Misclassified: [32/4]
+CE:  tensor(73.3244, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #1: Batch 3/1] Train loss: 73.025994, Misclassified: [32/1]
+CE:  tensor(80.6818, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #1: Batch 3/2] Train loss: 171.797244, Misclassified: [6/0]
+CE:  tensor(22.2931, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #1: Batch 3/0] Validation loss: 59.790494, Misclassified: [15/4]
+CE:  tensor(32.8633, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #2: Batch 3/0] Train loss: -5.000737, Misclassified: [32/2]
+CE:  tensor(27.0808, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #2: Batch 3/1] Train loss: -15.716376, Misclassified: [32/4]
+CE:  tensor(25.5874, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #2: Batch 3/2] Train loss: -11.791629, Misclassified: [6/1]
+CE:  tensor(31.1637, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #2: Batch 3/0] Validation loss: -23.309299, Misclassified: [15/2]
+CE:  tensor(28.5724, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #3: Batch 3/0] Train loss: -23.604666, Misclassified: [32/4]
+CE:  tensor(28.2376, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #3: Batch 3/1] Train loss: -23.537898, Misclassified: [32/7]
+CE:  tensor(28.3725, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #3: Batch 3/2] Train loss: -17.720031, Misclassified: [6/0]
+CE:  tensor(33.4978, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #3: Batch 3/0] Validation loss: -28.892706, Misclassified: [15/0]
+CE:  tensor(30.5975, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #4: Batch 3/0] Train loss: -28.004885, Misclassified: [32/3]
+CE:  tensor(32.9871, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #4: Batch 3/1] Train loss: -29.078772, Misclassified: [32/2]
+CE:  tensor(35.4408, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #4: Batch 3/2] Train loss: -30.592731, Misclassified: [6/0]
+CE:  tensor(37.7538, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #4: Batch 3/0] Validation loss: -34.554825, Misclassified: [15/0]
+CE:  tensor(25.5256, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #5: Batch 3/0] Train loss: -23.527518, Misclassified: [32/3]
+CE:  tensor(26.0962, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #5: Batch 3/1] Train loss: -24.075426, Misclassified: [32/8]
+CE:  tensor(32.8240, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #5: Batch 3/2] Train loss: -28.168599, Misclassified: [6/0]
+CE:  tensor(29.2545, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #5: Batch 3/0] Validation loss: -26.614869, Misclassified: [15/3]
+CE:  tensor(26.3971, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #6: Batch 3/0] Train loss: -24.810048, Misclassified: [32/3]
+CE:  tensor(30.4223, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #6: Batch 3/1] Train loss: -28.915956, Misclassified: [32/2]
+CE:  tensor(20.0508, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #6: Batch 3/2] Train loss: -16.479846, Misclassified: [6/1]
+CE:  tensor(25.5375, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #6: Batch 3/0] Validation loss: -23.611649, Misclassified: [15/1]
+CE:  tensor(29.4568, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #7: Batch 3/0] Train loss: -28.255622, Misclassified: [32/3]
+CE:  tensor(23.9118, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #7: Batch 3/1] Train loss: -22.748153, Misclassified: [32/7]
+CE:  tensor(35.0319, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #7: Batch 3/2] Train loss: -32.311940, Misclassified: [6/1]
+CE:  tensor(27.1121, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #7: Batch 3/0] Validation loss: -25.594975, Misclassified: [15/1]
+CE:  tensor(30.6900, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #8: Batch 3/0] Train loss: -29.745429, Misclassified: [32/1]
+CE:  tensor(30.4029, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #8: Batch 3/1] Train loss: -29.425155, Misclassified: [32/5]
+CE:  tensor(25.2521, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #8: Batch 3/2] Train loss: -22.816316, Misclassified: [6/2]
+CE:  tensor(30.4809, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #8: Batch 3/0] Validation loss: -29.111945, Misclassified: [15/2]
+CE:  tensor(31.2598, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #9: Batch 3/0] Train loss: -30.457249, Misclassified: [32/1]
+CE:  tensor(31.4201, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #9: Batch 3/1] Train loss: -30.645577, Misclassified: [32/2]
+CE:  tensor(40.2953, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #9: Batch 3/2] Train loss: -38.420263, Misclassified: [6/0]
+CE:  tensor(24.3977, device='cuda:0', grad_fn=<MulBackward0>)
+[Epoch #9: Batch 3/0] Validation loss: -23.344134, Misclassified: [15/3]
+Traceback (most recent call last):
+  File "C:/Users/ido.igip1/Anaconda3/DeepAdv3D/model_trainer_main.py", line 109, in <module>
+    train_ins.train()
+  File "C:\Users\ido.igip1\Anaconda3\DeepAdv3D\src\deep_adv_3d\train_loop.py", line 103, in train
+    self.evaluate(self.tensor_log_dir)
+AttributeError: 'Trainer' object has no attribute 'evaluate'
