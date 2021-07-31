@@ -1,0 +1,37 @@
+2021-07-30 19:35:31,699 INFO    MainThread:17608 [internal.py:wandb_internal():91] W&B internal server running at pid: 17608, started at: 2021-07-30 19:35:31.691299
+2021-07-30 19:35:31,707 INFO    WriterThread:17608 [datastore.py:open_for_write():80] open: D:\Roee_Yevgeniy\DeepAdv3D\wandb\run-20210730_193530-3pk46odk\run-3pk46odk.wandb
+2021-07-30 19:35:31,707 DEBUG   HandlerThread:17608 [handler.py:handle_request():124] handle_request: check_version
+2021-07-30 19:35:32,707 INFO    WriterThread:17608 [datastore.py:close():288] close: D:\Roee_Yevgeniy\DeepAdv3D\wandb\run-20210730_193530-3pk46odk\run-3pk46odk.wandb
+2021-07-30 19:35:32,707 INFO    HandlerThread:17608 [handler.py:finish():658] shutting down handler
+2021-07-30 19:35:32,707 ERROR   MainThread:17608 [internal.py:wandb_internal():159] Thread SenderThread:
+Traceback (most recent call last):
+  File "C:\Users\ido.igip1\Anaconda3\envs\DeepAdv3D\lib\site-packages\wandb\sdk\internal\internal_util.py", line 55, in run
+    self._run()
+  File "C:\Users\ido.igip1\Anaconda3\envs\DeepAdv3D\lib\site-packages\wandb\sdk\internal\internal_util.py", line 95, in _run
+    self._setup()
+  File "C:\Users\ido.igip1\Anaconda3\envs\DeepAdv3D\lib\site-packages\wandb\sdk\internal\internal.py", line 288, in _setup
+    interface=self._interface,
+  File "C:\Users\ido.igip1\Anaconda3\envs\DeepAdv3D\lib\site-packages\wandb\sdk\internal\sender.py", line 111, in __init__
+    default_settings=settings, retry_callback=self.retry_callback
+  File "C:\Users\ido.igip1\Anaconda3\envs\DeepAdv3D\lib\site-packages\wandb\sdk\internal\internal_api.py", line 91, in __init__
+    url="%s/graphql" % self.settings("base_url"),
+  File "C:\Users\ido.igip1\Anaconda3\envs\DeepAdv3D\lib\site-packages\wandb\apis\client.py", line 32, in __init__
+    settings = wandb.setup().settings
+  File "C:\Users\ido.igip1\Anaconda3\envs\DeepAdv3D\lib\site-packages\wandb\sdk\wandb_setup.py", line 247, in setup
+    ret = _setup(settings=settings)
+  File "C:\Users\ido.igip1\Anaconda3\envs\DeepAdv3D\lib\site-packages\wandb\sdk\wandb_setup.py", line 242, in _setup
+    wl = _WandbSetup(settings=settings)
+  File "C:\Users\ido.igip1\Anaconda3\envs\DeepAdv3D\lib\site-packages\wandb\sdk\wandb_setup.py", line 231, in __init__
+    _WandbSetup._instance = _WandbSetup__WandbSetup(settings=settings)
+  File "C:\Users\ido.igip1\Anaconda3\envs\DeepAdv3D\lib\site-packages\wandb\sdk\wandb_setup.py", line 92, in __init__
+    self._settings_setup(settings, self._early_logger)
+  File "C:\Users\ido.igip1\Anaconda3\envs\DeepAdv3D\lib\site-packages\wandb\sdk\wandb_setup.py", line 118, in _settings_setup
+    s._infer_run_settings_from_env(_logger=early_logger)
+  File "C:\Users\ido.igip1\Anaconda3\envs\DeepAdv3D\lib\site-packages\wandb\sdk\wandb_settings.py", line 941, in _infer_run_settings_from_env
+    program, _logger=_logger
+  File "C:\Users\ido.igip1\Anaconda3\envs\DeepAdv3D\lib\site-packages\wandb\sdk\wandb_settings.py", line 156, in _get_program_relpath_from_gitrepo
+    relative_path = os.path.relpath(full_path_to_program, start=root)
+  File "C:\Users\ido.igip1\Anaconda3\envs\DeepAdv3D\lib\ntpath.py", line 564, in relpath
+    path_drive, start_drive))
+ValueError: path is on mount 'C:', start on mount 'D:'
+2021-07-30 19:35:34,723 INFO    MainThread:17608 [internal.py:handle_exit():78] Internal process exited

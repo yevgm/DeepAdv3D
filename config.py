@@ -46,11 +46,11 @@ OPTIMIZER = 'AdamW' # 'Adam', 'AdamW', 'sgd'
 TRAINING_CLASSIFIER = False  # turn on to switch between classifier train and model train
 LR = 4e-3 # learning rate
 WEIGHT_DECAY = 0.5 # regularization
-TRAIN_BATCH_SIZE = 10  # number of data examples in one batch
+TRAIN_BATCH_SIZE = 32  # number of data examples in one batch
 TEST_BATCH_SIZE = 20
-N_EPOCH = 200  # number of train epochs
+N_EPOCH = 10  # number of train epochs
 RECON_LOSS_CONST = 400  # ratio between reconstruction loss and missclasificaition loss
-TRAIN_DATA_AUG = True
+TRAIN_DATA_AUG = False
 
 # adversarial example params:
 K = 40  # number of laplacian eigenvectors to take. NOTE: up to 70. more then that the model decoder is "broken" - see model
@@ -66,7 +66,7 @@ SHUFFLE_TEST_DATA = True
 TEST_PARAMS_DIR = os.path.join(TENSOR_LOG_DIR, "Mar-29-2021_23-51-05_Faust_Lr_0.005_Batch_32_l2_epoch_800_K_40")  # here you put the tensor_board_logs foldername to test the model
 TARGET_CLASS = 5  # the attack target - still not used\
 TEST_DATA_AUG = True
-PLOT_TEST_SAMPLE = True
+PLOT_TEST_SAMPLE = False
 TEST_EPOCHS = 1  # valid use only with "TEST_DATA_AUG = True"
 # validation set: 
 VAL_BATCH_SIZE = 20
@@ -98,17 +98,17 @@ VIS_SHOW_GRID = True
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   DEBUG
 # ----------------------------------------------------------------------------------------------------------------------#
-PLOT_TRAIN_IMAGES = True
+PLOT_TRAIN_IMAGES = False
 SHOW_TRAIN_SAMPLE_EVERY = 100  # plot vista / save image to folder every SHOW_TRAIN_SAMPLE_EVERY gradient steps
 # classifier bn
-CLS_USE_BN = True
+CLS_USE_BN = False
 CLS_BATCH_NORM_USE_STATISTICS = False
 CLS_BATCH_NORM_MOMENTUM = 0.5  # default is 0.1
 CLS_STRICT_PARAM_LOADING = False  # strict = False for dropping running mean and var of train batchnorm
 # model bn
-MODEL_USE_BN = True
-MODEL_BATCH_NORM_USE_STATISTICS = True
+MODEL_USE_BN = False
+MODEL_BATCH_NORM_USE_STATISTICS = False
 MODEL_BATCH_NORM_MOMENTUM = 0.5  # default is 0.1
 MODEL_STRICT_PARAM_LOADING = False  # strict = False for dropping running mean and var of train batchnorm
 # model dropout
-MODEL_USE_DROPOUT = True
+MODEL_USE_DROPOUT = False

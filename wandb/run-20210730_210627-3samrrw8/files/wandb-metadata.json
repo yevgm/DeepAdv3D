@@ -1,0 +1,24 @@
+{
+    "os": "Windows-10-10.0.17134-SP0",
+    "python": "3.7.0",
+    "heartbeatAt": "2021-07-30T18:06:30.049387",
+    "startedAt": "2021-07-30T18:06:27.289460",
+    "docker": null,
+    "gpu": "GeForce GTX 1080 Ti",
+    "gpu_count": 1,
+    "cpu_count": 16,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "C:/Users/ido.igip1/Anaconda3/DeepAdv3D/model_trainer_main.py",
+    "codePath": "model_trainer_main.py",
+    "git": {
+        "remote": "https://github.com/yevgm/DeepAdv3D",
+        "commit": "fb0160bcf94c49135357c1f6ee1d47946652784d"
+    },
+    "email": "roeebs123@gmail.com",
+    "root": "C:/Users/ido.igip1/Anaconda3/DeepAdv3D",
+    "host": "GIP-i7x-1080ti1",
+    "username": "ido.iGIP1",
+    "executable": "C:\\Users\\ido.igip1\\Anaconda3\\envs\\DeepAdv3D\\python.exe"
+}

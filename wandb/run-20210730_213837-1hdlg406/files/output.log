@@ -1,0 +1,5 @@
+
+[Epoch #0: Batch 7/0] Train loss: 1.816080, Misclassified: [10/0]
+[Epoch #0: Batch 7/1] Train loss: 2.743156, Misclassified: [10/1]
+[Epoch #0: Batch 7/2] Train loss: 1.877368, Misclassified: [10/0]
+[Epoch #0: Batch 7/3] Train loss: 1.588251, Misclassified: [10/1]

@@ -15,14 +15,14 @@ from utils.gradflow_check import *
 from vista.geom_vis import plot_mesh
 
 # debug imports
-from graphviz import Digraph, Source
+# from graphviz import Digraph, Source
 import re
 import torch
 import torch.nn.functional as F
 from torch.autograd import Variable
 from torch.autograd import Variable
 import torchvision.models as models
-from torchviz import make_dot
+# from torchviz import make_dot
 
 class Trainer:
 
@@ -50,7 +50,7 @@ class Trainer:
         self.classifier.to(DEVICE)
         self.model = model
         self.model.to(DEVICE)
-
+        wandb.watch((self.model, self.classifier), log="all", log_freq=1)
         # early stop
         self.early_stopping = EarlyStopping(patience=EARLY_STOP_WAIT)  # hardcoded for validation loss early stop
         # checkpoints regulator
@@ -185,6 +185,7 @@ class Trainer:
         reconstruction_loss = reconstruction_loss()
         loss = missloss + RECON_LOSS_CONST * reconstruction_loss
         # loss = missloss
+        # loss = reconstruction_loss
 
         return loss, missloss, reconstruction_loss
 
