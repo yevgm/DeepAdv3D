@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "C:/Users/ido.igip1/Anaconda3/DeepAdv3D/model_trainer_main.py", line 100, in <module>
+    model=model, classifier=classifier)
+  File "C:\Users\ido.igip1\Anaconda3\DeepAdv3D\src\deep_adv_3d\train_loop.py", line 57, in __init__
+    self.init_tensor_board()
+  File "C:\Users\ido.igip1\Anaconda3\DeepAdv3D\src\deep_adv_3d\train_loop.py", line 75, in init_tensor_board
+    self.writer = SummaryWriter(self.tensor_log_dir, flush_secs=FLUSH_RESULTS)
+NameError: name 'SummaryWriter' is not defined

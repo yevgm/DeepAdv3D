@@ -146,10 +146,14 @@ def classifier_report_to_tensorboard(tensor_obj, batch_idx, step_cntr, cur_batch
 def report_to_tensorboard(split, tensor_obj, batch_idx, step_cntr, cur_batch_len, epoch, n_batches, total_loss,
                           recon_loss, missclassify_loss, perturbed_logits, targets):
     # report to wandb
-    wandb.log({
-        "Total Loss": total_loss,
-        "Misclassification Loss": missclassify_loss,
-        "Reconstruction Loss": recon_loss})
+    wandb_log_dict = {"Total Loss": total_loss,
+    "Misclassification Loss": missclassify_loss}
+
+    # if USE_RECONSTRUCTION_LOSS:
+    if True:
+        wandb_log_dict.update({"Reconstruction Loss": recon_loss})
+
+    wandb.log(wandb_log_dict)
 
     # Metrics
     pred_choice = perturbed_logits.data.max(1)[1]

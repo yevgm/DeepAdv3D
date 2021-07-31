@@ -156,7 +156,7 @@ class Trainer:
 
             # report to tensorboard
             report_to_tensorboard(split, self.writer, i, step_cntr, cur_batch_len, epoch, self.num_batch, loss.item(),
-                                  reconstruction_loss.item(), missloss.item(), perturbed_logits, targets)
+                                  reconstruction_loss, missloss.item(), perturbed_logits, targets)
 
             if step_cntr is not None:
                 step_cntr += 1
@@ -176,18 +176,26 @@ class Trainer:
                        perturbed_logits, targets, edges):
 
         misclassification_loss = AdversarialLoss()
-        if LOSS == 'l2':
-            reconstruction_loss = L2Similarity(orig_vertices, adex, vertex_area)
+
+        if USE_RECONSTRUCTION_LOSS:
+            if LOSS == 'l2':
+                reconstruction_loss = L2Similarity(orig_vertices, adex, vertex_area)
+            else:
+                reconstruction_loss = LocalEuclideanSimilarity(orig_vertices.transpose(2, 1), adex.transpose(2, 1), edges)
+            reconstruction_loss = reconstruction_loss()
         else:
-            reconstruction_loss = LocalEuclideanSimilarity(orig_vertices.transpose(2, 1), adex.transpose(2, 1), edges)
+            reconstruction_loss = 0
 
         missloss = misclassification_loss(perturbed_logits, targets)
-        reconstruction_loss = reconstruction_loss()
+
         loss = missloss + RECON_LOSS_CONST * reconstruction_loss
         # loss = missloss
         # loss = reconstruction_loss
 
-        return loss, missloss, reconstruction_loss
+        if USE_RECONSTRUCTION_LOSS:
+            return loss, missloss, reconstruction_loss
+        else:
+            return missloss, missloss, reconstruction_loss
 
     def validation_step(self, epoch):
         total_loss = self.one_epoch_step(epoch=epoch, split='validation')

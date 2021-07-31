@@ -1,0 +1,15 @@
+C:/Users/ido.igip1/Anaconda3/DeepAdv3D/model_trainer_main.py:82: UserWarning: nn.init.xavier_uniform is now deprecated in favor of nn.init.xavier_uniform_.
+  nn.init.xavier_uniform(m.weight.data)
+C:/Users/ido.igip1/Anaconda3/DeepAdv3D/model_trainer_main.py:89: UserWarning: nn.init.xavier_uniform is now deprecated in favor of nn.init.xavier_uniform_.
+  nn.init.xavier_uniform(m.weight.data)
+tlab dim:  torch.Size([32, 10])
+peturbed logits dim:  torch.Size([32, 10])
+loss:  tensor(27.0435, device='cuda:0', grad_fn=<MeanBackward0>)
+Traceback (most recent call last):
+  File "C:/Users/ido.igip1/Anaconda3/DeepAdv3D/model_trainer_main.py", line 125, in <module>
+    train_ins.train()
+  File "C:\Users\ido.igip1\Anaconda3\DeepAdv3D\src\deep_adv_3d\train_loop.py", line 85, in train
+    self.one_epoch_step(epoch=epoch, split='train')
+  File "C:\Users\ido.igip1\Anaconda3\DeepAdv3D\src\deep_adv_3d\train_loop.py", line 159, in one_epoch_step
+    reconstruction_loss.item(), missloss.item(), perturbed_logits, targets)
+AttributeError: 'int' object has no attribute 'item'

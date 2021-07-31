@@ -17,6 +17,7 @@ from dataset.data_loaders import *
 from utils.torch.nn import *
 
 import wandb
+import torch.nn.init as init
 
 def load_datasets(dataset, train_batch=8, test_batch=20, val_batch=20):
     if dataset == 'Faust':
@@ -76,6 +77,21 @@ def initialize_weights(m):
         nn.init.constant_(m.bias.data, 0)
 
 
+def initialize_weights(m):
+    if isinstance(m, nn.Conv1d):
+        nn.init.xavier_uniform(m.weight.data)
+        if m.bias is not None:
+            m.bias.data.fill_(0.01)
+    elif isinstance(m, nn.BatchNorm2d):
+        nn.init.constant_(m.weight.data, 1)
+        nn.init.constant_(m.bias.data, 0)
+    elif isinstance(m, nn.Linear):
+        nn.init.xavier_uniform(m.weight.data)
+        if m.bias is not None:
+            m.bias.data.fill_(0.01)
+
+
+
 if __name__ == '__main__':
     # close tensorboard process and exit
     if TERMINATE_TB:
@@ -101,9 +117,6 @@ if __name__ == '__main__':
     # open tensorboard process if it's not already open
     if RUN_TB:
         tensor_board_sub_proccess_handler = TensorboardSupervisor(mode= RUN_TB + 2 * RUN_BROWSER)  # opens tensor at port 6006 if available
-
-    # wandb.watch(model, log="all")  # TODO add log
-    # wandb.watch(model)
 
     # train network
     train_ins.train()

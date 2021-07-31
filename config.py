@@ -112,3 +112,5 @@ MODEL_BATCH_NORM_MOMENTUM = 0.5  # default is 0.1
 MODEL_STRICT_PARAM_LOADING = False  # strict = False for dropping running mean and var of train batchnorm
 # model dropout
 MODEL_USE_DROPOUT = False
+
+USE_RECONSTRUCTION_LOSS = False
