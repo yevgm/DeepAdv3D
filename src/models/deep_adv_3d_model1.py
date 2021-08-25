@@ -3,7 +3,7 @@ import torch.utils.data
 from torch import nn as nn
 from torch.autograd import Variable
 import torch.nn.functional as F
-
+from src.models.pointnet import PointNetfeat
 # variable definitions
 from config import *
 
@@ -78,4 +78,26 @@ class Regressor(nn.Module):
         x = self.enc(x)
         x = self.dec(x)
         x = x.view(-1, 3, self.numVertices)
+        return x
+
+
+class RegressorOriginalPointnet(nn.Module):
+
+    def __init__(self):
+        super(RegressorOriginalPointnet, self).__init__()
+        self.feat = PointNetfeat()
+        self.fc1 = nn.Linear(1024, 4096)
+        self.relu = nn.ReLU()
+        self.fc2 = nn.Linear(4096, 8192)
+        self.dropout = nn.Dropout(p=0.3)
+        self.relu = nn.ReLU()
+        self.fc3 = nn.Linear(8192, 6890*3)
+
+    def forward(self, x):
+        # x, trans, trans_feat = self.feat(x)  # x is 1024, trans is exit from TNET1, trans_Feat is exit from tnet2
+        x = self.feat(x)  # x is 1024, trans is exit from TNET1, trans_Feat is exit from tnet2
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.dropout(self.fc2(x)))
+        x = self.fc3(x)
+        x = x.view(-1, 3, 6890)  # that's the only difference from pointnet, along with layer sizes
         return x

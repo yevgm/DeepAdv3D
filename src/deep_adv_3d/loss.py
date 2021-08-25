@@ -50,7 +50,7 @@ class AdversarialLoss(LossFunction):
 
 
     def __call__(self, perturbed_logits, target) -> torch.Tensor:
-        batch_size = target.shape[0]
+
         Z = perturbed_logits
         _, Zsorted_idx = torch.sort(Z, dim=1)
         Z_max_index = Zsorted_idx[:, -1]
@@ -64,7 +64,8 @@ class AdversarialLoss(LossFunction):
         Zmax = Z.gather(1, Z_max_index.unsqueeze(1)).squeeze()
         out = (Zmax - Ztarget)
         out = torch.nn.functional.relu(out)
-        out = out.sum() / batch_size  # batch average
+        out = out.sum()
+
         # try from ido's blog
         # ce = torch.nn.CrossEntropyLoss()(perturbed_logits, target)
         # out = -1 * ce

@@ -65,7 +65,8 @@ class Trainer:
 
 
         # plotter init
-        # self.plt = AdversarialPlotter()
+        if classifier is not None:
+            self.plt = AdversarialPlotter()
 
     def init_tensor_board(self):
         '''
@@ -97,14 +98,12 @@ class Trainer:
                 stop_training = self.early_stopping.on_epoch_end(epoch=epoch, monitored_value=val_loss)
                 if stop_training:
                     self.early_stopping.on_train_end()
-                    # self.plt.finalize()
+                    self.plt.finalize()
                     self.evaluate()
                     exit()
 
             self.scheduler.step(val_loss)
 
-        # evaluate the model at the end of training
-        # self.evaluate(self.tensor_log_dir)
 
     def define_optimizer(self):
         '''
@@ -134,23 +133,20 @@ class Trainer:
         else:
             raise('Split not specified')
 
-
-
         loss, orig_vertices, adex, faces = None, None, None, None
         epoch_loss, epoch_misclassified, epoch_classified = 0, 0, 0
+        num_clas, num_misclassified = 0,0
 
         for i, data in enumerate(data, 0):
-            orig_vertices, label, _, _, _, _, faces, edges = data
+            orig_vertices, label, _, _, _, targets, faces, edges = data
             orig_vertices = orig_vertices.transpose(2, 1)
 
             if not TRAINING_CLASSIFIER:
-                eigvecs, vertex_area, perturbed_logits, targets = 0, 0, 0, 0
-                # get eigenspace vector field
-                eigen_space_v = self.model(orig_vertices).transpose(2, 1)
-                # create the adversarial example (smoothly perturbed)
-                adex = orig_vertices + torch.bmm(eigvecs, eigen_space_v).transpose(2, 1)
+                perturbation = self.model(orig_vertices)
+                # create the adversarial example
+                adex = orig_vertices + perturbation
 
-                # perturbed_logits = self.classifier(adex)  # no grad is already implemented in the constructor
+                perturbed_logits = self.classifier(adex)  # no grad is already implemented in the constructor
                 # pred_choice_adex = perturbed_logits.data.max(1)[1]
                 # print('adex:   ', pred_choice_adex)
                 #
@@ -160,8 +156,10 @@ class Trainer:
                 # print('logits: ',pred_choice_orig)
                 # print('labels: ', label.squeeze())
                 # print('Classified: ',num_clas)
-                loss, missloss, reconstruction_loss = self.calculate_loss(orig_vertices, adex, vertex_area,
-                                                                          perturbed_logits, targets, edges)
+                loss = self.calculate_loss(perturbed_logits=perturbed_logits, labels=label, targets=targets)
+                pred_choice = perturbed_logits.data.max(1)[1]
+                # num_misclassified = (~pred_choice.eq(label)).sum().cpu()
+                num_misclassified = (pred_choice.eq(targets)).sum().cpu()
             else:
                 pred = self.model(orig_vertices)
                 pred = F.log_softmax(pred, dim=1)
@@ -176,14 +174,9 @@ class Trainer:
                 loss.backward()
                 self.optimizer.step()
 
-            if not TRAINING_CLASSIFIER:
-                # report to tensorboard
-                pred_choice = perturbed_logits.data.max(1)[1]
-                num_misclassified = pred_choice.eq(targets).sum().cpu()
-                # num_misclassified = (~pred_choice.eq(label.squeeze())).sum().cpu()
-
             epoch_loss = epoch_loss + loss.item()
             epoch_classified = epoch_classified + num_clas
+            epoch_misclassified = epoch_misclassified + num_misclassified
 
         # END OF TRAIN
 
@@ -191,12 +184,11 @@ class Trainer:
             report_to_wandb_classifier(epoch=epoch, split=split, epoch_loss=epoch_loss / 70,
                                        epoch_classified=epoch_classified)
         elif USE_WANDB:
-            pass
-            # report_to_tensorboard(split=split, epoch_loss=epoch_loss / 70, epoch_classified=epoch_classified / 70, reconstruction_loss,
-            #                       missloss, perturbed_logits, label.squeeze())
+            report_to_wandb_regressor(epoch=epoch, split=split, epoch_loss=epoch_loss / 70,
+                                      epoch_misclassified=epoch_misclassified)
 
         # push to visualizer every epoch - last batch
-        # self.push_data_to_plotter(orig_vertices, adex, faces, epoch, split)
+        self.push_data_to_plotter(orig_vertices, adex, faces, epoch, split)
 
         return loss.item()
 
@@ -209,11 +201,20 @@ class Trainer:
             epoch_loss, epoch_misclassified, epoch_classified = 0, 0, 0
 
             for i, data in enumerate(data, 0):
-                orig_vertices, label, _, _, _, _, faces, edges = data
+                orig_vertices, label, _, _, _, targets, faces, edges = data
                 orig_vertices = orig_vertices.transpose(2, 1)
 
                 if not TRAINING_CLASSIFIER:
-                    pass
+                    perturbation = self.model(orig_vertices).transpose(2, 1)
+                    # create the adversarial example
+                    adex = orig_vertices + perturbation
+
+                    perturbed_logits = self.classifier(adex)  # no grad is already implemented in the constructor
+
+                    loss = self.calculate_loss(perturbed_logits=perturbed_logits, labels=label)
+                    pred_choice = perturbed_logits.data.max(1)[1]
+                    # num_misclass = (~pred_choice.eq(label)).sum().cpu()
+                    num_misclass = (pred_choice.eq(targets)).sum().cpu()
 
                 else:
                     pred = self.model(orig_vertices)
@@ -224,57 +225,47 @@ class Trainer:
                     num_clas = pred_choice.eq(label).cpu().sum()
 
 
-                if not TRAINING_CLASSIFIER:
-                    pass
-                    # # report to tensorboard
-                    # pred_choice = perturbed_logits.data.max(1)[1]
-                    # num_misclassified = pred_choice.eq(targets).sum().cpu()
-                    # # num_misclassified = (~pred_choice.eq(label.squeeze())).sum().cpu()
-
-
         if USE_WANDB and TRAINING_CLASSIFIER:
             report_to_wandb_classifier(epoch=0, split="test", epoch_loss=loss.item() / 15, epoch_classified=num_clas.item())
         elif USE_WANDB:
-            pass
-            # report_to_tensorboard(split=split, epoch_loss=epoch_loss / 70, epoch_classified=epoch_classified / 70, reconstruction_loss,
-            #                       missloss, perturbed_logits, label.squeeze())
+            report_to_wandb_regressor(epoch=0, split="test", epoch_loss=loss.item() / 15, epoch_misclassified=num_misclass.item())
 
 
 
-    def calculate_loss(self, orig_vertices, adex, vertex_area,
-                       perturbed_logits, targets, edges):
+    def calculate_loss(self, perturbed_logits, labels, targets=None):
 
 
-        if CHOOSE_LOSS == 1:
-            misclassification_loss = AdversarialLoss()
-            missloss = misclassification_loss(perturbed_logits, targets)
-            loss = missloss
-            missloss_out, reconstruction_loss_out = 0, 0
-        elif CHOOSE_LOSS == 2:
-            if LOSS == 'l2':
-                reconstruction_loss = L2Similarity(orig_vertices, adex, vertex_area)
-            else:
-                reconstruction_loss = LocalEuclideanSimilarity(orig_vertices.transpose(2, 1), adex.transpose(2, 1),
-                                                               edges)
+        # if CHOOSE_LOSS == 1:
+        misclassification_loss = AdversarialLoss()
+        # loss = misclassification_loss(perturbed_logits, labels)
+        loss = misclassification_loss(perturbed_logits, targets)
+            # loss = missloss
+            # missloss_out, reconstruction_loss_out = 0, 0
+        # elif CHOOSE_LOSS == 2:
+        #     if LOSS == 'l2':
+        #         reconstruction_loss = L2Similarity(orig_vertices, adex, vertex_area)
+        #     else:
+        #         reconstruction_loss = LocalEuclideanSimilarity(orig_vertices.transpose(2, 1), adex.transpose(2, 1),
+        #                                                        edges)
+        #
+        #     reconstruction_loss = reconstruction_loss()
+        #     loss = reconstruction_loss
+        #     missloss_out, reconstruction_loss_out = 0, 0
+        # else:
+        #     misclassification_loss = AdversarialLoss()
+        #     missloss = misclassification_loss(perturbed_logits, targets)
+        #
+        #     if LOSS == 'l2':
+        #         reconstruction_loss = L2Similarity(orig_vertices, adex, vertex_area)
+        #     else:
+        #         reconstruction_loss = LocalEuclideanSimilarity(orig_vertices.transpose(2, 1), adex.transpose(2, 1), edges)
+        #
+        #     reconstruction_loss = reconstruction_loss()
+        #     loss = missloss + RECON_LOSS_CONST * reconstruction_loss
+        #     missloss_out = missloss.item()
+        #     reconstruction_loss_out = reconstruction_loss.item()
 
-            reconstruction_loss = reconstruction_loss()
-            loss = reconstruction_loss
-            missloss_out, reconstruction_loss_out = 0, 0
-        else:
-            misclassification_loss = AdversarialLoss()
-            missloss = misclassification_loss(perturbed_logits, targets)
-
-            if LOSS == 'l2':
-                reconstruction_loss = L2Similarity(orig_vertices, adex, vertex_area)
-            else:
-                reconstruction_loss = LocalEuclideanSimilarity(orig_vertices.transpose(2, 1), adex.transpose(2, 1), edges)
-
-            reconstruction_loss = reconstruction_loss()
-            loss = missloss + RECON_LOSS_CONST * reconstruction_loss
-            missloss_out = missloss.item()
-            reconstruction_loss_out = reconstruction_loss.item()
-
-        return loss, missloss_out, reconstruction_loss_out
+        return loss
 
     def validation_step(self, epoch):
         self.model.eval()

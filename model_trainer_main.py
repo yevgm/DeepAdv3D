@@ -11,7 +11,7 @@ from config import *
 
 # repository modules
 from models.pointnet import PointNet
-from models.deep_adv_3d_model1 import Regressor
+from models.deep_adv_3d_model1 import RegressorOriginalPointnet
 from deep_adv_3d.train_loop import *
 from dataset.data_loaders import *
 from utils.torch.nn import *
@@ -64,30 +64,13 @@ def load_datasets(dataset, train_batch=8, test_batch=20, val_batch=20):
 
     return trainLoader, validationLoader, testLoader
 
-def initialize_weights(m):
-    if isinstance(m, nn.Conv1d):
-        nn.init.kaiming_uniform_(m.weight.data, nonlinearity='relu')
-        if m.bias is not None:
-            nn.init.constant_(m.bias.data, 0)
-    elif isinstance(m, nn.BatchNorm1d):
-        nn.init.constant_(m.weight.data, 1)
-        nn.init.constant_(m.bias.data, 0)
-    elif isinstance(m, nn.Linear):
-        nn.init.kaiming_uniform_(m.weight.data)
-        nn.init.constant_(m.bias.data, 0)
-
 
 if __name__ == '__main__':
-    # close tensorboard process and exit
-    if TERMINATE_TB:
-        finalize_tensorboard()
-        exit()
+    # set seed for all platforms
+    set_determinsitic_run()
 
     if USE_WANDB:
         wandb.init(entity="deepadv3d", project="DeepAdv3D")
-
-    # set seed for all platforms
-    set_determinsitic_run()
 
     # Data Loading and pre-processing
     trainLoader, validationLoader, testLoader = load_datasets(dataset=DATASET_NAME, train_batch=TRAIN_BATCH_SIZE,
@@ -95,23 +78,12 @@ if __name__ == '__main__':
 
     # classifier and model definition
     classifier = PointNet(k=10)
-    classifier.load_state_dict(torch.load(PARAMS_FILE, map_location=DEVICE), strict=CLS_STRICT_PARAM_LOADING)  # strict = False for dropping running mean and var of train batchnorm
-    model = Regressor(numVertices=K)  # K - additive vector field (V) dimension in eigen-space
-    # model.apply(initialize_weights)  # TODO: remove
+    classifier.load_state_dict(torch.load(PARAMS_FILE, map_location=DEVICE))
+    model = RegressorOriginalPointnet()
+
     train_ins = Trainer(train_data=trainLoader, validation_data=validationLoader, test_data=testLoader,
                         model=model, classifier=classifier)
-    # open tensorboard process if it's not already open
-    if RUN_TB:
-        tensor_board_sub_proccess_handler = TensorboardSupervisor(mode= RUN_TB + 2 * RUN_BROWSER)  # opens tensor at port 6006 if available
-
 
     # train network
     train_ins.train()
-
-    # evaluate network
-    # train_ins.evaluate(TEST_PARAMS_DIR)
-
-
-
-
 

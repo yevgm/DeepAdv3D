@@ -20,7 +20,7 @@ sys.path.insert(0, SRC_DIR)
 #                                                   MODEL
 # ----------------------------------------------------------------------------------------------------------------------#
 # classifier:
-PARAMS_FILE = os.path.join(MODEL_DATA_DIR, "FAUST10_pointnet_rot_b128_v2.pt")  # FAUST10_pointnet_rot_b128.pt, momentum_05.pt, shrec14_71percent_acc_momentum05.pt
+PARAMS_FILE = os.path.join(MODEL_DATA_DIR, "FAUST_classifier_august.ckpt")  # FAUST10_pointnet_rot_b128_v2.pt, FAUST10_pointnet_rot_b128.pt, momentum_05.pt, shrec14_71percent_acc_momentum05.pt
 # model1:
 # MODEL1_PARAMS_DIR = os.path.join(MODEL_DATA_DIR, "model1_params") # .pt will be added in the code
 # PARAM_FILE_NAME = "model_params.pt"
@@ -47,7 +47,7 @@ LR_SCHEDULER_WAIT =  30 # epochs
 SCHEDULER_STEP_SIZE = 250
 OPTIMIZER = 'Adam' # 'Adam', 'AdamW', 'sgd'
 
-TRAINING_CLASSIFIER = True  # turn on to switch between classifier train and model train
+TRAINING_CLASSIFIER = False  # turn on to switch between classifier train and model train
 CALCULATE_EIGENVECTORS = False
 LR = 1e-3 # learning rate
 WEIGHT_DECAY = 1e-4 # regularization
@@ -63,7 +63,7 @@ LOSS = 'l2'  # 'l2', 'local_euclidean'
 # local euclidean loss params:
 CUTOFF = 5  # 40
 NEIGHBORS = 20  # 140
-CHOOSE_LOSS = 3  ## 1 for only misclassification, 2 for only reconstruction, 3 - both
+CHOOSE_LOSS = 1  ## 1 for only misclassification, 2 for only reconstruction, 3 - both
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   TEST
 # ----------------------------------------------------------------------------------------------------------------------#

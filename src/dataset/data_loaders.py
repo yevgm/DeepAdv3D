@@ -396,12 +396,11 @@ class FaustDatasetInMemory(data.Dataset):
 
         v = torch.from_numpy(v.astype(np.float32))
         # v = torch.from_numpy(np.random.rand(6890,3).astype(np.float32))  # TODO remove - it is debug!
-        # cls = torch.from_numpy(np.array([index % 10]).astype(np.int64))
+
 
         # calculate laplacian eigenvectors matrix and areas
         if not CALCULATE_EIGENVECTORS:
             eigvals, eigvecs, vertex_area = 0, 0, 0
-            targets = 0
         else:
             eigvals, eigvecs, vertex_area = eigenpairs(v, self.faces[index], K, double_precision=True)
             # eigvals = eigvals.to(DEVICE)
@@ -410,7 +409,7 @@ class FaustDatasetInMemory(data.Dataset):
 
             # draw new targets every time a new data is created
             # targets = self.set_targets()
-            targets = self.targets[index]
+        targets = self.targets[index]
 
         return v.to(DEVICE), self.cls[index],  eigvals, eigvecs, vertex_area \
             , targets, self.faces[index].to(DEVICE), self.edges[index]
