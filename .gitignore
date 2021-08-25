@@ -17,3 +17,4 @@ coma/**
 .ipynb_checkpoints/**
 outputFolder/**
 model_data/**
+wandb/**

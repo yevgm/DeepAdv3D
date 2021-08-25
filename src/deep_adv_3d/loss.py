@@ -4,6 +4,7 @@ from config import *
 
 # repository modules
 import utils
+import torch
 from utils.misc import kNN
 
 # ----------------------------------------------------------------------------------------------------------------------#
@@ -64,6 +65,10 @@ class AdversarialLoss(LossFunction):
         out = (Zmax - Ztarget)
         out = torch.nn.functional.relu(out)
         out = out.sum() / batch_size  # batch average
+        # try from ido's blog
+        # ce = torch.nn.CrossEntropyLoss()(perturbed_logits, target)
+        # out = -1 * ce
+
         return out
 
 class AdversarialLoss2(torch.nn.Module):

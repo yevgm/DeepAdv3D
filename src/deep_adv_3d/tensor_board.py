@@ -144,17 +144,26 @@ def classifier_report_to_tensorboard(tensor_obj, batch_idx, step_cntr, cur_batch
                                num_classified / float(cur_batch_len), step_cntr)
 
 def report_to_tensorboard(split, tensor_obj, batch_idx, step_cntr, cur_batch_len, epoch, n_batches, total_loss,
-                          recon_loss, missclassify_loss, perturbed_logits, targets):
-    # report to wandb
-    wandb.log({
-        "Total Loss": total_loss,
-        "Misclassification Loss": missclassify_loss,
-        "Reconstruction Loss": recon_loss})
+                          recon_loss, missclassify_loss, perturbed_logits, targets, misclassified_mean,labels, classifier_stat):
 
     # Metrics
     pred_choice = perturbed_logits.data.max(1)[1]
-    num_misclassified = pred_choice.eq(targets).sum().cpu()
+    # num_misclassified = (~pred_choice.eq(labels)).sum().cpu()
+    num_misclassified = (pred_choice.eq(targets)).sum().cpu()
+
+
+
     if split == 'train':
+        # report to wandb
+        if USE_WANDB:
+            wandb.log({
+                "Train\Total Loss": total_loss,
+                "Train\Misclassification Loss": missclassify_loss,
+                "Train\Reconstruction Loss": recon_loss,
+                "Train\Misclassified percent": num_misclassified / float(cur_batch_len),
+                "Train\Misclassified mean": misclassified_mean,
+                "Classifier Accuracy mean": classifier_stat})
+
         if step_cntr % SHOW_LOSS_EVERY == SHOW_LOSS_EVERY - 1:  # every SHOW_LOSS_EVERY mini-batches
             # old stdout prints
             print('[Epoch #%d: Batch %d/%d] Train loss: %f, Misclassified: [%d/%d]' % (
@@ -170,6 +179,15 @@ def report_to_tensorboard(split, tensor_obj, batch_idx, step_cntr, cur_batch_len
             tensor_obj.add_scalar('Accuracy/Train_Misclassified_targets',
                                    num_misclassified / float(cur_batch_len), step_cntr)
     elif split == 'validation':
+        # report to wandb
+        if USE_WANDB:
+            wandb.log({
+                "Validation\Total Loss": total_loss,
+                "Validation\Misclassification Loss": missclassify_loss,
+                "Validation\Reconstruction Loss": recon_loss,
+                "Validation\Misclassified percent": num_misclassified / float(cur_batch_len),
+                "Validation\Misclassified mean": misclassified_mean})
+
         # old stdout prints
         print('[Epoch #%d: Batch %d/%d] Validation loss: %f, Misclassified: [%d/%d]' % (
             epoch, n_batches, batch_idx, total_loss, float(cur_batch_len), num_misclassified.item()))

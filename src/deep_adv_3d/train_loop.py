@@ -18,6 +18,7 @@ from vista.geom_vis import plot_mesh
 # from graphviz import Digraph, Source
 import re
 import torch
+import wandb
 import torch.nn.functional as F
 from torch.autograd import Variable
 from torch.autograd import Variable
@@ -45,12 +46,15 @@ class Trainer:
 
         self.classifier = classifier
         self.classifier.eval()
+        # self.classifier.train()
         for param in self.classifier.parameters():
             param.requires_grad = False
         self.classifier.to(DEVICE)
         self.model = model
         self.model.to(DEVICE)
-        wandb.watch((self.model, self.classifier), log="all", log_freq=1)
+        # W and B
+        if USE_WANDB:
+            wandb.watch((self.model, self.classifier), log="all", log_freq=1)
         # early stop
         self.early_stopping = EarlyStopping(patience=EARLY_STOP_WAIT)  # hardcoded for validation loss early stop
         # checkpoints regulator
@@ -60,6 +64,8 @@ class Trainer:
         # attributes initializations
         self.optimizer, self.scheduler = None, None
         self.train_step_cntr, self.val_step_cntr = 0, 0
+        self.train_misclassified_mean, self.val_misclassified_mean = None, None
+        self.classifier_stat = None
 
         # plotter init
         self.plt = AdversarialPlotter()
@@ -100,14 +106,14 @@ class Trainer:
             self.scheduler.step(val_loss)
 
         # evaluate the model at the end of training
-        self.evaluate(self.tensor_log_dir)
+        # self.evaluate(self.tensor_log_dir)
 
     def define_optimizer(self):
         '''
         choose the optizimer and it's hyper-parameters
         '''
         if OPTIMIZER == 'AdamW':
-            optimizer = torch.optim.AdamW(self.model.parameters(), lr=self.lr, betas=(0.9, 0.999),
+            optimizer = torch.optim.AdamW(list(self.model.parameters()), lr=self.lr, betas=(0.9, 0.999),
                                           weight_decay=self.weight_decay)
         elif OPTIMIZER == 'sgd':
             optimizer = torch.optim.SGD(self.model.parameters(), lr=self.lr, weight_decay=self.weight_decay,
@@ -122,13 +128,14 @@ class Trainer:
         return optimizer, scheduler
 
     def one_epoch_step(self, epoch=0, split='train'):
-
         if split == 'train':
             data = self.train_data
             step_cntr = self.train_step_cntr
+            misclassified_mean = self.train_misclassified_mean
         elif split == 'validation':
             data = self.validation_data
             step_cntr = self.train_step_cntr  # this is on purpose
+            misclassified_mean = self.val_misclassified_mean
         else:
             data = self.test_data
             step_cntr = None
@@ -145,7 +152,15 @@ class Trainer:
             adex = orig_vertices + torch.bmm(eigvecs, eigen_space_v).transpose(2, 1)
 
             perturbed_logits = self.classifier(adex)  # no grad is already implemented in the constructor
+            pred_choice_adex = perturbed_logits.data.max(1)[1]
+            print('adex:   ', pred_choice_adex)
 
+            logits = self.classifier(orig_vertices)
+            pred_choice_orig = logits.data.max(1)[1]
+            num_clas = pred_choice_orig.eq(label.squeeze()).sum().cpu()
+            print('logits: ',pred_choice_orig)
+            print('labels: ', label.squeeze())
+            print('Classified: ',num_clas)
             loss, missloss, reconstruction_loss = self.calculate_loss(orig_vertices, adex, vertex_area,
                                                                       perturbed_logits, targets, edges)
 
@@ -155,8 +170,23 @@ class Trainer:
             self.optimizer.step()
 
             # report to tensorboard
+            pred_choice = perturbed_logits.data.max(1)[1]
+            num_misclassified = pred_choice.eq(targets).sum().cpu()
+            # num_misclassified = (~pred_choice.eq(label.squeeze())).sum().cpu()
+            if misclassified_mean is None:
+                misclassified_mean = num_misclassified / float(cur_batch_len)
+            else:
+                misclassified_mean = (misclassified_mean + (num_misclassified / float(cur_batch_len)) / (step_cntr + 1)) * ((step_cntr + 1) / (step_cntr + 2))
+
+            if split == 'train':
+                if self.classifier_stat is None:
+                    self.classifier_stat = num_clas / float(cur_batch_len)
+                else:
+                    self.classifier_stat = (self.classifier_stat + (num_clas / float(cur_batch_len)) / (
+                                step_cntr + 1)) * ((step_cntr + 1) / (step_cntr + 2))
+
             report_to_tensorboard(split, self.writer, i, step_cntr, cur_batch_len, epoch, self.num_batch, loss.item(),
-                                  reconstruction_loss.item(), missloss.item(), perturbed_logits, targets)
+                                  reconstruction_loss, missloss, perturbed_logits, targets, misclassified_mean, label.squeeze(), self.classifier_stat)
 
             if step_cntr is not None:
                 step_cntr += 1
@@ -164,8 +194,10 @@ class Trainer:
         # update relevant step counter
         if split == 'train':
             self.train_step_cntr = step_cntr
+            self.train_misclassified_mean = misclassified_mean
         elif split == 'validation':
             self.val_step_cntr = step_cntr
+            self.val_misclassified_mean = misclassified_mean
 
         # push to visualizer every epoch - last batch
         self.push_data_to_plotter(orig_vertices, adex, faces, epoch, split)
@@ -175,19 +207,37 @@ class Trainer:
     def calculate_loss(self, orig_vertices, adex, vertex_area,
                        perturbed_logits, targets, edges):
 
-        misclassification_loss = AdversarialLoss()
-        if LOSS == 'l2':
-            reconstruction_loss = L2Similarity(orig_vertices, adex, vertex_area)
+
+        if CHOOSE_LOSS == 1:
+            misclassification_loss = AdversarialLoss()
+            missloss = misclassification_loss(perturbed_logits, targets)
+            loss = missloss
+            missloss_out, reconstruction_loss_out = 0, 0
+        elif CHOOSE_LOSS == 2:
+            if LOSS == 'l2':
+                reconstruction_loss = L2Similarity(orig_vertices, adex, vertex_area)
+            else:
+                reconstruction_loss = LocalEuclideanSimilarity(orig_vertices.transpose(2, 1), adex.transpose(2, 1),
+                                                               edges)
+
+            reconstruction_loss = reconstruction_loss()
+            loss = reconstruction_loss
+            missloss_out, reconstruction_loss_out = 0, 0
         else:
-            reconstruction_loss = LocalEuclideanSimilarity(orig_vertices.transpose(2, 1), adex.transpose(2, 1), edges)
+            misclassification_loss = AdversarialLoss()
+            missloss = misclassification_loss(perturbed_logits, targets)
 
-        missloss = misclassification_loss(perturbed_logits, targets)
-        reconstruction_loss = reconstruction_loss()
-        loss = missloss + RECON_LOSS_CONST * reconstruction_loss
-        # loss = missloss
-        # loss = reconstruction_loss
+            if LOSS == 'l2':
+                reconstruction_loss = L2Similarity(orig_vertices, adex, vertex_area)
+            else:
+                reconstruction_loss = LocalEuclideanSimilarity(orig_vertices.transpose(2, 1), adex.transpose(2, 1), edges)
 
-        return loss, missloss, reconstruction_loss
+            reconstruction_loss = reconstruction_loss()
+            loss = missloss + RECON_LOSS_CONST * reconstruction_loss
+            missloss_out = missloss.item()
+            reconstruction_loss_out = reconstruction_loss.item()
+
+        return loss, missloss_out, reconstruction_loss_out
 
     def validation_step(self, epoch):
         total_loss = self.one_epoch_step(epoch=epoch, split='validation')

@@ -16,6 +16,7 @@ from deep_adv_3d.train_loop import *
 from dataset.data_loaders import *
 from utils.torch.nn import *
 
+import torch.nn as nn
 import wandb
 
 def load_datasets(dataset, train_batch=8, test_batch=20, val_batch=20):
@@ -68,7 +69,7 @@ def initialize_weights(m):
         nn.init.kaiming_uniform_(m.weight.data, nonlinearity='relu')
         if m.bias is not None:
             nn.init.constant_(m.bias.data, 0)
-    elif isinstance(m, nn.BatchNorm2d):
+    elif isinstance(m, nn.BatchNorm1d):
         nn.init.constant_(m.weight.data, 1)
         nn.init.constant_(m.bias.data, 0)
     elif isinstance(m, nn.Linear):
@@ -82,7 +83,8 @@ if __name__ == '__main__':
         finalize_tensorboard()
         exit()
 
-    wandb.init(entity="deepadv3d", project="DeepAdv3D")
+    if USE_WANDB:
+        wandb.init(entity="deepadv3d", project="DeepAdv3D")
 
     # set seed for all platforms
     set_determinsitic_run()
@@ -95,15 +97,13 @@ if __name__ == '__main__':
     classifier = PointNet(k=10)
     classifier.load_state_dict(torch.load(PARAMS_FILE, map_location=DEVICE), strict=CLS_STRICT_PARAM_LOADING)  # strict = False for dropping running mean and var of train batchnorm
     model = Regressor(numVertices=K)  # K - additive vector field (V) dimension in eigen-space
-    model.apply(initialize_weights)  # TODO: remove
+    # model.apply(initialize_weights)  # TODO: remove
     train_ins = Trainer(train_data=trainLoader, validation_data=validationLoader, test_data=testLoader,
                         model=model, classifier=classifier)
     # open tensorboard process if it's not already open
     if RUN_TB:
         tensor_board_sub_proccess_handler = TensorboardSupervisor(mode= RUN_TB + 2 * RUN_BROWSER)  # opens tensor at port 6006 if available
 
-    # wandb.watch(model, log="all")  # TODO add log
-    # wandb.watch(model)
 
     # train network
     train_ins.train()
