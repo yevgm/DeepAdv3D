@@ -32,20 +32,12 @@ def weights_init_normal(m):
         # m.bias.data should be 0
             m.bias.data.fill_(0)
 
-def train(train_data, test_data, classifier:torch.nn.Module):
+def train(train_data, val_data, test_data, classifier:torch.nn.Module):
 	# load parameters:
 	# classifier.load_state_dict(torch.load(PARAMS_FILE, map_location=DEVICE))
 
 	# initialize weights with normal distribution
 	# classifier.apply(weights_init_normal)
-
-	# pre-train preparations
-	create_data_output_dir()
-	now = datetime.now()
-	d = now.strftime("%b-%d-%Y_%H-%M-%S")
-	tensor_log_dir = generate_new_tensorboard_results_dir(d, model='classifier')
-	writer = SummaryWriter(tensor_log_dir, flush_secs=FLUSH_RESULTS)
-	save_weights_dir = os.path.join(tensor_log_dir, PARAM_FILE_NAME)
 
 	if OPTIMIZER == 'AdamW':
 		optimizer = torch.optim.AdamW(classifier.parameters(), lr=LR, betas=(0.9, 0.999),
@@ -79,9 +71,6 @@ def train(train_data, test_data, classifier:torch.nn.Module):
 				# Metrics
 				pred_choice = pred.data.max(1)[1]
 				correct = pred_choice.eq(target.data).cpu().sum()
-
-				# report to tensorboard
-				classifier_report_to_tensorboard(writer, i, step_cntr, cur_batch_len, epoch, len(train_data), loss.item(), correct)
 
 				step_cntr += 1
 

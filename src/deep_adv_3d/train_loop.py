@@ -31,7 +31,7 @@ class Trainer:
                        validation_data: torch.utils.data.DataLoader,
                        test_data: torch.utils.data.DataLoader,
                        model: nn.Module,
-                       classifier: nn.Module):
+                       classifier:nn.Module=None):
 
         self.train_data = train_data
         self.validation_data = validation_data
@@ -39,22 +39,21 @@ class Trainer:
         self.batch_size = TRAIN_BATCH_SIZE
         self.num_batch = len(self.train_data)
         self.test_num_batch = len(self.test_data)
-        self.scheduler_step = SCHEDULER_STEP_SIZE
         self.n_epoch = N_EPOCH
         self.weight_decay = WEIGHT_DECAY
         self.lr = LR
-
         self.classifier = classifier
-        self.classifier.eval()
-        # self.classifier.train()
-        for param in self.classifier.parameters():
-            param.requires_grad = False
-        self.classifier.to(DEVICE)
+
+        if classifier is not None:
+            self.classifier.eval()
+            for param in self.classifier.parameters():
+                param.requires_grad = False
+            self.classifier.to(DEVICE)
         self.model = model
         self.model.to(DEVICE)
         # W and B
         if USE_WANDB:
-            wandb.watch((self.model, self.classifier), log="all", log_freq=1)
+            wandb.watch((self.model), log="all", log_freq=1)
         # early stop
         self.early_stopping = EarlyStopping(patience=EARLY_STOP_WAIT)  # hardcoded for validation loss early stop
         # checkpoints regulator
@@ -63,12 +62,10 @@ class Trainer:
 
         # attributes initializations
         self.optimizer, self.scheduler = None, None
-        self.train_step_cntr, self.val_step_cntr = 0, 0
-        self.train_misclassified_mean, self.val_misclassified_mean = None, None
-        self.classifier_stat = None
+
 
         # plotter init
-        self.plt = AdversarialPlotter()
+        # self.plt = AdversarialPlotter()
 
     def init_tensor_board(self):
         '''
@@ -84,10 +81,10 @@ class Trainer:
         # pre-train preparations
 
         self.optimizer, self.scheduler = self.define_optimizer()
-        self.model = self.model.train()  # set to train mode
         val_loss = 0
         for epoch in range(self.n_epoch):
             # train step
+            self.model.train()
             self.one_epoch_step(epoch=epoch, split='train')
 
             # validation step
@@ -100,7 +97,8 @@ class Trainer:
                 stop_training = self.early_stopping.on_epoch_end(epoch=epoch, monitored_value=val_loss)
                 if stop_training:
                     self.early_stopping.on_train_end()
-                    self.plt.finalize()
+                    # self.plt.finalize()
+                    self.evaluate()
                     exit()
 
             self.scheduler.step(val_loss)
@@ -119,7 +117,7 @@ class Trainer:
             optimizer = torch.optim.SGD(self.model.parameters(), lr=self.lr, weight_decay=self.weight_decay,
                                         nesterov=True, momentum=0.9)
         else:
-            optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr, betas=(0.9, 0.999),
+            optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr,
                                          weight_decay=self.weight_decay)
 
         # scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=self.scheduler_step, gamma=0.5)
@@ -130,79 +128,118 @@ class Trainer:
     def one_epoch_step(self, epoch=0, split='train'):
         if split == 'train':
             data = self.train_data
-            step_cntr = self.train_step_cntr
-            misclassified_mean = self.train_misclassified_mean
+
         elif split == 'validation':
             data = self.validation_data
-            step_cntr = self.train_step_cntr  # this is on purpose
-            misclassified_mean = self.val_misclassified_mean
         else:
-            data = self.test_data
-            step_cntr = None
+            raise('Split not specified')
+
+
 
         loss, orig_vertices, adex, faces = None, None, None, None
+        epoch_loss, epoch_misclassified, epoch_classified = 0, 0, 0
+
         for i, data in enumerate(data, 0):
-            orig_vertices, label, _, eigvecs, vertex_area, targets, faces, edges = data
-            cur_batch_len = orig_vertices.shape[0]
+            orig_vertices, label, _, _, _, _, faces, edges = data
             orig_vertices = orig_vertices.transpose(2, 1)
 
-            # get eigenspace vector field
-            eigen_space_v = self.model(orig_vertices).transpose(2, 1)
-            # create the adversarial example (smoothly perturbed)
-            adex = orig_vertices + torch.bmm(eigvecs, eigen_space_v).transpose(2, 1)
+            if not TRAINING_CLASSIFIER:
+                eigvecs, vertex_area, perturbed_logits, targets = 0, 0, 0, 0
+                # get eigenspace vector field
+                eigen_space_v = self.model(orig_vertices).transpose(2, 1)
+                # create the adversarial example (smoothly perturbed)
+                adex = orig_vertices + torch.bmm(eigvecs, eigen_space_v).transpose(2, 1)
 
-            perturbed_logits = self.classifier(adex)  # no grad is already implemented in the constructor
-            pred_choice_adex = perturbed_logits.data.max(1)[1]
-            print('adex:   ', pred_choice_adex)
+                # perturbed_logits = self.classifier(adex)  # no grad is already implemented in the constructor
+                # pred_choice_adex = perturbed_logits.data.max(1)[1]
+                # print('adex:   ', pred_choice_adex)
+                #
+                # logits = self.classifier(orig_vertices)
+                # pred_choice_orig = logits.data.max(1)[1]
+                # num_clas = pred_choice_orig.eq(label.squeeze()).sum().cpu()
+                # print('logits: ',pred_choice_orig)
+                # print('labels: ', label.squeeze())
+                # print('Classified: ',num_clas)
+                loss, missloss, reconstruction_loss = self.calculate_loss(orig_vertices, adex, vertex_area,
+                                                                          perturbed_logits, targets, edges)
+            else:
+                pred = self.model(orig_vertices)
+                pred = F.log_softmax(pred, dim=1)
+                loss = F.nll_loss(pred, label, reduction='sum')
 
-            logits = self.classifier(orig_vertices)
-            pred_choice_orig = logits.data.max(1)[1]
-            num_clas = pred_choice_orig.eq(label.squeeze()).sum().cpu()
-            print('logits: ',pred_choice_orig)
-            print('labels: ', label.squeeze())
-            print('Classified: ',num_clas)
-            loss, missloss, reconstruction_loss = self.calculate_loss(orig_vertices, adex, vertex_area,
-                                                                      perturbed_logits, targets, edges)
+                pred_choice = pred.data.max(1)[1]
+                num_clas = pred_choice.eq(label).cpu().sum()
 
             # Back-propagation step
-            self.optimizer.zero_grad()
-            loss.backward()
-            self.optimizer.step()
-
-            # report to tensorboard
-            pred_choice = perturbed_logits.data.max(1)[1]
-            num_misclassified = pred_choice.eq(targets).sum().cpu()
-            # num_misclassified = (~pred_choice.eq(label.squeeze())).sum().cpu()
-            if misclassified_mean is None:
-                misclassified_mean = num_misclassified / float(cur_batch_len)
-            else:
-                misclassified_mean = (misclassified_mean + (num_misclassified / float(cur_batch_len)) / (step_cntr + 1)) * ((step_cntr + 1) / (step_cntr + 2))
-
             if split == 'train':
-                if self.classifier_stat is None:
-                    self.classifier_stat = num_clas / float(cur_batch_len)
-                else:
-                    self.classifier_stat = (self.classifier_stat + (num_clas / float(cur_batch_len)) / (
-                                step_cntr + 1)) * ((step_cntr + 1) / (step_cntr + 2))
+                self.optimizer.zero_grad()
+                loss.backward()
+                self.optimizer.step()
 
-            report_to_tensorboard(split, self.writer, i, step_cntr, cur_batch_len, epoch, self.num_batch, loss.item(),
-                                  reconstruction_loss, missloss, perturbed_logits, targets, misclassified_mean, label.squeeze(), self.classifier_stat)
+            if not TRAINING_CLASSIFIER:
+                # report to tensorboard
+                pred_choice = perturbed_logits.data.max(1)[1]
+                num_misclassified = pred_choice.eq(targets).sum().cpu()
+                # num_misclassified = (~pred_choice.eq(label.squeeze())).sum().cpu()
 
-            if step_cntr is not None:
-                step_cntr += 1
+            epoch_loss = epoch_loss + loss.item()
+            epoch_classified = epoch_classified + num_clas
 
-        # update relevant step counter
-        if split == 'train':
-            self.train_step_cntr = step_cntr
-            self.train_misclassified_mean = misclassified_mean
-        elif split == 'validation':
-            self.val_step_cntr = step_cntr
-            self.val_misclassified_mean = misclassified_mean
+        # END OF TRAIN
+
+        if USE_WANDB and TRAINING_CLASSIFIER:
+            report_to_wandb_classifier(epoch=epoch, split=split, epoch_loss=epoch_loss / 70,
+                                       epoch_classified=epoch_classified)
+        elif USE_WANDB:
+            pass
+            # report_to_tensorboard(split=split, epoch_loss=epoch_loss / 70, epoch_classified=epoch_classified / 70, reconstruction_loss,
+            #                       missloss, perturbed_logits, label.squeeze())
 
         # push to visualizer every epoch - last batch
-        self.push_data_to_plotter(orig_vertices, adex, faces, epoch, split)
+        # self.push_data_to_plotter(orig_vertices, adex, faces, epoch, split)
 
         return loss.item()
+
+    def evaluate(self):
+        data = self.test_data
+        self.model.eval()
+
+        with torch.no_grad():
+            loss, orig_vertices, adex, faces = None, None, None, None
+            epoch_loss, epoch_misclassified, epoch_classified = 0, 0, 0
+
+            for i, data in enumerate(data, 0):
+                orig_vertices, label, _, _, _, _, faces, edges = data
+                orig_vertices = orig_vertices.transpose(2, 1)
+
+                if not TRAINING_CLASSIFIER:
+                    pass
+
+                else:
+                    pred = self.model(orig_vertices)
+                    pred = F.log_softmax(pred, dim=1)
+                    loss = F.nll_loss(pred, label, reduction='sum')
+
+                    pred_choice = pred.data.max(1)[1]
+                    num_clas = pred_choice.eq(label).cpu().sum()
+
+
+                if not TRAINING_CLASSIFIER:
+                    pass
+                    # # report to tensorboard
+                    # pred_choice = perturbed_logits.data.max(1)[1]
+                    # num_misclassified = pred_choice.eq(targets).sum().cpu()
+                    # # num_misclassified = (~pred_choice.eq(label.squeeze())).sum().cpu()
+
+
+        if USE_WANDB and TRAINING_CLASSIFIER:
+            report_to_wandb_classifier(epoch=0, split="test", epoch_loss=loss.item() / 15, epoch_classified=num_clas.item())
+        elif USE_WANDB:
+            pass
+            # report_to_tensorboard(split=split, epoch_loss=epoch_loss / 70, epoch_classified=epoch_classified / 70, reconstruction_loss,
+            #                       missloss, perturbed_logits, label.squeeze())
+
+
 
     def calculate_loss(self, orig_vertices, adex, vertex_area,
                        perturbed_logits, targets, edges):
@@ -240,7 +277,9 @@ class Trainer:
         return loss, missloss_out, reconstruction_loss_out
 
     def validation_step(self, epoch):
-        total_loss = self.one_epoch_step(epoch=epoch, split='validation')
+        self.model.eval()
+        with torch.no_grad():
+            total_loss = self.one_epoch_step(epoch=epoch, split='validation')
         return total_loss
 
     def push_data_to_plotter(self, orig_vertices, adex, faces, epoch, split):

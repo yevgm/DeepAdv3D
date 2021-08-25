@@ -89,14 +89,6 @@ class PointNetfeat(nn.Module):
         self.conv1 = torch.nn.Conv1d(3, 64, 1)
         self.conv2 = torch.nn.Conv1d(64, 128, 1)
         self.conv3 = torch.nn.Conv1d(128, 1024, 1)
-        if CLS_USE_BN:
-            self.bn1 = nn.BatchNorm1d(64, momentum=CLS_BATCH_NORM_MOMENTUM, track_running_stats=CLS_BATCH_NORM_USE_STATISTICS)
-            self.bn2 = nn.BatchNorm1d(128, momentum=CLS_BATCH_NORM_MOMENTUM, track_running_stats=CLS_BATCH_NORM_USE_STATISTICS)
-            self.bn3 = nn.BatchNorm1d(1024, momentum=CLS_BATCH_NORM_MOMENTUM, track_running_stats=CLS_BATCH_NORM_USE_STATISTICS)
-        else:
-            self.bn1 = nn.Identity()
-            self.bn2 = nn.Identity()
-            self.bn3 = nn.Identity()
 
         self.global_feat = global_feat
 
@@ -105,10 +97,10 @@ class PointNetfeat(nn.Module):
         # if len(x.shape)<3:
         #     x = torch.unsqueeze(x.T, 0) ## fix for geometric data loader
 
-        x = F.relu(self.bn1(self.conv1(x)))  # the first MLP layer (mlp64,64 shared)
+        x = F.relu(self.conv1(x))  # the first MLP layer (mlp64,64 shared)
 
-        x = F.relu(self.bn2(self.conv2(x)))
-        x = self.bn3(self.conv3(x))
+        x = F.relu(self.conv2(x))
+        x = self.conv3(x)
         x = torch.max(x, 2, keepdim=True)[0]
         x = x.view(-1, 1024)
         if self.global_feat:
@@ -122,25 +114,17 @@ class PointNet(nn.Module):
         self.classes = k
         self.feat = PointNetfeat()
         self.fc1 = nn.Linear(1024, 512)
-        if CLS_USE_BN:
-            self.bn1 = nn.BatchNorm1d(512, momentum=CLS_BATCH_NORM_MOMENTUM, track_running_stats=CLS_BATCH_NORM_USE_STATISTICS)
-        else:
-            self.bn1 = nn.Identity()
         self.relu = nn.ReLU()
         self.fc2 = nn.Linear(512, 256)
         self.dropout = nn.Dropout(p=0.3)
-        if CLS_USE_BN:
-            self.bn2 = nn.BatchNorm1d(256, momentum=CLS_BATCH_NORM_MOMENTUM, track_running_stats=CLS_BATCH_NORM_USE_STATISTICS)
-        else:
-            self.bn2 = nn.Identity()
         self.relu = nn.ReLU()
         self.fc3 = nn.Linear(256, self.classes)
 
     def forward(self, x):
         # x, trans, trans_feat = self.feat(x)  # x is 1024, trans is exit from TNET1, trans_Feat is exit from tnet2
         x = self.feat(x)  # x is 1024, trans is exit from TNET1, trans_Feat is exit from tnet2
-        x = F.relu(self.bn1(self.fc1(x)))
-        x = F.relu(self.bn2(self.dropout(self.fc2(x))))
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.dropout(self.fc2(x)))
         x = self.fc3(x)
         return x
 

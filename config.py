@@ -42,19 +42,20 @@ USE_WANDB = True
 #                                                   TRAIN HYPERPARAMETERS
 # ----------------------------------------------------------------------------------------------------------------------#
 UNIVERSAL_RAND_SEED = 143 #143
-EARLY_STOP_WAIT = 15  # epochs
-LR_SCHEDULER_WAIT =  7 # epochs
+EARLY_STOP_WAIT = 60  # epochs
+LR_SCHEDULER_WAIT =  30 # epochs
 SCHEDULER_STEP_SIZE = 250
-OPTIMIZER = 'AdamW' # 'Adam', 'AdamW', 'sgd'
+OPTIMIZER = 'Adam' # 'Adam', 'AdamW', 'sgd'
 
-TRAINING_CLASSIFIER = False  # turn on to switch between classifier train and model train
-LR = 1e-2 # learning rate
-WEIGHT_DECAY = 0.1 # regularization
+TRAINING_CLASSIFIER = True  # turn on to switch between classifier train and model train
+CALCULATE_EIGENVECTORS = False
+LR = 1e-3 # learning rate
+WEIGHT_DECAY = 1e-4 # regularization
 TRAIN_BATCH_SIZE = 32  # number of data examples in one batch
 TEST_BATCH_SIZE = 20
 N_EPOCH = 500  # number of train epochs
 RECON_LOSS_CONST = 200  # ratio between reconstruction loss and missclasificaition loss
-TRAIN_DATA_AUG = True
+TRAIN_DATA_AUG = False
 
 # adversarial example params:
 K = 50  #40 number of laplacian eigenvectors to take. NOTE: up to 70. more then that the model decoder is "broken" - see model
@@ -67,15 +68,15 @@ CHOOSE_LOSS = 3  ## 1 for only misclassification, 2 for only reconstruction, 3 -
 #                                                   TEST
 # ----------------------------------------------------------------------------------------------------------------------#
 # Don't forget to update the test parameters to the original train!
-SHUFFLE_TEST_DATA = True
+SHUFFLE_TEST_DATA = False
 TEST_PARAMS_DIR = os.path.join(TENSOR_LOG_DIR, "Mar-29-2021_23-51-05_Faust_Lr_0.005_Batch_32_l2_epoch_800_K_40")  # here you put the tensor_board_logs foldername to test the model
 TARGET_CLASS = 5  # the attack target - still not used\
-TEST_DATA_AUG = True
+TEST_DATA_AUG = False
 PLOT_TEST_SAMPLE = False
 TEST_EPOCHS = 1  # valid use only with "TEST_DATA_AUG = True"
 # validation set: 
 VAL_BATCH_SIZE = 20
-SHUFFLE_VAL_DATA = True
+SHUFFLE_VAL_DATA = False
 VAL_STEP_EVERY = 1  # epochs
 VAL_DATA_AUG = False
 # ----------------------------------------------------------------------------------------------------------------------#

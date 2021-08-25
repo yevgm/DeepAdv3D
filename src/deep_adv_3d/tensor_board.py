@@ -143,99 +143,63 @@ def classifier_report_to_tensorboard(tensor_obj, batch_idx, step_cntr, cur_batch
         tensor_obj.add_scalar('Accuracy/Train_classified',
                                num_classified / float(cur_batch_len), step_cntr)
 
-def report_to_tensorboard(split, tensor_obj, batch_idx, step_cntr, cur_batch_len, epoch, n_batches, total_loss,
-                          recon_loss, missclassify_loss, perturbed_logits, targets, misclassified_mean,labels, classifier_stat):
-
-    # Metrics
-    pred_choice = perturbed_logits.data.max(1)[1]
-    # num_misclassified = (~pred_choice.eq(labels)).sum().cpu()
-    num_misclassified = (pred_choice.eq(targets)).sum().cpu()
-
-
+def report_to_wandb_classifier(epoch, split, epoch_loss, epoch_classified=0):
 
     if split == 'train':
-        # report to wandb
-        if USE_WANDB:
-            wandb.log({
-                "Train\Total Loss": total_loss,
-                "Train\Misclassification Loss": missclassify_loss,
-                "Train\Reconstruction Loss": recon_loss,
-                "Train\Misclassified percent": num_misclassified / float(cur_batch_len),
-                "Train\Misclassified mean": misclassified_mean,
-                "Classifier Accuracy mean": classifier_stat})
 
-        if step_cntr % SHOW_LOSS_EVERY == SHOW_LOSS_EVERY - 1:  # every SHOW_LOSS_EVERY mini-batches
-            # old stdout prints
-            print('[Epoch #%d: Batch %d/%d] Train loss: %f, Misclassified: [%d/%d]' % (
-                epoch, n_batches, batch_idx, total_loss, float(cur_batch_len), num_misclassified.item()))
+        wandb.log({
+            "Train\Epoch Loss": epoch_loss,
+            "Train\Epoch Classified": epoch_classified})
 
-            # ...log the running loss
-            tensor_obj.add_scalar('Loss/Train_total',
-                                   total_loss, step_cntr)
-            tensor_obj.add_scalar('Loss/Train_reconstruction_loss',
-                                   RECON_LOSS_CONST * recon_loss, step_cntr)
-            tensor_obj.add_scalar('Loss/Train_misclassification_loss',
-                                   missclassify_loss, step_cntr)
-            tensor_obj.add_scalar('Accuracy/Train_Misclassified_targets',
-                                   num_misclassified / float(cur_batch_len), step_cntr)
+
+        print('[Epoch #%d] Train loss: %f, Classified: [%d/70]' % (
+            epoch, epoch_loss, epoch_classified))
     elif split == 'validation':
-        # report to wandb
-        if USE_WANDB:
-            wandb.log({
-                "Validation\Total Loss": total_loss,
-                "Validation\Misclassification Loss": missclassify_loss,
-                "Validation\Reconstruction Loss": recon_loss,
-                "Validation\Misclassified percent": num_misclassified / float(cur_batch_len),
-                "Validation\Misclassified mean": misclassified_mean})
 
-        # old stdout prints
-        print('[Epoch #%d: Batch %d/%d] Validation loss: %f, Misclassified: [%d/%d]' % (
-            epoch, n_batches, batch_idx, total_loss, float(cur_batch_len), num_misclassified.item()))
+        wandb.log({
+            "Validation\Epoch Loss": epoch_loss,
+            "Validation\Epoch Classified": epoch_classified})
 
-        # ...log the running loss
-        tensor_obj.add_scalar('Loss/Val_Total',
-                              total_loss, step_cntr)
-        tensor_obj.add_scalar('Loss/Val_Reconstruction_Loss',
-                              RECON_LOSS_CONST * recon_loss, step_cntr)
-        tensor_obj.add_scalar('Loss/Val_Misclassification_Loss',
-                              missclassify_loss, step_cntr)
-        tensor_obj.add_scalar('Accuracy/Val_Misclassified_Targets',
-                              num_misclassified / float(cur_batch_len), step_cntr)
-    else:
-        print('Test loss: %f, Misclassified: [%d/%d]' % (total_loss, float(cur_batch_len), num_misclassified.item()))
-
-        # ...log the running loss
-        tensor_obj.add_scalar('Loss/Test_total',
-                              total_loss, 1)
-        tensor_obj.add_scalar('Loss/Test_reconstruction_loss',
-                              recon_loss, 1)
-        tensor_obj.add_scalar('Loss/Test_misclassification_loss',
-                              missclassify_loss, 1)
-        tensor_obj.add_scalar('Accuracy/Test_Misclassified_targets',
-                              num_misclassified / float(cur_batch_len), 1)
-
-# def report_test_to_tensorboard(tensor_obj, total_loss, recon_loss, missclassify_loss, num_misclassified, cur_batch_len):
+        print('[Epoch #%d] Validation loss: %f, Classified: [%d/15]' % (
+            epoch, epoch_loss, epoch_classified))
+    elif split== 'test':
+        my_data = [
+            ["TestLoss", epoch_loss],
+            ["TestAccuracy", epoch_classified]
+        ]
+        columns = ["Name", "Values"]
+        data_table = wandb.Table(data=my_data, columns=columns)
+        wandb.log({"Test_Results":data_table})
+# def report_to_wandb_regressor(labels, split, epoch_loss, epoch_classified=0,
+#                           reconstruction_loss=0, missloss=0, perturbed_logits=0):
 #
-#     print('test loss: %f, Misclassified: [%d/%d]' % (total_loss, float(cur_batch_len), num_misclassified.item()))
+#     if split == 'train':
+#         # report to wandb
+#         wandb.log({
+#             "Train\Epoch Loss": epoch_loss,
+#             "Train\Misclassification Loss": missclassify_loss,
+#             "Train\Reconstruction Loss": recon_loss,
+#             "Train\Misclassified percent": num_misclassified / float(cur_batch_len),
+#             "Train\Misclassified mean": misclassified_mean,
+#             "Classifier Accuracy mean": classifier_stat})
 #
-#     # ...log the running loss
-#     tensor_obj.add_scalar('Loss/Test_total',
-#                           total_loss, 1)
-#     tensor_obj.add_scalar('Loss/Test_reconstruction_loss',
-#                           recon_loss, 1)
-#     tensor_obj.add_scalar('Loss/Test_misclassification_loss',
-#                           missclassify_loss, 1)
-#     tensor_obj.add_scalar('Accuracy/Test_Misclassified_targets',
-#                           num_misclassified / float(cur_batch_len), 1)
+#         if step_cntr % SHOW_LOSS_EVERY == SHOW_LOSS_EVERY - 1:  # every SHOW_LOSS_EVERY mini-batches
+#             # old stdout prints
+#             print('[Epoch #%d: Batch %d/%d] Train loss: %f, Misclassified: [%d/%d]' % (
+#                 epoch, n_batches, batch_idx, total_loss, float(cur_batch_len), num_misclassified.item()))
+#     elif split == 'validation':
+#         # report to wandb
+#         wandb.log({
+#             "Validation\Total Loss": total_loss,
+#             "Validation\Misclassification Loss": missclassify_loss,
+#             "Validation\Reconstruction Loss": recon_loss,
+#             "Validation\Misclassified percent": num_misclassified / float(cur_batch_len),
+#             "Validation\Misclassified mean": misclassified_mean})
+#
+#         # old stdout prints
+#         print('[Epoch #%d: Batch %d/%d] Validation loss: %f, Misclassified: [%d/%d]' % (
+#             epoch, n_batches, batch_idx, total_loss, float(cur_batch_len), num_misclassified.item()))
 
-def classifier_report_test_to_tensorboard(tensor_obj, total_loss, num_classified, number_of_test_samples):
-    print('test loss: %f, classified: [%d/%d]' % (total_loss, float(number_of_test_samples), num_classified.item()))
-
-    # ...log the running loss
-    tensor_obj.add_scalar('Loss/Test_total',
-                          total_loss, 1)
-    tensor_obj.add_scalar('Accuracy/Test_classified_targets',
-                          num_classified / float(number_of_test_samples), 1)
 
 
 if __name__ == '__main__':

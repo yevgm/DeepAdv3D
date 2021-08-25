@@ -11,6 +11,7 @@ import tqdm
 import torch
 import torch.nn.functional as func
 import random
+import wandb
 
 # variable definitions
 from config import *
@@ -31,6 +32,7 @@ from models.pointnet import PointNet
 from model_trainer_main import load_datasets
 from utils.torch.nn import *
 # from dataset.faust import FaustDataset as FaustData
+from src.deep_adv_3d.train_loop import Trainer
 
 def random_uniform_rotation(dim=3):
     H = np.eye(dim)
@@ -81,68 +83,22 @@ def rotation_z(angle, degrees=True):
 
 
 if __name__ == "__main__":
-
-    model = PointNet(k=10, feature_transform=False, global_transform=False)
-    model = model.to(DEVICE)
-
     # set seed for all platforms
     set_determinsitic_run()
 
+    if USE_WANDB:
+        wandb.init(entity="deepadv3d", project="DeepAdv3D")
+
+    model = PointNet(k=10)
+    model = model.to(DEVICE)
+
+
     # Data Loading and pre-processing
-    trainLoader, testLoader = load_datasets(dataset=DATASET_NAME, train_batch=TRAIN_BATCH_SIZE,
-                                            test_batch=TEST_BATCH_SIZE)
+    trainLoader, validationLoader, testLoader = load_datasets(dataset=DATASET_NAME, train_batch=TRAIN_BATCH_SIZE,
+                                                              test_batch=TEST_BATCH_SIZE, val_batch=VAL_BATCH_SIZE)
 
-    classifier_trainer.train(train_data=trainLoader, test_data=testLoader, classifier=model)
+    # classifier_trainer.train(train_data=trainLoader, val_data=validationLoader, test_data=testLoader, classifier=model)
+    train_ins = Trainer(train_data=trainLoader, validation_data=validationLoader, test_data=testLoader,
+                            model=model)
 
-
-    # classifier_trainer.evaluate(testLoader, classifier)
-    # ntrain.train(
-    #             train_data=trainLoader,
-    #             test_data=testLoader,
-    #             classifier=model,
-    #             batchSize=TRAIN_BATCH_SIZE,
-    #             parameters_file=PARAMS_FILE,
-    #             epoch_number=N_EPOCH,
-    #             learning_rate=LR,
-    #             train=True)
-
-
-    # model.load_state_dict(torch.load(PARAMS_FILE, map_location=DEVICE))
-    # model.eval()
-    #
-    # count = 0
-    # number_of_tests = 100
-    # # rotation invariance testing
-    # for i in np.arange(0, number_of_tests,1):
-    #     R = torch.Tensor(random_uniform_rotation()).to(DEVICE)
-    #
-    #     v_orig = testLoader.dataset[i%20][0]
-    #     true_y = testLoader.dataset[i%20][1].to(DEVICE)
-    #     v = testLoader.dataset[i%20][0].to(DEVICE)
-    #     faces = testLoader.dataset.f
-    #     Z, _, _ = model(v)
-    #     f = torch.nn.functional.log_softmax(Z, dim=1)
-    #     pred_y = f.argmax()
-    #
-    #     v_rot = v
-    #     v_rot = torch.mm(v, R).to(DEVICE)
-    #     # v_rot = np.abs(np.random.normal()) * v
-    #     v_rot = v_rot + torch.Tensor(np.random.normal(0, 0.01, size=(1, 3)).astype('f')).to(DEVICE)
-    #     # theta = np.random.uniform(0, np.pi * 2)
-    #     # rotation_matrix = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
-    #     # v = v.cpu().numpy()
-    #     # v[:, [0, 2]] = v[:, [0, 2]].dot(rotation_matrix)  # random rotation
-    #     # v = torch.from_numpy(v).to(DEVICE)
-    #     Z_rot, _, _ = model(v_rot)
-    #     f_rot = torch.nn.functional.log_softmax(Z_rot, dim=1)
-    #     pred_y_rot = f_rot.argmax()
-    #
-    #     # plot_mesh_montage([v, v_rot], [faces, faces])
-    #
-    #
-    #
-    #     count += pred_y_rot==pred_y
-    #
-    # print("accuracy is :", count/float(number_of_tests))
-
-
+    train_ins.train()

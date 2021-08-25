@@ -329,16 +329,23 @@ class FaustDatasetInMemory(data.Dataset):
             if file.endswith(".ply"):
                 self.fns.append(file)
         assert len(self.fns) == 100, "assumed that there are 100 train examples"
+
+        # Define Classes
+        cls = np.arange(0,100) % 10
         # sort - very important
         list.sort(self.fns)
-
         # split tran\test
         if self.split == 'train':
             self.fns = self.fns[0:70]
+            self.cls = cls[0:70]
         elif self.split == 'validation':
             self.fns = self.fns[70:85]
-        else:
+            self.cls = cls[70:85]
+        elif self.split == "test":
             self.fns = self.fns[85:]
+            self.cls = cls[85:]
+
+        self.cls = torch.from_numpy(self.cls.astype(np.int64)).to(DEVICE)
 
         # load all dataset to memory
         self.v = []
@@ -364,7 +371,6 @@ class FaustDatasetInMemory(data.Dataset):
             else:
                 edges = 0
             self.edges.append(edges)
-        # self.num_vertices = self.v[0].shape[0]
             self.targets = self.set_targets().to(DEVICE)
 
 
@@ -390,10 +396,10 @@ class FaustDatasetInMemory(data.Dataset):
 
         v = torch.from_numpy(v.astype(np.float32))
         # v = torch.from_numpy(np.random.rand(6890,3).astype(np.float32))  # TODO remove - it is debug!
-        cls = torch.from_numpy(np.array([index % 10]).astype(np.int64))
+        # cls = torch.from_numpy(np.array([index % 10]).astype(np.int64))
 
         # calculate laplacian eigenvectors matrix and areas
-        if TRAINING_CLASSIFIER:
+        if not CALCULATE_EIGENVECTORS:
             eigvals, eigvecs, vertex_area = 0, 0, 0
             targets = 0
         else:
@@ -406,7 +412,7 @@ class FaustDatasetInMemory(data.Dataset):
             # targets = self.set_targets()
             targets = self.targets[index]
 
-        return v.to(DEVICE), cls.to(DEVICE),  eigvals, eigvecs, vertex_area \
+        return v.to(DEVICE), self.cls[index],  eigvals, eigvecs, vertex_area \
             , targets, self.faces[index].to(DEVICE), self.edges[index]
 
     def __len__(self):
