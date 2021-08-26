@@ -140,7 +140,7 @@ class DensePointNetFeatures(nn.Module):
         return z
 
 class ShapeEncoder(nn.Module):
-    def __init__(self, code_size=1024, in_channels=3, dense=True):
+    def __init__(self, code_size=1024, in_channels=3):
         super().__init__()
         self.code_size = code_size
         self.in_channels = in_channels
@@ -208,7 +208,7 @@ class ShapeDecoder(nn.Module):
     # Where pnt_code_size == in_channels + 2*shape_code
     # Output: predicted coordinates for each point, after the deformation [B x nv x 3]
     def forward(self, x):
-        x = x.transpose(2, 1).contiguous()  # [b x nv x in_channels]
+        # x = x.transpose(2, 1).contiguous()  # [b x nv x in_channels]
         for convl, bnl in zip(self.convls[:-1], self.bnls):
             x = F.relu(bnl(convl(x)))
         out = 2 * self.thl(self.convls[-1](x))  # TODO - Fix this constant - we need a global scale
@@ -221,8 +221,8 @@ class OshriRegressor(nn.Module):
         super(OshriRegressor, self).__init__()
         self.numVertices = numVertices
         self.outDim = 3 * numVertices
-        self.enc = ShapeEncoder()
-        self.dec = ShapeDecoder()
+        self.enc = ShapeEncoder(code_size=1024, in_channels=3)
+        self.dec = ShapeDecoder(pnt_code_size=1024, out_channels=3, num_convl=5)
 
         self.enc.init_weights()
         self.dec.init_weights()

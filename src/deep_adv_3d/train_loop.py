@@ -139,7 +139,7 @@ class Trainer:
 
         for i, data in enumerate(data, 0):
             orig_vertices, label, _, _, _, targets, faces, edges = data
-            orig_vertices = orig_vertices.transpose(2, 1)
+            # orig_vertices = orig_vertices.transpose(2, 1)
 
             if not TRAINING_CLASSIFIER:
                 perturbation = self.model(orig_vertices)
