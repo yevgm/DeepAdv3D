@@ -42,8 +42,8 @@ USE_WANDB = True
 #                                                   TRAIN HYPERPARAMETERS
 # ----------------------------------------------------------------------------------------------------------------------#
 UNIVERSAL_RAND_SEED = 143 #143
-EARLY_STOP_WAIT = 60  # epochs
-LR_SCHEDULER_WAIT =  30 # epochs
+EARLY_STOP_WAIT = 120  # epochs
+LR_SCHEDULER_WAIT =  60 # epochs
 SCHEDULER_STEP_SIZE = 250
 OPTIMIZER = 'Adam' # 'Adam', 'AdamW', 'sgd'
 

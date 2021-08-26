@@ -144,6 +144,7 @@ class Trainer:
             if not TRAINING_CLASSIFIER:
                 perturbation = self.model(orig_vertices)
                 # create the adversarial example
+                # adex = perturbation
                 adex = orig_vertices + perturbation
 
                 perturbed_logits = self.classifier(adex)  # no grad is already implemented in the constructor
@@ -158,8 +159,8 @@ class Trainer:
                 # print('Classified: ',num_clas)
                 loss = self.calculate_loss(perturbed_logits=perturbed_logits, labels=label, targets=targets)
                 pred_choice = perturbed_logits.data.max(1)[1]
-                # num_misclassified = (~pred_choice.eq(label)).sum().cpu()
-                num_misclassified = (pred_choice.eq(targets)).sum().cpu()
+                # num_misclassified = (~pred_choice.eq(label)).sum().cpu()  # for untargeted attack such as crossentropy
+                num_misclassified = (pred_choice.eq(targets)).sum().cpu()  # for targeted attack
             else:
                 pred = self.model(orig_vertices)
                 pred = F.log_softmax(pred, dim=1)
@@ -213,8 +214,8 @@ class Trainer:
 
                     loss = self.calculate_loss(perturbed_logits=perturbed_logits, labels=label)
                     pred_choice = perturbed_logits.data.max(1)[1]
-                    # num_misclass = (~pred_choice.eq(label)).sum().cpu()
-                    num_misclass = (pred_choice.eq(targets)).sum().cpu()
+                    # num_misclass = (~pred_choice.eq(label)).sum().cpu()  # for untargeted attack such as crossentropy
+                    num_misclass = (pred_choice.eq(targets)).sum().cpu()  # for targeted attack
 
                 else:
                     pred = self.model(orig_vertices)
@@ -237,8 +238,8 @@ class Trainer:
 
         # if CHOOSE_LOSS == 1:
         misclassification_loss = AdversarialLoss()
-        # loss = misclassification_loss(perturbed_logits, labels)
-        loss = misclassification_loss(perturbed_logits, targets)
+        # loss = misclassification_loss(perturbed_logits, labels) # for untargeted attack
+        loss = misclassification_loss(perturbed_logits, targets) # for targeted attack
             # loss = missloss
             # missloss_out, reconstruction_loss_out = 0, 0
         # elif CHOOSE_LOSS == 2:

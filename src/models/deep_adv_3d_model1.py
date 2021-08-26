@@ -101,3 +101,134 @@ class RegressorOriginalPointnet(nn.Module):
         x = self.fc3(x)
         x = x.view(-1, 3, 6890)  # that's the only difference from pointnet, along with layer sizes
         return x
+
+    ################### OSHRI MODEL ###############################
+
+class DensePointNetFeatures(nn.Module):
+    def __init__(self, code_size, in_channels):
+        super().__init__()
+        self.conv1 = nn.Conv1d(in_channels, 64, 1)
+        self.conv2 = nn.Conv1d(in_channels + 64, 128, 1)
+        self.conv3 = nn.Conv1d(in_channels + 64 + 128, code_size, 1)
+        self.bn1 = nn.BatchNorm1d(64)
+        self.bn2 = nn.BatchNorm1d(128)
+        self.bn3 = nn.BatchNorm1d(code_size)
+
+    def init_weights(self):
+        conv_mu = 0.0
+        conv_sigma = 0.02
+        bn_gamma_mu = 1.0
+        bn_gamma_sigma = 0.02
+        bn_betta_bias = 0.0
+
+        for m in self.modules():
+            if isinstance(m, nn.Conv1d):
+                nn.init.normal_(m.weight, mean=conv_mu, std=conv_sigma)
+            elif isinstance(m, nn.BatchNorm1d):
+                nn.init.normal_(m.weight, mean=bn_gamma_mu, std=bn_gamma_sigma)  # weight=gamma, bias=betta
+                nn.init.constant_(m.bias, bn_betta_bias)
+
+    # noinspection PyTypeChecker
+    def forward(self, x):
+        # Input: Batch of Point Clouds : [b x num_vertices X in_channels]
+        # Output: The global feature vector : [b x code_size]
+        x = x.transpose(2, 1).contiguous()  # [b x in_channels x num_vertices]
+        y = F.relu(self.bn1(self.conv1(x)))  # [B x 64 x n]
+        z = F.relu(self.bn2(self.conv2(torch.cat((x, y), 1))))  # [B x 128 x n]
+        z = self.bn3(self.conv3(torch.cat((x, y, z), 1)))  # [B x code_size x n]
+        z, _ = torch.max(z, 2)  # [B x code_size]
+        return z
+
+class ShapeEncoder(nn.Module):
+    def __init__(self, code_size=1024, in_channels=3, dense=True):
+        super().__init__()
+        self.code_size = code_size
+        self.in_channels = in_channels
+
+        features = DensePointNetFeatures(self.code_size, self.in_channels)
+
+
+        self.encoder = nn.Sequential(
+            features,
+            nn.Linear(self.code_size, self.code_size),
+            nn.BatchNorm1d(self.code_size),
+            nn.ReLU()
+        )
+
+    def init_weights(self):
+        bn_gamma_mu = 1.0
+        bn_gamma_sigma = 0.02
+        bn_betta_bias = 0.0
+
+        nn.init.normal_(self.encoder[2].weight, mean=bn_gamma_mu, std=bn_gamma_sigma)  # weight=gamma
+        nn.init.constant_(self.encoder[2].bias, bn_betta_bias)  # bias=betta
+
+# Input: Batch of Point Clouds : [b x num_vertices X in_channels]
+# Output: The global feature vector : [b x code_size]
+    def forward(self, shape):
+        return self.encoder(shape)
+
+class ShapeDecoder(nn.Module):
+    CCFG = [1, 1, 2, 4, 8, 16, 16]  # Enlarge this if you need more
+
+    def __init__(self, pnt_code_size, out_channels, num_convl):
+        super().__init__()
+
+        self.pnt_code_size = pnt_code_size
+        self.out_channels = out_channels
+        if num_convl > len(self.CCFG):
+            raise NotImplementedError("Please enlarge the Conv Config vector")
+
+        self.thl = nn.Tanh()
+        self.convls = []
+        self.bnls = []
+        for i in range(num_convl - 1):
+            self.convls.append(nn.Conv1d(self.pnt_code_size // self.CCFG[i], self.pnt_code_size // self.CCFG[i + 1], 1))
+            self.bnls.append(nn.BatchNorm1d(self.pnt_code_size // self.CCFG[i + 1]))
+        self.convls.append(nn.Conv1d(self.pnt_code_size // self.CCFG[num_convl - 1], self.out_channels, 1))
+        self.convls = nn.ModuleList(self.convls)
+        self.bnls = nn.ModuleList(self.bnls)
+
+    def init_weights(self):
+        conv_mu = 0.0
+        conv_sigma = 0.02
+        bn_gamma_mu = 1.0
+        bn_gamma_sigma = 0.02
+        bn_betta_bias = 0.0
+
+        for m in self.modules():
+            if isinstance(m, nn.Conv1d):
+                nn.init.normal_(m.weight, mean=conv_mu, std=conv_sigma)
+            elif isinstance(m, nn.BatchNorm1d):
+                nn.init.normal_(m.weight, mean=bn_gamma_mu, std=bn_gamma_sigma)  # weight=gamma
+                nn.init.constant_(m.bias, bn_betta_bias)  # bias=betta
+
+    # noinspection PyTypeChecker
+    # Input: Point code for each point: [b x nv x pnt_code_size]
+    # Where pnt_code_size == in_channels + 2*shape_code
+    # Output: predicted coordinates for each point, after the deformation [B x nv x 3]
+    def forward(self, x):
+        x = x.transpose(2, 1).contiguous()  # [b x nv x in_channels]
+        for convl, bnl in zip(self.convls[:-1], self.bnls):
+            x = F.relu(bnl(convl(x)))
+        out = 2 * self.thl(self.convls[-1](x))  # TODO - Fix this constant - we need a global scale
+        out = out.transpose(2, 1)
+        return out
+
+class OshriRegressor(nn.Module):
+
+    def __init__(self, numVertices=6890):
+        super(OshriRegressor, self).__init__()
+        self.numVertices = numVertices
+        self.outDim = 3 * numVertices
+        self.enc = ShapeEncoder()
+        self.dec = ShapeDecoder()
+
+        self.enc.init_weights()
+        self.dec.init_weights()
+
+    def forward(self, x):
+        x = self.enc(x)
+        x = self.dec(x)
+        x = x.view(-1, 3, self.numVertices)
+        return x
