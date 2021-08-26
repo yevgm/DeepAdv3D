@@ -145,7 +145,7 @@ class Trainer:
                 perturbation = self.model(orig_vertices)
                 # create the adversarial example
                 # adex = perturbation
-                adex = orig_vertices + perturbation
+                adex = orig_vertices + perturbation.transpose(2, 1)
 
                 perturbed_logits = self.classifier(adex)  # no grad is already implemented in the constructor
                 # pred_choice_adex = perturbed_logits.data.max(1)[1]

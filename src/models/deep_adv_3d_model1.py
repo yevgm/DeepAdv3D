@@ -169,7 +169,7 @@ class ShapeEncoder(nn.Module):
         return self.encoder(shape)
 
 class ShapeDecoder(nn.Module):
-    CCFG = [1, 1, 2, 4, 8, 16, 16]  # Enlarge this if you need more
+    CCFG = [1, 2, 4, 8, 16]  # Enlarge this if you need more
 
     def __init__(self, pnt_code_size, out_channels, num_convl):
         super().__init__()
@@ -183,9 +183,9 @@ class ShapeDecoder(nn.Module):
         self.convls = []
         self.bnls = []
         for i in range(num_convl - 1):
-            self.convls.append(nn.Conv1d(self.pnt_code_size // self.CCFG[i], self.pnt_code_size // self.CCFG[i + 1], 1))
-            self.bnls.append(nn.BatchNorm1d(self.pnt_code_size // self.CCFG[i + 1]))
-        self.convls.append(nn.Conv1d(self.pnt_code_size // self.CCFG[num_convl - 1], self.out_channels, 1))
+            self.convls.append(nn.Conv1d(self.pnt_code_size * self.CCFG[i], self.pnt_code_size * self.CCFG[i + 1], 1))
+            self.bnls.append(nn.BatchNorm1d(self.pnt_code_size * self.CCFG[i + 1]))
+        self.convls.append(nn.Conv1d(self.pnt_code_size * self.CCFG[num_convl - 1], self.out_channels, 1))
         self.convls = nn.ModuleList(self.convls)
         self.bnls = nn.ModuleList(self.bnls)
 
@@ -212,7 +212,8 @@ class ShapeDecoder(nn.Module):
         for convl, bnl in zip(self.convls[:-1], self.bnls):
             x = F.relu(bnl(convl(x)))
         out = 2 * self.thl(self.convls[-1](x))  # TODO - Fix this constant - we need a global scale
-        out = out.transpose(2, 1)
+        # out = out.transpose(2, 1)
+        out = out.squeeze()
         return out
 
 class OshriRegressor(nn.Module):
@@ -222,13 +223,14 @@ class OshriRegressor(nn.Module):
         self.numVertices = numVertices
         self.outDim = 3 * numVertices
         self.enc = ShapeEncoder(code_size=1024, in_channels=3)
-        self.dec = ShapeDecoder(pnt_code_size=1024, out_channels=3, num_convl=5)
+        self.dec = ShapeDecoder(pnt_code_size=1024, out_channels=3 * numVertices, num_convl=5)
 
         self.enc.init_weights()
         self.dec.init_weights()
 
     def forward(self, x):
         x = self.enc(x)
+        x = x.unsqueeze(dim=2)
         x = self.dec(x)
         x = x.view(-1, 3, self.numVertices)
         return x
