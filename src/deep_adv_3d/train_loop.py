@@ -138,14 +138,16 @@ class Trainer:
         num_clas, num_misclassified = 0,0
 
         for i, data in enumerate(data, 0):
-            orig_vertices, label, _, _, _, targets, faces, edges = data
+            orig_vertices, label, _, eigvecs, _, targets, faces, edges = data
             orig_vertices = orig_vertices.transpose(2, 1)
 
             if not TRAINING_CLASSIFIER:
-                perturbation = self.model(orig_vertices)
+                eigen_space_v = self.model(orig_vertices).transpose(2, 1)
+                # perturbation = self.model(orig_vertices)
                 # create the adversarial example
                 # adex = perturbation
-                adex = orig_vertices + perturbation
+                # adex = orig_vertices + perturbation
+                adex = orig_vertices + torch.bmm(eigvecs, eigen_space_v).transpose(2, 1)
 
                 perturbed_logits = self.classifier(adex)  # no grad is already implemented in the constructor
                 # pred_choice_adex = perturbed_logits.data.max(1)[1]

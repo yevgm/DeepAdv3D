@@ -246,3 +246,26 @@ class OshriRegressor(nn.Module):
         # x = self.fc3(x)
         # x = x.view(-1, 3, 6890)  # that's the only difference from pointnet, along with layer sizes
         return x
+
+################ MODELS THAT SUPPORT EIGEN VECTORS #############
+
+
+class RegressorOriginalPointnetEigen(nn.Module):
+
+    def __init__(self, K):
+        super(RegressorOriginalPointnetEigen, self).__init__()
+        self.feat = PointNetfeat()
+        self.fc1 = nn.Linear(1024, 512)
+        self.relu = nn.ReLU()
+        self.fc2 = nn.Linear(512, 256)
+        self.dropout = nn.Dropout(p=0.3)
+        self.relu = nn.ReLU()
+        self.fc3 = nn.Linear(256, K*3)
+
+    def forward(self, x):
+        x = self.feat(x)
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.dropout(self.fc2(x)))
+        x = self.fc3(x)
+        x = x.view(-1, 3, K)
+        return x
