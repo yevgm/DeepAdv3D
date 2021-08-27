@@ -146,57 +146,60 @@ def classifier_report_to_tensorboard(tensor_obj, batch_idx, step_cntr, cur_batch
 def report_to_wandb_classifier(epoch, split, epoch_loss, epoch_classified=0):
 
     if split == 'train':
-
-        wandb.log({
-            "Train\Epoch Loss": epoch_loss,
-            "Train\Epoch Classified": epoch_classified})
+        if USE_WANDB:
+            wandb.log({
+                "Train\Epoch Loss": epoch_loss,
+                "Train\Epoch Classified": epoch_classified})
 
 
         print('[Epoch #%d] Train loss: %f, Classified: [%d/70]' % (
             epoch, epoch_loss, epoch_classified))
     elif split == 'validation':
-
-        wandb.log({
-            "Validation\Epoch Loss": epoch_loss,
-            "Validation\Epoch Classified": epoch_classified})
+        if USE_WANDB:
+            wandb.log({
+                "Validation\Epoch Loss": epoch_loss,
+                "Validation\Epoch Classified": epoch_classified})
 
         print('[Epoch #%d] Validation loss: %f, Classified: [%d/15]' % (
             epoch, epoch_loss, epoch_classified))
     elif split== 'test':
-        my_data = [
-            ["TestLoss", epoch_loss],
-            ["TestAccuracy", epoch_classified]
-        ]
-        columns = ["Name", "Values"]
-        data_table = wandb.Table(data=my_data, columns=columns)
-        wandb.log({"Test_Results":data_table})
+        if USE_WANDB:
+            my_data = [
+                ["TestLoss", epoch_loss],
+                ["TestAccuracy", epoch_classified]
+            ]
+            columns = ["Name", "Values"]
+            data_table = wandb.Table(data=my_data, columns=columns)
+            wandb.log({"Test_Results":data_table})
 
 
 def report_to_wandb_regressor(epoch, split, epoch_loss, epoch_misclassified):
 
     if split == 'train':
-        wandb.log({
-            "Train\Epoch Loss": epoch_loss,
-            "Train\Epoch Misclassified": epoch_misclassified})
+        if USE_WANDB:
+            wandb.log({
+                "Train\Epoch Loss": epoch_loss,
+                "Train\Epoch Misclassified": epoch_misclassified})
 
         print('[Epoch #%d] Train loss: %f, Misclassified: [%d/70]' % (
             epoch, epoch_loss, epoch_misclassified))
     elif split == 'validation':
-
-        wandb.log({
-            "Validation\Epoch Loss": epoch_loss,
-            "Validation\Epoch Misclassified": epoch_misclassified})
+        if USE_WANDB:
+            wandb.log({
+                "Validation\Epoch Loss": epoch_loss,
+                "Validation\Epoch Misclassified": epoch_misclassified})
 
         print('[Epoch #%d] Validation loss: %f, Misclassified: [%d/15]' % (
             epoch, epoch_loss, epoch_misclassified))
     elif split == 'test':
-        my_data = [
-            ["Test Loss", epoch_loss],
-            ["Test Misclassified/15", epoch_misclassified]
-        ]
-        columns = ["Name", "Values"]
-        data_table = wandb.Table(data=my_data, columns=columns)
-        wandb.log({"Test_Results": data_table})
+        if USE_WANDB:
+            my_data = [
+                ["Test Loss", epoch_loss],
+                ["Test Misclassified/15", epoch_misclassified]
+            ]
+            columns = ["Name", "Values"]
+            data_table = wandb.Table(data=my_data, columns=columns)
+            wandb.log({"Test_Results": data_table})
 
 
 

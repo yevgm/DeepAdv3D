@@ -37,7 +37,8 @@ FLUSH_RESULTS = 5  # in seconds
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   Weights and biases
 # ----------------------------------------------------------------------------------------------------------------------#
-USE_WANDB = False
+USE_WANDB = True
+LOG_GRADIENTS_WANDB = False  # slows down the training significantly. 
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   TRAIN HYPERPARAMETERS
 # ----------------------------------------------------------------------------------------------------------------------#
@@ -50,7 +51,7 @@ OPTIMIZER = 'Adam' # 'Adam', 'AdamW', 'sgd'
 TRAINING_CLASSIFIER = False  # turn on to switch between classifier train and model train
 CALCULATE_EIGENVECTORS = False
 LR = 1e-3 # learning rate
-WEIGHT_DECAY = 1e-4 # regularization
+WEIGHT_DECAY = 1e-4 # regularization 1e-4
 TRAIN_BATCH_SIZE = 32  # number of data examples in one batch
 TEST_BATCH_SIZE = 20
 N_EPOCH = 500  # number of train epochs
@@ -107,7 +108,7 @@ VIS_SHOW_GRID = True
 PLOT_TRAIN_IMAGES = False
 SHOW_TRAIN_SAMPLE_EVERY = 100  # plot vista / save image to folder every SHOW_TRAIN_SAMPLE_EVERY gradient steps
 # classifier bn
-CLS_USE_BN = True
+CLS_USE_BN = False
 CLS_BATCH_NORM_USE_STATISTICS = False
 CLS_BATCH_NORM_MOMENTUM = 0.1  # default is 0.1
 CLS_STRICT_PARAM_LOADING = False  # strict = False for dropping running mean and var of train batchnorm

@@ -52,8 +52,8 @@ class Trainer:
         self.model = model
         self.model.to(DEVICE)
         # W and B
-        if USE_WANDB:
-            wandb.watch((self.model), log="all", log_freq=1)
+        if LOG_GRADIENTS_WANDB:
+            wandb.watch((self.model), log="all", log_freq=5)
         # early stop
         self.early_stopping = EarlyStopping(patience=EARLY_STOP_WAIT)  # hardcoded for validation loss early stop
         # checkpoints regulator
@@ -139,13 +139,13 @@ class Trainer:
 
         for i, data in enumerate(data, 0):
             orig_vertices, label, _, _, _, targets, faces, edges = data
-            # orig_vertices = orig_vertices.transpose(2, 1)
+            orig_vertices = orig_vertices.transpose(2, 1)
 
             if not TRAINING_CLASSIFIER:
                 perturbation = self.model(orig_vertices)
                 # create the adversarial example
                 # adex = perturbation
-                adex = orig_vertices + perturbation.transpose(2, 1)
+                adex = orig_vertices + perturbation
 
                 perturbed_logits = self.classifier(adex)  # no grad is already implemented in the constructor
                 # pred_choice_adex = perturbed_logits.data.max(1)[1]
@@ -181,10 +181,10 @@ class Trainer:
 
         # END OF TRAIN
 
-        if USE_WANDB and TRAINING_CLASSIFIER:
+        if TRAINING_CLASSIFIER:
             report_to_wandb_classifier(epoch=epoch, split=split, epoch_loss=epoch_loss / 70,
                                        epoch_classified=epoch_classified)
-        elif USE_WANDB:
+        else:
             report_to_wandb_regressor(epoch=epoch, split=split, epoch_loss=epoch_loss / 70,
                                       epoch_misclassified=epoch_misclassified)
 
@@ -206,13 +206,13 @@ class Trainer:
                 orig_vertices = orig_vertices.transpose(2, 1)
 
                 if not TRAINING_CLASSIFIER:
-                    perturbation = self.model(orig_vertices).transpose(2, 1)
+                    perturbation = self.model(orig_vertices)
                     # create the adversarial example
                     adex = orig_vertices + perturbation
 
                     perturbed_logits = self.classifier(adex)  # no grad is already implemented in the constructor
 
-                    loss = self.calculate_loss(perturbed_logits=perturbed_logits, labels=label)
+                    loss = self.calculate_loss(perturbed_logits=perturbed_logits, labels=label, targets=targets)
                     pred_choice = perturbed_logits.data.max(1)[1]
                     # num_misclass = (~pred_choice.eq(label)).sum().cpu()  # for untargeted attack such as crossentropy
                     num_misclass = (pred_choice.eq(targets)).sum().cpu()  # for targeted attack

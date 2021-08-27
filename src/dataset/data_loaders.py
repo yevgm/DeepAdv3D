@@ -361,17 +361,19 @@ class FaustDatasetInMemory(data.Dataset):
             self.v.append(np.column_stack((x, y, z)))
 
             f = np.stack(plydata['face']['vertex_indices'])
-            faces = torch.from_numpy(f).type(torch.long)
-            self.faces.append(faces)
+            self.faces = torch.from_numpy(f).type(torch.long)
+            # self.faces.append(faces)
 
-            # calculate edges from faces for local euclidean similarity
-            if (self.split == 'train') & (LOSS == 'local_euclidean'):
-                e = edges_from_faces(faces)
-                edges = torch.from_numpy(e).type(torch.long).to(DEVICE)
-            else:
-                edges = 0
-            self.edges.append(edges)
-            self.targets = self.set_targets().to(DEVICE)
+
+        # calculate edges from faces for local euclidean similarity
+        if (self.split == 'train') & (LOSS == 'local_euclidean'):
+            e = edges_from_faces(self.faces)
+            edges = torch.from_numpy(e).type(torch.long)
+        else:
+            edges = 0
+
+        self.edges = edges
+        self.targets = self.set_targets()
 
 
 
@@ -402,7 +404,7 @@ class FaustDatasetInMemory(data.Dataset):
         if not CALCULATE_EIGENVECTORS:
             eigvals, eigvecs, vertex_area = 0, 0, 0
         else:
-            eigvals, eigvecs, vertex_area = eigenpairs(v, self.faces[index], K, double_precision=True)
+            eigvals, eigvecs, vertex_area = eigenpairs(v, self.faces, K, double_precision=True)
             # eigvals = eigvals.to(DEVICE)
             eigvecs = eigvecs.to(DEVICE)
             vertex_area = vertex_area.to(DEVICE)
@@ -412,7 +414,7 @@ class FaustDatasetInMemory(data.Dataset):
         targets = self.targets[index]
 
         return v.to(DEVICE), self.cls[index],  eigvals, eigvecs, vertex_area \
-            , targets, self.faces[index].to(DEVICE), self.edges[index]
+            , targets, self.faces, self.edges
 
     def __len__(self):
         return len(self.fns)

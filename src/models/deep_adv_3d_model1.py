@@ -38,25 +38,25 @@ class Encoder(nn.Module):
 
 class Decoder(nn.Module):
 
-    def __init__(self, outDim):
+    def __init__(self, in_feat, outDim):
         super(Decoder, self).__init__()
 
-        self.fc1 = nn.Linear(1024, 4 * outDim)  # 1024, 2048
+        self.fc1 = nn.Linear(in_feat, 4 * in_feat)  # 1024, 2048
         if MODEL_USE_BN:
-            self.bn1 = nn.BatchNorm1d(4 * outDim, momentum=MODEL_BATCH_NORM_MOMENTUM, track_running_stats=MODEL_BATCH_NORM_USE_STATISTICS)  # 2048
+            self.bn1 = nn.BatchNorm1d(4 * in_feat, momentum=MODEL_BATCH_NORM_MOMENTUM, track_running_stats=MODEL_BATCH_NORM_USE_STATISTICS)  # 2048
         else:
             self.bn1 = nn.Identity()
 
-        self.fc2 = nn.Linear(4 * outDim, 2 * outDim)  # 2048, 8192
+        self.fc2 = nn.Linear(4 * in_feat, 8 * in_feat)  # 2048, 8192
         if MODEL_USE_DROPOUT:
             self.dropout = nn.Dropout(p=0.3)
         else:
             self.dropout = nn.Identity()
         if MODEL_USE_BN:
-            self.bn2 = nn.BatchNorm1d(2 * outDim, momentum=MODEL_BATCH_NORM_MOMENTUM, track_running_stats=MODEL_BATCH_NORM_USE_STATISTICS)  # 8192
+            self.bn2 = nn.BatchNorm1d(8 * in_feat, momentum=MODEL_BATCH_NORM_MOMENTUM, track_running_stats=MODEL_BATCH_NORM_USE_STATISTICS)  # 8192
         else:
             self.bn2 = nn.Identity()
-        self.fc3 = nn.Linear(2 * outDim, outDim)  # 8192, outDim , 6890 is for faust
+        self.fc3 = nn.Linear(8 * in_feat, outDim)  # 8192, outDim , 6890 is for faust
 
     def forward(self, x):
         x = F.leaky_relu(self.bn1(self.fc1(x)))
@@ -72,7 +72,7 @@ class Regressor(nn.Module):
         self.numVertices = numVertices
         self.outDim = 3*numVertices
         self.enc = Encoder(firstDim)
-        self.dec = Decoder(self.outDim)
+        self.dec = Decoder(in_feat=1024,outDim=self.outDim)
 
     def forward(self, x):
         x = self.enc(x)
@@ -169,7 +169,7 @@ class ShapeEncoder(nn.Module):
         return self.encoder(shape)
 
 class ShapeDecoder(nn.Module):
-    CCFG = [1, 2, 4, 8, 16]  # Enlarge this if you need more
+    CCFG = [1, 2, 4, 8]  # Enlarge this if you need more
 
     def __init__(self, pnt_code_size, out_channels, num_convl):
         super().__init__()
@@ -223,14 +223,26 @@ class OshriRegressor(nn.Module):
         self.numVertices = numVertices
         self.outDim = 3 * numVertices
         self.enc = ShapeEncoder(code_size=1024, in_channels=3)
-        self.dec = ShapeDecoder(pnt_code_size=1024, out_channels=3 * numVertices, num_convl=5)
+        self.dec = ShapeDecoder(pnt_code_size=1024, out_channels=3 * numVertices, num_convl=4)
 
         self.enc.init_weights()
         self.dec.init_weights()
 
+        # self.fc1 = nn.Linear(1024, 4096)
+        # self.relu = nn.ReLU()
+        # self.fc2 = nn.Linear(4096, 8192)
+        # self.dropout = nn.Dropout(p=0.3)
+        # self.relu = nn.ReLU()
+        # self.fc3 = nn.Linear(8192, 6890*3)
+
     def forward(self, x):
+        x = x.transpose(2,1)
         x = self.enc(x)
         x = x.unsqueeze(dim=2)
         x = self.dec(x)
         x = x.view(-1, 3, self.numVertices)
+        # x = F.relu(self.fc1(x))
+        # x = F.relu(self.dropout(self.fc2(x)))
+        # x = self.fc3(x)
+        # x = x.view(-1, 3, 6890)  # that's the only difference from pointnet, along with layer sizes
         return x
