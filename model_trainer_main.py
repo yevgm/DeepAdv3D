@@ -79,10 +79,10 @@ if __name__ == '__main__':
     # classifier and model definition
     classifier = PointNet(k=10)
     classifier.load_state_dict(torch.load(PARAMS_FILE, map_location=DEVICE))
-    # model = RegressorOriginalPointnet()
+    model = RegressorOriginalPointnet()
     # model = OshriRegressor()
     # model = Regressor(numVertices=6890)
-    model = RegressorOriginalPointnetEigen(K=K)
+    # model = RegressorOriginalPointnetEigen(K=K)
     train_ins = Trainer(train_data=trainLoader, validation_data=validationLoader, test_data=testLoader,
                         model=model, classifier=classifier)
 

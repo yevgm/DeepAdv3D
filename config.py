@@ -43,8 +43,8 @@ LOG_GRADIENTS_WANDB = False  # slows down the training significantly.
 #                                                   TRAIN HYPERPARAMETERS
 # ----------------------------------------------------------------------------------------------------------------------#
 UNIVERSAL_RAND_SEED = 143 #143
-EARLY_STOP_WAIT = 120  # epochs
-LR_SCHEDULER_WAIT =  60 # epochs
+EARLY_STOP_WAIT = 240  # epochs
+LR_SCHEDULER_WAIT =  120 # epochs
 SCHEDULER_STEP_SIZE = 250
 OPTIMIZER = 'Adam' # 'Adam', 'AdamW', 'sgd'
 
@@ -55,16 +55,16 @@ WEIGHT_DECAY = 1e-4 # regularization 1e-4
 TRAIN_BATCH_SIZE = 32  # number of data examples in one batch
 TEST_BATCH_SIZE = 20
 N_EPOCH = 500  # number of train epochs
-RECON_LOSS_CONST = 200  # ratio between reconstruction loss and missclasificaition loss
+RECON_LOSS_CONST = 100  # ratio between reconstruction loss and missclasificaition loss
 TRAIN_DATA_AUG = False
 
 # adversarial example params:
-K = 50  #40 number of laplacian eigenvectors to take. NOTE: up to 70. more then that the model decoder is "broken" - see model
+K = 30  #40 number of laplacian eigenvectors to take. NOTE: up to 70. more then that the model decoder is "broken" - see model
 LOSS = 'l2'  # 'l2', 'local_euclidean'
 # local euclidean loss params:
 CUTOFF = 5  # 40
 NEIGHBORS = 20  # 140
-CHOOSE_LOSS = 1  ## 1 for only misclassification, 2 for only reconstruction, 3 - both
+CHOOSE_LOSS = 3  ## 1 for only misclassification, 2 for only reconstruction, 3 - both
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   TEST
 # ----------------------------------------------------------------------------------------------------------------------#

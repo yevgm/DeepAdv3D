@@ -134,11 +134,12 @@ class Trainer:
             raise('Split not specified')
 
         loss, orig_vertices, adex, faces = None, None, None, None
-        epoch_loss, epoch_misclassified, epoch_classified = 0, 0, 0
+        epoch_loss, epoch_misclassified, epoch_classified, epoch_misclass_loss, epoch_recon_loss = 0, 0, 0, 0, 0
         num_clas, num_misclassified = 0,0
 
         for i, data in enumerate(data, 0):
-            orig_vertices, label, _, eigvecs, _, targets, faces, edges = data
+            # orig_vertices, label, _, _, vertex_area, targets, faces, edges = data
+            orig_vertices, label, _, eigvecs, vertex_area, targets, faces, edges = data
             orig_vertices = orig_vertices.transpose(2, 1)
 
             if not TRAINING_CLASSIFIER:
@@ -159,7 +160,9 @@ class Trainer:
                 # print('logits: ',pred_choice_orig)
                 # print('labels: ', label.squeeze())
                 # print('Classified: ',num_clas)
-                loss = self.calculate_loss(perturbed_logits=perturbed_logits, labels=label, targets=targets)
+                loss, misloss, recon_loss = self.calculate_loss(perturbed_logits=perturbed_logits, labels=label,
+                                                                targets=targets, orig_vertices=orig_vertices,
+                                                                adex=adex, vertex_area=vertex_area)
                 pred_choice = perturbed_logits.data.max(1)[1]
                 # num_misclassified = (~pred_choice.eq(label)).sum().cpu()  # for untargeted attack such as crossentropy
                 num_misclassified = (pred_choice.eq(targets)).sum().cpu()  # for targeted attack
@@ -180,6 +183,8 @@ class Trainer:
             epoch_loss = epoch_loss + loss.item()
             epoch_classified = epoch_classified + num_clas
             epoch_misclassified = epoch_misclassified + num_misclassified
+            epoch_misclass_loss = epoch_misclass_loss + misloss
+            epoch_recon_loss = epoch_recon_loss + recon_loss
 
         # END OF TRAIN
 
@@ -188,7 +193,8 @@ class Trainer:
                                        epoch_classified=epoch_classified)
         else:
             report_to_wandb_regressor(epoch=epoch, split=split, epoch_loss=epoch_loss / 70,
-                                      epoch_misclassified=epoch_misclassified)
+                                      epoch_misclassified=epoch_misclassified, misloss=misloss / 70,
+                                      recon_loss=recon_loss / 70)
 
         # push to visualizer every epoch - last batch
         self.push_data_to_plotter(orig_vertices, adex, faces, epoch, split)
@@ -235,38 +241,45 @@ class Trainer:
 
 
 
-    def calculate_loss(self, perturbed_logits, labels, targets=None):
+    def calculate_loss(self, perturbed_logits, labels, orig_vertices=None, adex=None, vertex_area=None, targets=None):
 
-
-        # if CHOOSE_LOSS == 1:
-        misclassification_loss = AdversarialLoss()
+        # only misclassification loss
+        if CHOOSE_LOSS == 1:
+            misclassification_loss = AdversarialLoss()
         # loss = misclassification_loss(perturbed_logits, labels) # for untargeted attack
-        loss = misclassification_loss(perturbed_logits, targets) # for targeted attack
+            loss = misclassification_loss(perturbed_logits, targets) # for targeted attack
             # loss = missloss
             # missloss_out, reconstruction_loss_out = 0, 0
-        # elif CHOOSE_LOSS == 2:
-        #     if LOSS == 'l2':
-        #         reconstruction_loss = L2Similarity(orig_vertices, adex, vertex_area)
-        #     else:
-        #         reconstruction_loss = LocalEuclideanSimilarity(orig_vertices.transpose(2, 1), adex.transpose(2, 1),
-        #                                                        edges)
+
+        # only reconstruction loss
+        elif CHOOSE_LOSS == 2:
+            if LOSS == 'l2':
+                reconstruction_loss = L2Similarity(orig_vertices, adex, vertex_area)
+            else:
+                raise('Not implemented reonstruction loss')
+                # reconstruction_loss = LocalEuclideanSimilarity(orig_vertices.transpose(2, 1), adex.transpose(2, 1),
+                #                                                edges)
         #
-        #     reconstruction_loss = reconstruction_loss()
-        #     loss = reconstruction_loss
-        #     missloss_out, reconstruction_loss_out = 0, 0
-        # else:
-        #     misclassification_loss = AdversarialLoss()
-        #     missloss = misclassification_loss(perturbed_logits, targets)
-        #
-        #     if LOSS == 'l2':
-        #         reconstruction_loss = L2Similarity(orig_vertices, adex, vertex_area)
-        #     else:
+            loss = reconstruction_loss()
+            # missloss_out, reconstruction_loss_out = 0, 0
+
+        # misclass loss + recon loss
+        else:
+            misclassification_loss = AdversarialLoss()
+            missloss = misclassification_loss(perturbed_logits, targets)
+
+            if LOSS == 'l2':
+                reconstruction_loss = L2Similarity(orig_vertices, adex, vertex_area)
+            else:
+                raise('Not implemented reonstruction loss')
         #         reconstruction_loss = LocalEuclideanSimilarity(orig_vertices.transpose(2, 1), adex.transpose(2, 1), edges)
-        #
-        #     reconstruction_loss = reconstruction_loss()
-        #     loss = missloss + RECON_LOSS_CONST * reconstruction_loss
-        #     missloss_out = missloss.item()
-        #     reconstruction_loss_out = reconstruction_loss.item()
+
+            recon_loss = reconstruction_loss()
+            loss = missloss + RECON_LOSS_CONST * recon_loss
+
+            missloss_out = missloss.item()
+            recon_loss_out = recon_loss.item()
+            return loss, missloss_out, recon_loss_out
 
         return loss
 
