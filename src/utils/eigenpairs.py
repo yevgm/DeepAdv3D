@@ -30,16 +30,17 @@ def eigenpairs(pos:torch.Tensor, faces:torch.Tensor, K:int, double_precision:boo
     ai, av = area.indices().cpu(), area.values().cpu()
 
     ri, ci = si
-    S = scipy.sparse.csr_matrix( (sv, (ri, ci)), shape=(n, n))
-    S = S + scipy.sparse.eye(n, dtype=S.dtype) * EPS  # for numerical stability
+    # S = scipy.sparse.csr_matrix( (sv, (ri, ci)), shape=(n, n))
+    # S = S + scipy.sparse.eye(n, dtype=S.dtype) * EPS  # for numerical stability
 
     ri, ci = ai
     A = scipy.sparse.csr_matrix( (av, (ri, ci)), shape=(n, n))
 
-    eigvals, eigvecs = slinalg.eigsh(S , M=A, k=K, sigma=-1e-6)
+    # eigvals, eigvecs = slinalg.eigsh(S , M=A, k=K, sigma=-1e-6)
 
     # eigvals = torch.tensor(eigvals, device=device, dtype=dtype) # not required
     eigvals = 0
-    eigvecs = torch.tensor(eigvecs, device=device, dtype=dtype, requires_grad=True)
+    eigvecs = 0
+    # eigvecs = torch.tensor(eigvecs, device=device, dtype=dtype, requires_grad=True)
     areas = torch.tensor(A.diagonal(), device=device)
     return eigvals, eigvecs, areas

@@ -406,7 +406,7 @@ class FaustDatasetInMemory(data.Dataset):
         else:
             eigvals, eigvecs, vertex_area = eigenpairs(v, self.faces, K, double_precision=True)
             # eigvals = eigvals.to(DEVICE)
-            eigvecs = eigvecs.to(DEVICE)
+            # eigvecs = eigvecs.to(DEVICE)
             vertex_area = vertex_area.to(DEVICE)
 
             # draw new targets every time a new data is created
