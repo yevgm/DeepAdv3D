@@ -6,9 +6,6 @@ from torch.autograd import Variable
 import numpy as np
 import torch.nn.functional as F
 from utils.torch.nn import *
-# variable definitions
-from config import *
-
 
 # class STN3d(nn.Module):
 #     def __init__(self):
@@ -84,41 +81,55 @@ from config import *
 #         return x
 
 class PointNetfeat(nn.Module):
-    def __init__(self, global_feat=True):
+    def __init__(self, run_config):
         super(PointNetfeat, self).__init__()
+        self.latent_space_feat = run_config['LATENT_SPACE_FEAT']
         self.conv1 = torch.nn.Conv1d(3, 64, 1)
         self.conv2 = torch.nn.Conv1d(64, 128, 1)
-        self.conv3 = torch.nn.Conv1d(128, 1024, 1)
+        self.conv3 = torch.nn.Conv1d(128, run_config['LATENT_SPACE_FEAT'], 1)
+        if run_config['CLS_USE_BN']:
+            self.bn1 = nn.BatchNorm1d(64)
+            self.bn2 = nn.BatchNorm1d(128)
+            self.bn3 = nn.BatchNorm1d(run_config['LATENT_SPACE_FEAT'])
+        else:
+            self.bn1 = nn.Identity()
+            self.bn2 = nn.Identity()
+            self.bn3 = nn.Identity()
 
-        self.global_feat = global_feat
 
 
     def forward(self, x):
-        # if len(x.shape)<3:
-        #     x = torch.unsqueeze(x.T, 0) ## fix for geometric data loader
-
         x = F.relu(self.conv1(x))  # the first MLP layer (mlp64,64 shared)
-
         x = F.relu(self.conv2(x))
         x = self.conv3(x)
         x = torch.max(x, 2, keepdim=True)[0]
         x = x.view(-1, 1024)
-        if self.global_feat:
-            return x
+        return x
 
 
 class PointNet(nn.Module):
 
-    def __init__(self, k=16):
+    def __init__(self, run_config, k=16):
         super(PointNet, self).__init__()
+
         self.classes = k
-        self.feat = PointNetfeat()
-        self.fc1 = nn.Linear(1024, 512)
+        self.feat = PointNetfeat(run_config)
+        self.fc1 = nn.Linear(run_config['LATENT_SPACE_FEAT'], 512)
         self.relu = nn.ReLU()
-        self.fc2 = nn.Linear(512, 256)
-        self.dropout = nn.Dropout(p=0.3)
+        self.fc2 = nn.Linear(512, run_config['POINTNET_LAST_LAYER_SIZE'])
+        self.dropout = nn.Dropout(p=run_config['DROPOUT_PROB_CLS'])
         self.relu = nn.ReLU()
-        self.fc3 = nn.Linear(256, self.classes)
+        self.fc3 = nn.Linear(run_config['POINTNET_LAST_LAYER_SIZE'], self.classes)
+
+        if run_config['CLS_USE_BN']:
+            self.bn1 = nn.BatchNorm1d(run_config['LATENT_SPACE_FEAT'])
+            self.bn2 = nn.BatchNorm1d(512)
+            self.bn3 = nn.BatchNorm1d(run_config['POINTNET_LAST_LAYER_SIZE'])
+        else:
+            self.bn1 = nn.Identity()
+            self.bn2 = nn.Identity()
+            self.bn3 = nn.Identity()
+
 
     def forward(self, x):
         # x, trans, trans_feat = self.feat(x)  # x is 1024, trans is exit from TNET1, trans_Feat is exit from tnet2
@@ -148,6 +159,6 @@ if __name__ == '__main__':
     # out, _, _ = seg(sim_data)
     # print('seg', out.size())
 
-    model = Regressor(numVertices=6890)
-    out = model(sim_data)
+    # model = Regressor(numVertices=6890)
+    # out = model(sim_data)
     print('Regressor', out.size())

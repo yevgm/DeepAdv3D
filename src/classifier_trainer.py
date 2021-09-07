@@ -9,8 +9,6 @@ from tqdm import tqdm
 from datetime import datetime
 import numpy as np
 
-# variable definitions
-from config import *
 
 # repository modules
 from models.pointnet import PointNet
@@ -34,7 +32,7 @@ def weights_init_normal(m):
 
 def train(train_data, val_data, test_data, classifier:torch.nn.Module):
 	# load parameters:
-	# classifier.load_state_dict(torch.load(PARAMS_FILE, map_location=DEVICE))
+	# classifier.load_state_dict(torch.load(PARAMS_FILE, map_location=run_config['DEVICE']))
 
 	# initialize weights with normal distribution
 	# classifier.apply(weights_init_normal)
@@ -88,7 +86,7 @@ def evaluate(test_data, classifier, test_param_dir=TEST_PARAMS_DIR):
 	# pre-test preparations
 	s_writer = SummaryWriter(test_param_dir, flush_secs=FLUSH_RESULTS)
 	test_param_file = get_param_file(test_param_dir)
-	classifier.load_state_dict(torch.load(test_param_file, map_location=DEVICE))
+	classifier.load_state_dict(torch.load(test_param_file, map_location=run_config['DEVICE']))
 	classifier = classifier.eval()  # set to test mode
 
 

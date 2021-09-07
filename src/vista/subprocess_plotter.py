@@ -11,11 +11,10 @@ import numpy as np
 # ----------------------------------------------------------------------------------------------------------------------#
 
 class ParallelPlotterBase(Process, ABC):
-    from config import VIS_CMAP, VIS_STRATEGY, VIS_SHOW_EDGES, VIS_SMOOTH_SHADING, \
-        VIS_N_MESH_SETS, VIS_SHOW_GRID
 
-    def __init__(self):
+    def __init__(self, run_config):
         super().__init__()
+        self.run_config = run_config
         self.sd = Manager().dict()  # shared data between processes (vertices, faces .. )
         # self.lock = Manager().Lock()
         # self.lock.acquire()
@@ -25,9 +24,9 @@ class ParallelPlotterBase(Process, ABC):
         self.last_plotted_epoch = -1
         self.train_d, self.val_d, self.data_cache, self.plt_title = None, None, None, None
 
-        self.kwargs = {'smooth_shade_on': self.VIS_SMOOTH_SHADING, 'show_edges': self.VIS_SHOW_EDGES,
-                       'strategy': self.VIS_STRATEGY, 'cmap': self.VIS_CMAP,
-                       'grid_on': self.VIS_SHOW_GRID}
+        self.kwargs = {'smooth_shade_on': run_config['VIS_SMOOTH_SHADING'], 'show_edges': run_config['VIS_SHOW_EDGES'],
+                       'strategy': run_config['VIS_STRATEGY'], 'cmap': run_config['VIS_CMAP'],
+                       'grid_on': run_config['VIS_SHOW_GRID']}
 
     def run(self):
         # Init on consumer side:
@@ -102,20 +101,23 @@ class ParallelPlotterBase(Process, ABC):
 # ----------------------------------------------------------------------------------------------------------------------#
 
 class AdversarialPlotter(ParallelPlotterBase):
+    def __init__(self, run_config):
+        super().__init__(run_config)
+
     def prepare_plotter_dict(self, orig_vertices, adexs, faces):
 
-        max_b_idx = self.VIS_N_MESH_SETS
+        max_b_idx = self.run_config['VIS_N_MESH_SETS']
         dict = {'orig_vertices': orig_vertices.detach().cpu().numpy()[:max_b_idx, :, :],
                 'adexs': adexs.detach().cpu().numpy()[:max_b_idx, :, :],
                 'faces': faces.detach().cpu().numpy()[:max_b_idx]}
         return dict
 
     def plot_data(self):
-
-        p = pv.Plotter(shape=(2 * self.VIS_N_MESH_SETS, 2), title=self.plt_title)
+        run_config = self.run_config
+        p = pv.Plotter(shape=(2 * run_config['VIS_N_MESH_SETS'], 2), title=self.plt_title)
         for di, (d, set_name) in enumerate(zip([self.train_d, self.val_d], ['Train', 'Vald'])):
-            for i in range(self.VIS_N_MESH_SETS):
-                subplt_row_id = i + di * self.VIS_N_MESH_SETS
+            for i in range(run_config['VIS_N_MESH_SETS']):
+                subplt_row_id = i + di * run_config['VIS_N_MESH_SETS']
                 orig_vertices = d['orig_vertices'][i].squeeze().transpose()
                 adex = d['adexs'][i].squeeze().transpose()
                 faces = d['faces'][i].squeeze()
@@ -123,10 +125,10 @@ class AdversarialPlotter(ParallelPlotterBase):
                 zeros = np.zeros(diff.shape)
 
                 p.subplot(subplt_row_id, 0)  # original example
-                mesh_append(p, v=orig_vertices, f=faces,
+                mesh_append(p, run_config=run_config, v=orig_vertices, f=faces,
                             clr=zeros, label=f'{set_name} original {i}', **self.kwargs)
                 p.subplot(subplt_row_id, 1)  # adversarial example
-                mesh_append(p, v=adex, f=faces,
+                mesh_append(p, run_config=run_config, v=adex, f=faces,
                             clr=diff, label=f'{set_name} Adv example {i}', **self.kwargs)
                 # if self.last_plotted_epoch > 0:
                 #     p.update(force_redraw=True)

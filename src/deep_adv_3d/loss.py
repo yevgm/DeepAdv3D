@@ -1,7 +1,3 @@
-
-# variable definitions
-from config import *
-
 # repository modules
 import utils
 import torch
@@ -152,40 +148,40 @@ class L2Similarity(LossFunction):
         return L2 / N
 
 
-class LocalEuclideanSimilarity(LossFunction):
-    def __init__(self, original_pos: torch.Tensor,
-                       perturbed_pos: torch.Tensor,
-                       edges: torch.Tensor):
-        super().__init__(original_pos, perturbed_pos)
-        # check input validity
-        if original_pos.shape[-1] != 3:
-            raise ValueError("Vertices positions must have shape [b,3,n]")
-        if perturbed_pos.shape[-1] != 3:
-            raise ValueError("Vertices positions must have shape [b,3,n]")
-        if edges.shape[-1] != 2:
-            raise ValueError("Edges must have shape [b,2,n]")
-
-        self.neighborhood = NEIGHBORS
-        self.batch_size = self.original_pos.shape[0]
-        out = [kNN(pos=self.original_pos[batch, :, :],  #TODO try to find a way to automatically compute cut-off
-                        edges=edges[batch, :],
-                        neighbors_num=self.neighborhood,
-                        cutoff=CUTOFF) for batch in range(0, original_pos.shape[0])]
-        # convert to batch tensor
-        out = [out[batch].unsqueeze(0) for batch in range(0, self.batch_size)]
-        self.kNN = torch.cat(out)
-
-    def __call__(self) -> torch.Tensor:
-        n = self.original_pos.shape[1]  # vertex count
-        pos = self.original_pos
-        ppos = self.perturbed_pos
-
-        flat_kNN = self.kNN.view(self.batch_size, -1)
-        X = torch.cat([pos[batch, flat_kNN[batch, :]].view(-1, self.neighborhood, 3).unsqueeze(0)
-                       for batch in range(0, self.batch_size)])
-        Xr = torch.cat([ppos[batch, flat_kNN[batch, :]].view(-1, self.neighborhood, 3).unsqueeze(0)
-                       for batch in range(0, self.batch_size)])
-        dist = torch.norm(X - pos.view(self.batch_size, n, 1, 3), p=2, dim=-1)
-        dist_r = torch.norm(Xr - ppos.view(self.batch_size, n, 1, 3), p=2, dim=-1)
-        dist_loss = torch.nn.functional.mse_loss(dist, dist_r, reduction="mean")
-        return dist_loss
+# class LocalEuclideanSimilarity(LossFunction):
+#     def __init__(self, original_pos: torch.Tensor,
+#                        perturbed_pos: torch.Tensor,
+#                        edges: torch.Tensor):
+#         super().__init__(original_pos, perturbed_pos)
+#         # check input validity
+#         if original_pos.shape[-1] != 3:
+#             raise ValueError("Vertices positions must have shape [b,3,n]")
+#         if perturbed_pos.shape[-1] != 3:
+#             raise ValueError("Vertices positions must have shape [b,3,n]")
+#         if edges.shape[-1] != 2:
+#             raise ValueError("Edges must have shape [b,2,n]")
+#
+#         self.neighborhood = NEIGHBORS
+#         self.batch_size = self.original_pos.shape[0]
+#         out = [kNN(pos=self.original_pos[batch, :, :],  #TODO try to find a way to automatically compute cut-off
+#                         edges=edges[batch, :],
+#                         neighbors_num=self.neighborhood,
+#                         cutoff=CUTOFF) for batch in range(0, original_pos.shape[0])]
+#         # convert to batch tensor
+#         out = [out[batch].unsqueeze(0) for batch in range(0, self.batch_size)]
+#         self.kNN = torch.cat(out)
+#
+#     def __call__(self) -> torch.Tensor:
+#         n = self.original_pos.shape[1]  # vertex count
+#         pos = self.original_pos
+#         ppos = self.perturbed_pos
+#
+#         flat_kNN = self.kNN.view(self.batch_size, -1)
+#         X = torch.cat([pos[batch, flat_kNN[batch, :]].view(-1, self.neighborhood, 3).unsqueeze(0)
+#                        for batch in range(0, self.batch_size)])
+#         Xr = torch.cat([ppos[batch, flat_kNN[batch, :]].view(-1, self.neighborhood, 3).unsqueeze(0)
+#                        for batch in range(0, self.batch_size)])
+#         dist = torch.norm(X - pos.view(self.batch_size, n, 1, 3), p=2, dim=-1)
+#         dist_r = torch.norm(Xr - ppos.view(self.batch_size, n, 1, 3), p=2, dim=-1)
+#         dist_loss = torch.nn.functional.mse_loss(dist, dist_r, reduction="mean")
+#         return dist_loss

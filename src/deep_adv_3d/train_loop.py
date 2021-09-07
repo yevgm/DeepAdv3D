@@ -3,9 +3,6 @@ import torch.nn as nn
 from torch.utils.tensorboard import SummaryWriter
 from datetime import datetime
 
-# variable definitions
-from config import *
-
 
 from deep_adv_3d.loss import *
 from deep_adv_3d.utils import *
@@ -31,31 +28,34 @@ class Trainer:
                        validation_data: torch.utils.data.DataLoader,
                        test_data: torch.utils.data.DataLoader,
                        model: nn.Module,
-                       classifier:nn.Module=None):
-
+                       run_config,
+                       classifier:nn.Module=None
+                       ):
+        self.run_config = run_config
         self.train_data = train_data
         self.validation_data = validation_data
         self.test_data = test_data
-        self.batch_size = TRAIN_BATCH_SIZE
+        self.batch_size = run_config['TRAIN_BATCH_SIZE']
         self.num_batch = len(self.train_data)
         self.test_num_batch = len(self.test_data)
-        self.n_epoch = N_EPOCH
-        self.weight_decay = WEIGHT_DECAY
-        self.lr = LR
+        self.n_epoch = run_config['N_EPOCH']
+        self.weight_decay = run_config['WEIGHT_DECAY']
+        self.lr = run_config['LR']
+        self.dropout_prob = run_config['DROPOUT_PROB']
         self.classifier = classifier
 
         if classifier is not None:
             self.classifier.eval()
             for param in self.classifier.parameters():
                 param.requires_grad = False
-            self.classifier.to(DEVICE)
+            self.classifier.to(run_config['DEVICE'])
         self.model = model
-        self.model.to(DEVICE)
+        self.model.to(run_config['DEVICE'])
         # W and B
-        if LOG_GRADIENTS_WANDB:
-            wandb.watch((self.model), log="all", log_freq=5)
+        if run_config['LOG_GRADIENTS_WANDB']:
+            wandb.watch(self.model, log="all", log_freq=5)
         # early stop
-        self.early_stopping = EarlyStopping(patience=EARLY_STOP_WAIT)  # hardcoded for validation loss early stop
+        self.early_stopping = EarlyStopping(patience=run_config['EARLY_STOP_WAIT'])  # hardcoded for validation loss early stop
         # checkpoints regulator
         self.init_tensor_board()
         self.checkpoint_callback = ModelCheckpoint(filepath=self.tensor_log_dir, model=self.model)
@@ -63,20 +63,10 @@ class Trainer:
         # attributes initializations
         self.optimizer, self.scheduler = None, None
 
-
         # plotter init
-        if classifier is not None:
-            self.plt = AdversarialPlotter()
+        if run_config['USE_PLOTTER']:
+            self.plt = AdversarialPlotter(run_config)
 
-    def init_tensor_board(self):
-        '''
-        Create output directory wrapper and initialize tensorboard object instance
-        '''
-        create_data_output_dir()
-        now = datetime.now()
-        d = now.strftime("%b-%d-%Y_%H-%M-%S")
-        self.tensor_log_dir = generate_new_tensorboard_results_dir(d)
-        self.writer = SummaryWriter(self.tensor_log_dir, flush_secs=FLUSH_RESULTS)
 
     def train(self):
         # pre-train preparations
@@ -89,7 +79,7 @@ class Trainer:
             self.one_epoch_step(epoch=epoch, split='train')
 
             # validation step
-            if epoch % VAL_STEP_EVERY == 0:
+            if epoch % self.run_config['VAL_STEP_EVERY'] == 0:
                 # pass validation through model
                 val_loss = self.validation_step(epoch)
                 # check if model parameters should be saved
@@ -98,21 +88,27 @@ class Trainer:
                 stop_training = self.early_stopping.on_epoch_end(epoch=epoch, monitored_value=val_loss)
                 if stop_training:
                     self.early_stopping.on_train_end()
-                    self.plt.finalize()
+                    if self.run_config['USE_PLOTTER']:
+                        self.plt.finalize()
                     self.evaluate()
                     exit()
 
             self.scheduler.step(val_loss)
+
+        if self.run_config['USE_PLOTTER']:
+            self.plt.finalize()
+        self.evaluate()
 
 
     def define_optimizer(self):
         '''
         choose the optizimer and it's hyper-parameters
         '''
-        if OPTIMIZER == 'AdamW':
-            optimizer = torch.optim.AdamW(list(self.model.parameters()), lr=self.lr, betas=(0.9, 0.999),
+        optimizer_type = self.run_config['OPTIMIZER']
+        if optimizer_type == 'AdamW':
+            optimizer = torch.optim.AdamW(self.model.parameters(), lr=self.lr,
                                           weight_decay=self.weight_decay)
-        elif OPTIMIZER == 'sgd':
+        elif optimizer_type == 'sgd':
             optimizer = torch.optim.SGD(self.model.parameters(), lr=self.lr, weight_decay=self.weight_decay,
                                         nesterov=True, momentum=0.9)
         else:
@@ -120,7 +116,7 @@ class Trainer:
                                          weight_decay=self.weight_decay)
 
         # scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=self.scheduler_step, gamma=0.5)
-        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=LR_SCHEDULER_WAIT)
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=self.run_config['LR_SCHEDULER_WAIT'])
 
         return optimizer, scheduler
 
@@ -135,18 +131,17 @@ class Trainer:
 
         loss, orig_vertices, adex, faces = None, None, None, None
         epoch_loss, epoch_misclassified, epoch_classified, epoch_misclass_loss, epoch_recon_loss = 0, 0, 0, 0, 0
-        num_clas, num_misclassified, misloss, recon_loss = 0,0,0,0
+        num_clas, num_misclassified, misloss, recon_loss = 0, 0, 0, 0
 
         for i, data in enumerate(data, 0):
             orig_vertices, label, _, _, vertex_area, targets, faces, edges = data
             # orig_vertices, label, _, eigvecs, vertex_area, targets, faces, edges = data
             orig_vertices = orig_vertices.transpose(2, 1)
 
-            if not TRAINING_CLASSIFIER:
-                # eigen_space_v = self.model(orig_vertices).transpose(2, 1)
+
+            if not self.run_config['TRAINING_CLASSIFIER']:
                 perturbation = self.model(orig_vertices)
                 # create the adversarial example
-                # adex = perturbation
                 adex = orig_vertices + perturbation
                 # adex = orig_vertices + torch.bmm(eigvecs, eigen_space_v).transpose(2, 1)
 
@@ -188,16 +183,17 @@ class Trainer:
 
         # END OF TRAIN
 
-        if TRAINING_CLASSIFIER:
-            report_to_wandb_classifier(epoch=epoch, split=split, epoch_loss=epoch_loss / DATASET_TRAIN_SIZE,
+        if self.run_config['TRAINING_CLASSIFIER']:
+            report_to_wandb_classifier(run_config=self.run_config, epoch=epoch, split=split, epoch_loss=epoch_loss / 70,
                                        epoch_classified=epoch_classified)
         else:
-            report_to_wandb_regressor(epoch=epoch, split=split, epoch_loss=epoch_loss / DATASET_TRAIN_SIZE,
-                                      epoch_misclassified=epoch_misclassified, misloss=misloss / DATASET_TRAIN_SIZE,
-                                      recon_loss=recon_loss / DATASET_TRAIN_SIZE)
+            report_to_wandb_regressor(run_config=self.run_config, epoch=epoch, split=split, epoch_loss=epoch_loss / 70,
+                                      epoch_misclassified=epoch_misclassified, misloss=misloss / 70,
+                                      recon_loss=recon_loss / 70)
 
         # push to visualizer every epoch - last batch
-        # self.push_data_to_plotter(orig_vertices, adex, faces, epoch, split)
+        if self.run_config['USE_PLOTTER']:
+            self.push_data_to_plotter(orig_vertices, adex, faces, epoch, split)
 
         return loss.item()
 
@@ -213,7 +209,7 @@ class Trainer:
                 orig_vertices, label, _, _, _, targets, faces, edges = data
                 orig_vertices = orig_vertices.transpose(2, 1)
 
-                if not TRAINING_CLASSIFIER:
+                if not self.run_config['TRAINING_CLASSIFIER']:
                     perturbation = self.model(orig_vertices)
                     # create the adversarial example
                     adex = orig_vertices + perturbation
@@ -234,48 +230,43 @@ class Trainer:
                     num_clas = pred_choice.eq(label).cpu().sum()
 
 
-        if USE_WANDB and TRAINING_CLASSIFIER:
-            report_to_wandb_classifier(epoch=0, split="test", epoch_loss=loss.item() / 15, epoch_classified=num_clas.item())
-        elif USE_WANDB:
-            report_to_wandb_regressor(epoch=0, split="test", epoch_loss=loss.item() / 15, epoch_misclassified=num_misclass.item())
+        if self.run_config['TRAINING_CLASSIFIER']:
+            report_to_wandb_classifier(run_config=self.run_config, epoch=0, split="test", epoch_loss=loss.item() / 15, epoch_classified=num_clas.item())
+        else:
+            report_to_wandb_regressor(run_config=self.run_config, epoch=0, split="test", epoch_loss=loss.item() / 15, epoch_misclassified=num_misclass.item())
 
 
 
-    def calculate_loss(self, perturbed_logits, labels, orig_vertices=None, adex=None, vertex_area=None, targets=None):
-
+    def calculate_loss(self, perturbed_logits, labels, orig_vertices=None, adex=None, vertex_area=None, targets=None,
+                       epoch=None):
+        recon_const = self.run_config['RECON_LOSS_CONST']
         # only misclassification loss
-        if CHOOSE_LOSS == 1:
+        if self.run_config['CHOOSE_LOSS'] == 1:
             misclassification_loss = AdversarialLoss()
         # loss = misclassification_loss(perturbed_logits, labels) # for untargeted attack
             loss = misclassification_loss(perturbed_logits, targets) # for targeted attack
-            # loss = missloss
-            # missloss_out, reconstruction_loss_out = 0, 0
 
         # only reconstruction loss
-        elif CHOOSE_LOSS == 2:
-            if LOSS == 'l2':
+        elif self.run_config['CHOOSE_LOSS'] == 2:
+            if self.run_config['LOSS'] == 'l2':
                 reconstruction_loss = L2Similarity(orig_vertices, adex, vertex_area)
             else:
                 raise('Not implemented reonstruction loss')
-                # reconstruction_loss = LocalEuclideanSimilarity(orig_vertices.transpose(2, 1), adex.transpose(2, 1),
-                #                                                edges)
-        #
-            loss = reconstruction_loss()
-            # missloss_out, reconstruction_loss_out = 0, 0
 
-        # misclass loss + recon loss
+            recon_loss = reconstruction_loss()
+            loss = recon_loss, 0, recon_loss
+
         else:
             misclassification_loss = AdversarialLoss()
             missloss = misclassification_loss(perturbed_logits, targets)
 
-            if LOSS == 'l2':
+            if self.run_config['LOSS'] == 'l2':
                 reconstruction_loss = L2Similarity(orig_vertices, adex, vertex_area)
             else:
                 raise('Not implemented reonstruction loss')
-        #         reconstruction_loss = LocalEuclideanSimilarity(orig_vertices.transpose(2, 1), adex.transpose(2, 1), edges)
 
             recon_loss = reconstruction_loss()
-            loss = missloss + RECON_LOSS_CONST * recon_loss
+            loss = missloss + recon_const * recon_loss
 
             missloss_out = missloss.item()
             recon_loss_out = recon_loss.item()
@@ -289,7 +280,19 @@ class Trainer:
             total_loss = self.one_epoch_step(epoch=epoch, split='validation')
         return total_loss
 
+    def init_tensor_board(self):
+        '''
+        Create output directory wrapper and initialize tensorboard object instance
+        '''
+        create_data_output_dir(self.run_config)
+        now = datetime.now()
+        d = now.strftime("%b-%d-%Y_%H-%M-%S")
+        self.tensor_log_dir = generate_new_results_dir(date=d, run_config=self.run_config)
+        self.writer = SummaryWriter(self.tensor_log_dir, flush_secs=self.run_config['FLUSH_RESULTS'])
+
     def push_data_to_plotter(self, orig_vertices, adex, faces, epoch, split):
+        VIS_N_MESH_SETS = self.run_config['VIS_N_MESH_SETS']
+
         if split == 'train':
             data_dict = self.plt.prepare_plotter_dict(orig_vertices[:VIS_N_MESH_SETS, :, :],
                                                       adex[:VIS_N_MESH_SETS, :, :],
@@ -302,60 +305,6 @@ class Trainer:
                                                       faces[:VIS_N_MESH_SETS, :, :])
             new_data = (self.plt.uncache(), val_data_dict)
             self.plt.push(new_epoch=epoch, new_data=new_data)
-
-
-    # def evaluate(self, test_param_dir=TEST_PARAMS_DIR):  # TODO - fix this when train loop is finished
-    #     # pre-test preparations
-    #     s_writer = SummaryWriter(test_param_dir, flush_secs=FLUSH_RESULTS)
-    #     test_param_file = get_param_file(test_param_dir)
-    #     self.model.load_state_dict(torch.load(test_param_file, map_location=DEVICE), strict=MODEL_STRICT_PARAM_LOADING)
-    #     self.model = self.model.eval()  # set to test mode
-    #
-    #     running_total_loss = 0.0
-    #     running_reconstruction_loss = 0.0
-    #     running_misclassify_loss = 0.0
-    #     num_misclassified = 0
-    #     test_len = len(self.test_data.dataset)
-    #     with torch.no_grad():
-    #         # the evaluation is based purely on the misclassifications amount on the test set
-    #         for i, data in enumerate(self.test_data):
-    #             orig_vertices, label, _, eigvecs, vertex_area, targets, faces, edges = data
-    #             label = label[:, 0]
-    #             orig_vertices = orig_vertices.transpose(2, 1)
-    #
-    #
-    #             # get Eigenspace vector field
-    #             eigen_space_v = self.model(orig_vertices).transpose(2, 1)
-    #             # adversarial example (smoothly perturbed)
-    #             adex = orig_vertices + torch.bmm(eigvecs, eigen_space_v).transpose(2, 1)
-    #             # pass through classifier
-    #             logits, _, _ = self.classifier(orig_vertices)
-    #             perturbed_logits, _, _ = self.classifier(adex)
-    #
-    #             # debug
-    #             # pred_orig = logits.data.max(1)[1]
-    #             # pred_choice = perturbed_logits.data.max(1)[1]
-    #             # num_classified = pred_orig.eq(label).cpu().sum()
-    #             # num_misclassified = pred_choice.eq(targets).cpu().sum()
-    #
-    #             # visualize the output TODO: think about how exactly
-    #             if PLOT_TEST_SAMPLE & (i == 0):  # save first batch (20 examples) as png
-    #                 dump_adversarial_example_image_batch(orig_vertices, adex, faces, label, targets, logits, perturbed_logits, test_param_dir)
-    #
-    #             pred_choice = perturbed_logits.data.max(1)[1]
-    #             num_misclassified += pred_choice.eq(targets).cpu().sum()
-    #
-    #             loss, missloss, similarity_loss = self.calculate_loss(orig_vertices, adex, vertex_area,
-    #                                                                   perturbed_logits, targets, edges)
-    #
-    #             running_total_loss += loss
-    #             running_reconstruction_loss += RECON_LOSS_CONST * similarity_loss
-    #             running_misclassify_loss += missloss
-    #
-    #         report_test_to_tensorboard(s_writer, running_total_loss / self.test_num_batch,
-    #                                    running_reconstruction_loss / self.test_num_batch,
-    #                                    running_misclassify_loss / self.test_num_batch,
-    #                                    num_misclassified, test_len)
 
 
 

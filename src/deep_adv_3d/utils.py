@@ -3,9 +3,8 @@ import shutil
 import logging as log
 import warnings
 import numpy as np
-
-# variable definitions
-from config import *
+import torch
+import sys
 from vista.adv_plotter import labels
 from vista.geom_vis import plot_mesh, plot_mesh_montage
 
@@ -333,11 +332,11 @@ class ModelCheckpoint(Callback):
 #                                                   Misc Functions
 # ----------------------------------------------------------------------------------------------------------------------#
 
-def create_data_output_dir():
+def create_data_output_dir(run_config):
 
-    if not os.path.isdir(MODEL_DATA_DIR):
+    if not os.path.isdir(run_config['MODEL_DATA_DIR']):
         try:
-            os.mkdir(MODEL_DATA_DIR)
+            os.mkdir(run_config['MODEL_DATA_DIR'])
         except:
             sys.exit("New model data folder could not be created")
 
@@ -361,11 +360,11 @@ def get_param_file(dir_name):
             return os.path.join(dir_name, file)
 
 
-def dump_adversarial_example_image(orig_vertices, adex, faces, step_num, file_path):
-    if PLOT_TRAIN_IMAGES & (step_num > 0) & (step_num % SHOW_TRAIN_SAMPLE_EVERY == 0):
-        p, _ = plot_mesh_montage([orig_vertices[0].T, adex[0].T], [faces[0], faces[0]], screenshot=True)
-        path = os.path.join(file_path, "step_" + str(step_num) + ".png")
-        p.show(screenshot=path, full_screen=True)
+# def dump_adversarial_example_image(orig_vertices, adex, faces, step_num, file_path):
+#     if PLOT_TRAIN_IMAGES & (step_num > 0) & (step_num % SHOW_TRAIN_SAMPLE_EVERY == 0):
+#         p, _ = plot_mesh_montage([orig_vertices[0].T, adex[0].T], [faces[0], faces[0]], screenshot=True)
+#         path = os.path.join(file_path, "step_" + str(step_num) + ".png")
+#         p.show(screenshot=path, full_screen=True)
 
 def dump_adversarial_example_image_batch(orig_vertices, adex, faces, orig_class, targets, logits, perturbed_logits, file_path):
     # orig_v_list = []

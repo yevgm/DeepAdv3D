@@ -30,11 +30,10 @@ def identify_system():
         print(f'\tGPU {i}: {p.name} [{p.multi_processor_count} SMPs , {convert_bytes(p.total_memory)} Memory]')
 
 
-def set_determinsitic_run(seed=None):
+def set_determinsitic_run(run_config, seed=None):
     if seed is None:
         # Specific to the ShapeCompletion platform
-        from config import UNIVERSAL_RAND_SEED
-        seed = UNIVERSAL_RAND_SEED
+        seed = run_config['UNIVERSAL_RAND_SEED']
 
     # CPU Seeds
     random.seed(seed)

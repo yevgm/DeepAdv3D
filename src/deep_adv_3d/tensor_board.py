@@ -1,9 +1,7 @@
-# variable definitions
-from config import *
-
 from shutil import copyfile
 from multiprocessing import Process
 import os
+import sys
 import logging
 import psutil
 import signal
@@ -14,15 +12,14 @@ import wandb
 # ----------------------------------------------------------------------------------------------------------------------#
 class TensorboardSupervisor:
 
-    def __init__(self, log_dp=None, mode=3):
+    def __init__(self, run_config, log_dp=None, mode=3):
         # 'Mode: 0 - Does nothing. 1 - Opens up only server. 2 - Opens up only chrome. 3- Opens up both '
         super().__init__()
         self.mode = mode
         if mode not in [1, 2, 3]:
             raise ValueError(f'Invalid mode: {mode}')
         if log_dp is None:
-            from config import TENSOR_LOG_DIR
-            log_dp = TENSOR_LOG_DIR
+            log_dp = run_config['TENSOR_LOG_DIR']
         if mode != 2:
             self.server = TensorboardServer(log_dp)
             self.server.start()
@@ -90,13 +87,16 @@ def findProcessIdByName(processName):
            pass
     return listOfProcessObjects
 
-def generate_new_tensorboard_results_dir(date, mode="train", model='adv3d'):
+def generate_new_results_dir(date, run_config, model='adv3d'):
 
-    # find folder name
-    if mode == "train":
-        batch_size = TRAIN_BATCH_SIZE
-    else:
-        batch_size = TEST_BATCH_SIZE
+    batch_size = run_config['TRAIN_BATCH_SIZE']
+    TENSOR_LOG_DIR = run_config['TENSOR_LOG_DIR']
+    DATASET_NAME = run_config['DATASET_NAME']
+    LOSS = run_config['LOSS']
+    LR = run_config['LR']
+    K = run_config['K']
+    N_EPOCH = run_config['N_EPOCH']
+    REPO_ROOT = run_config['REPO_ROOT']
 
     # create the main folder if not exists
     if not os.path.isdir(TENSOR_LOG_DIR):
@@ -104,12 +104,16 @@ def generate_new_tensorboard_results_dir(date, mode="train", model='adv3d'):
             os.mkdir(TENSOR_LOG_DIR)
         except:
             sys.exit("New tensorboard folder could not be created")
-    if model == "adv3d":
-        new_tensorboard_name = date + "_" + str(DATASET_NAME)+"_Lr_"+str(LR)+"_Batch_"+str(batch_size)+"_"\
-                              +LOSS+"_epoch_"+str(N_EPOCH)+"_K_"+str(K)
+
+    if run_config['RUN_NAME'] is not None:
+        new_tensorboard_name = date + "_" + run_config['RUN_NAME']
     else:
-        new_tensorboard_name = date + "_" + str(DATASET_NAME) + "_Lr_" + str(LR) + "_Batch_" + str(batch_size) + "_" \
-                               + LOSS + "_epoch_" + str(N_EPOCH) + "_classifier_train"
+        if model == "adv3d":
+            new_tensorboard_name = date + "_" + str(DATASET_NAME)+"_Lr_"+str(LR)+"_Batch_"+str(batch_size)+"_"\
+                                  +LOSS+"_epoch_"+str(N_EPOCH)+"_K_"+str(K)
+        else:
+            new_tensorboard_name = date + "_" + str(DATASET_NAME) + "_Lr_" + str(LR) + "_Batch_" + str(batch_size) + "_" \
+                                   + LOSS + "_epoch_" + str(N_EPOCH) + "_classifier_train"
     new_dir_name = os.path.join(TENSOR_LOG_DIR, new_tensorboard_name)
 
     # create the folder if not exists
@@ -123,39 +127,39 @@ def generate_new_tensorboard_results_dir(date, mode="train", model='adv3d'):
 
     # copy current config file to log hyper parameters
     try:
-        copyfile(os.path.join(REPO_ROOT, "config.py"), os.path.join(new_dir_name, "config.py"))
+        copyfile(os.path.join(REPO_ROOT, "run_config.py"), os.path.join(new_dir_name, "run_config.py"))
     except IOError:
         sys.exit("Can't copy config file to new tensorboard log dir")
 
     return new_dir_name
 
 
-def classifier_report_to_tensorboard(tensor_obj, batch_idx, step_cntr, cur_batch_len, epoch, n_batches, total_loss,
-                                    num_classified):
-    if step_cntr % SHOW_LOSS_EVERY == SHOW_LOSS_EVERY - 1:  # every SHOW_LOSS_EVERY mini-batches
-        # old stdout prints
-        print('[Epoch #%d: Batch %d/%d] train loss: %f, Classified: [%d/%d]' % (
-            epoch, n_batches, batch_idx, total_loss, float(cur_batch_len), num_classified.item()))
+# def classifier_report_to_tensorboard(tensor_obj, batch_idx, step_cntr, cur_batch_len, epoch, n_batches, total_loss,
+#                                     num_classified):
+#     if step_cntr % SHOW_LOSS_EVERY == SHOW_LOSS_EVERY - 1:  # every SHOW_LOSS_EVERY mini-batches
+#         # old stdout prints
+#         print('[Epoch #%d: Batch %d/%d] train loss: %f, Classified: [%d/%d]' % (
+#             epoch, n_batches, batch_idx, total_loss, float(cur_batch_len), num_classified.item()))
+#
+#         # ...log the running loss
+#         tensor_obj.add_scalar('Loss/Train_total',
+#                                total_loss, step_cntr)
+#         tensor_obj.add_scalar('Accuracy/Train_classified',
+#                                num_classified / float(cur_batch_len), step_cntr)
 
-        # ...log the running loss
-        tensor_obj.add_scalar('Loss/Train_total',
-                               total_loss, step_cntr)
-        tensor_obj.add_scalar('Accuracy/Train_classified',
-                               num_classified / float(cur_batch_len), step_cntr)
-
-def report_to_wandb_classifier(epoch, split, epoch_loss, epoch_classified=0):
+def report_to_wandb_classifier(run_config, epoch, split, epoch_loss, epoch_classified=0):
 
     if split == 'train':
-        if USE_WANDB:
+        if run_config['USE_WANDB']:
             wandb.log({
                 "Train\Epoch Loss": epoch_loss,
                 "Train\Epoch Classified": epoch_classified})
 
 
         print('[Epoch #%d] Train loss: %f, Classified: [%d/%d]' % (
-            epoch, epoch_loss, epoch_classified, DATASET_TRAIN_SIZE))
+            epoch, epoch_loss, epoch_classified, run_config['DATASET_TRAIN_SIZE']))
     elif split == 'validation':
-        if USE_WANDB:
+        if run_config['USE_WANDB']:
             wandb.log({
                 "Validation\Epoch Loss": epoch_loss,
                 "Validation\Epoch Classified": epoch_classified})
@@ -163,49 +167,63 @@ def report_to_wandb_classifier(epoch, split, epoch_loss, epoch_classified=0):
         print('[Epoch #%d] Validation loss: %f, Classified: [%d/40]' % (
             epoch, epoch_loss, epoch_classified))
     elif split== 'test':
-        if USE_WANDB:
-            my_data = [
-                ["TestLoss", epoch_loss],
-                ["TestAccuracy", epoch_classified]
-            ]
-            columns = ["Name", "Values"]
-            data_table = wandb.Table(data=my_data, columns=columns)
-            wandb.log({"Test_Results":data_table})
+
+        if run_config['USE_WANDB']:
+            wandb.log({
+                "Test\loss": epoch_loss,
+                "Test\classified": epoch_classified})
+
+            print('Test loss: %f, Classified: [%d/15]' % (epoch_loss, epoch_classified))
+            # my_data = [
+            #     ["TestLoss", epoch_loss],
+            #     ["TestAccuracy", epoch_classified]
+            # ]
+            # columns = ["Name", "Values"]
+            # data_table = wandb.Table(data=my_data, columns=columns)
+            # wandb.log({"Test_Results":data_table})
 
 
-def report_to_wandb_regressor(epoch, split, epoch_loss, epoch_misclassified, misloss=None, recon_loss=None):
+def report_to_wandb_regressor(run_config, epoch, split, epoch_loss, epoch_misclassified, misloss=None, recon_loss=None):
 
     if split == 'train':
-        if USE_WANDB:
+        if run_config['USE_WANDB']:
             logdict = {"Train\Epoch Loss": epoch_loss, "Train\Epoch Misclassified": epoch_misclassified}
             if misloss is not None:
                 logdict.update({"Train/Misclass Loss": misloss})
             if recon_loss is not None:
-                logdict.update({"Train/Reconstruction Loss": RECON_LOSS_CONST*recon_loss})
+                logdict.update({"Train\Reconstruction Loss": recon_loss})
             wandb.log(logdict)
 
         print('[Epoch #%d] Train loss: %f, Misclassified: [%d/%d]' % (
-            epoch, epoch_loss, epoch_misclassified, DATASET_TRAIN_SIZE))
+            epoch, epoch_loss, epoch_misclassified, run_config['DATASET_TRAIN_SIZE']))
     elif split == 'validation':
-        if USE_WANDB:
+        if run_config['USE_WANDB']:
             logdict = {"Validation\Epoch Loss": epoch_loss, "Validation\Epoch Misclassified": epoch_misclassified}
             if misloss is not None:
                 logdict.update({"Validation/Misclass Loss": misloss})
             if recon_loss is not None:
-                logdict.update({"Validation/Reconstruction Loss": RECON_LOSS_CONST*recon_loss})
+
+                logdict.update({"Validation\Reconstruction Loss": recon_loss})
             wandb.log(logdict)
 
         print('[Epoch #%d] Validation loss: %f, Misclassified: [%d/40]' % (
             epoch, epoch_loss, epoch_misclassified))
     elif split == 'test':
-        if USE_WANDB:
-            my_data = [
-                ["Test Loss", epoch_loss],
-                ["Test Misclassified/15", epoch_misclassified]
-            ]
-            columns = ["Name", "Values"]
-            data_table = wandb.Table(data=my_data, columns=columns)
-            wandb.log({"Test_Results": data_table})
+
+        if run_config['USE_WANDB']:
+            wandb.log({
+                "Test\loss": epoch_loss,
+                "Test\misclassified": epoch_misclassified})
+
+            print('Test loss: %f, misclassified: [%d/15]' % (epoch_loss, epoch_misclassified))
+
+            # my_data = [
+            #     ["Test Loss", epoch_loss],
+            #     ["Test Misclassified/15", epoch_misclassified]
+            # ]
+            # columns = ["Name", "Values"]
+            # data_table = wandb.Table(data=my_data, columns=columns)
+            # wandb.log({"Test_Results": data_table})
 
 
 

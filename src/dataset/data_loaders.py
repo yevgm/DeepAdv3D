@@ -17,8 +17,7 @@ from utils.transforms import random_uniform_rotation
 from utils.eigenpairs import eigenpairs
 from utils.misc import edges_from_faces
 from utils.ios import read_obj_verts
-# variable definitions
-from config import *
+
 
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   Functions
@@ -207,121 +206,124 @@ from config import *
 #         return len(self.fns)
 
 
-class FaustDataset(data.Dataset):
-    def __init__(self, root, split='train', data_augmentation=False):
-        self.root = root
-        self.split = split
-        self.data_augmentation = data_augmentation
-
-        # create list of valid files
-        self.fns = []
-        for file in os.listdir(self.root):
-            if file.endswith(".ply"):
-                self.fns.append(file)
-        assert len(self.fns) == 100 , "assumed that there are 100 train examples"
-
-        # split tran\test
-        if self.split == 'train':
-            self.fns = self.fns[0:70]
-        elif self.split == 'validation':
-            self.fns = self.fns[70:85]
-        else:
-            self.fns = self.fns[85:]
-
-        # self.set_targets()
-        # self.num_vertices = 6890  # hardcoded for now
-
-
-    def __getitem__(self, index):
-        if index < 10 :
-            fn = 'tr_reg_00'+str(index)+'.ply'
-        else:
-            fn = 'tr_reg_0' + str(index)+'.ply'
-
-        with open(os.path.join(self.root, fn), 'rb') as f:
-            plydata = PlyData.read(f)
-        x = plydata['vertex']['x']
-        y = plydata['vertex']['y']
-        z = plydata['vertex']['z']
-        v = np.column_stack((x, y, z))
-        if 'red' in plydata['vertex']._property_lookup:
-            r = plydata['vertex']['red']
-            g = plydata['vertex']['green']
-            b = plydata['vertex']['blue']
-            rgb = np.column_stack((r, g, b))
-            rgb = torch.from_numpy(rgb.astype(np.float32))
-        else:
-            rgb = None
-        f = np.stack(plydata['face']['vertex_indices'])
-        faces = torch.from_numpy(f).type(torch.long).to(DEVICE)
-        self.rgb = rgb
-
-
-        # calculate edges from faces for local euclidean similarity
-        if (self.split == 'train') & (LOSS == 'local_euclidean'):
-            e = edges_from_faces(f)
-            edges = torch.from_numpy(e).type(torch.long).to(DEVICE)
-        else:
-            edges = 0
-
-        # # center and scale
-        v = v - np.expand_dims(np.mean(v, axis=0), 0)  # center
-        # dist = np.max(np.sqrt(np.sum(v ** 2, axis=1)), 0)
-        # v = v / dist  # scale
-
-        if self.data_augmentation:
-            # theta = np.random.uniform(0, np.pi * 2)
-            # rotation_matrix = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
-            # v[:, [0, 2]] = v[:, [0, 2]].dot(rotation_matrix)  # random Z rotation
-
-            # random unitary rotation
-            r = random_uniform_rotation()
-            v = v @ r
-            # random translation
-            v += np.random.normal(0, 0.01, size=(1, 3))
-
-        v = torch.from_numpy(v.astype(np.float32))
-        cls = torch.from_numpy(np.array([index % 10]).astype(np.int64))
-
-        # calculate laplacian eigenvectors matrix and areas
-        if TRAINING_CLASSIFIER:
-            eigvals, eigvecs, vertex_area = 0, 0, 0
-            targets = 0
-        else:
-            eigvals, eigvecs, vertex_area = eigenpairs(v, faces, K, double_precision=True)
-            # eigvals = eigvals.to(DEVICE)
-            eigvecs = eigvecs.to(DEVICE)
-            vertex_area = vertex_area.to(DEVICE)
-
-            # draw new targets every time a new data is created
-            targets = self.set_targets()
-            targets = targets.to(DEVICE)[index]
-
-        return v.to(DEVICE), cls.to(DEVICE), eigvals, eigvecs, vertex_area, \
-               targets, faces, edges
-
-    def __len__(self):
-        return len(self.fns)
-
-    def set_targets(self):
-        # draw random target for each shape
-        targets = np.zeros(len(self))-1
-        for i in np.arange(0, len(self)):
-            target = random.randint(0, 9)
-            while target == (i % 10):
-                target = random.randint(0, 9)
-            targets[i] = target
-        targets = torch.from_numpy(targets).long().to(DEVICE)
-        return targets
+# class FaustDataset(data.Dataset):
+#     def __init__(self, root, split='train', data_augmentation=False):
+#         self.root = root
+#         self.split = split
+#         self.data_augmentation = data_augmentation
+#
+#         # create list of valid files
+#         self.fns = []
+#         for file in os.listdir(self.root):
+#             if file.endswith(".ply"):
+#                 self.fns.append(file)
+#         assert len(self.fns) == 100 , "assumed that there are 100 train examples"
+#
+#         # split tran\test
+#         if self.split == 'train':
+#             self.fns = self.fns[0:70]
+#         elif self.split == 'validation':
+#             self.fns = self.fns[70:85]
+#         else:
+#             self.fns = self.fns[85:]
+#
+#         # self.set_targets()
+#         # self.num_vertices = 6890  # hardcoded for now
+#
+#
+#     def __getitem__(self, index):
+#         if index < 10 :
+#             fn = 'tr_reg_00'+str(index)+'.ply'
+#         else:
+#             fn = 'tr_reg_0' + str(index)+'.ply'
+#
+#         with open(os.path.join(self.root, fn), 'rb') as f:
+#             plydata = PlyData.read(f)
+#         x = plydata['vertex']['x']
+#         y = plydata['vertex']['y']
+#         z = plydata['vertex']['z']
+#         v = np.column_stack((x, y, z))
+#         if 'red' in plydata['vertex']._property_lookup:
+#             r = plydata['vertex']['red']
+#             g = plydata['vertex']['green']
+#             b = plydata['vertex']['blue']
+#             rgb = np.column_stack((r, g, b))
+#             rgb = torch.from_numpy(rgb.astype(np.float32))
+#         else:
+#             rgb = None
+#         f = np.stack(plydata['face']['vertex_indices'])
+#         faces = torch.from_numpy(f).type(torch.long).to(run_config['DEVICE'])
+#         self.rgb = rgb
+#
+#
+#         # calculate edges from faces for local euclidean similarity
+#         if (self.split == 'train') & (LOSS == 'local_euclidean'):
+#             e = edges_from_faces(f)
+#             edges = torch.from_numpy(e).type(torch.long).to(run_config['DEVICE'])
+#         else:
+#             edges = 0
+#
+#         # # center and scale
+#         v = v - np.expand_dims(np.mean(v, axis=0), 0)  # center
+#         # dist = np.max(np.sqrt(np.sum(v ** 2, axis=1)), 0)
+#         # v = v / dist  # scale
+#
+#         if self.data_augmentation:
+#             # theta = np.random.uniform(0, np.pi * 2)
+#             # rotation_matrix = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
+#             # v[:, [0, 2]] = v[:, [0, 2]].dot(rotation_matrix)  # random Z rotation
+#
+#             # random unitary rotation
+#             r = random_uniform_rotation()
+#             v = v @ r
+#             # random translation
+#             v += np.random.normal(0, 0.01, size=(1, 3))
+#
+#         v = torch.from_numpy(v.astype(np.float32))
+#         cls = torch.from_numpy(np.array([index % 10]).astype(np.int64))
+#
+#         # calculate laplacian eigenvectors matrix and areas
+#         if TRAINING_CLASSIFIER:
+#             eigvals, eigvecs, vertex_area = 0, 0, 0
+#             targets = 0
+#         else:
+#             eigvals, eigvecs, vertex_area = eigenpairs(v, faces, K, double_precision=True)
+#             # eigvals = eigvals.to(run_config['DEVICE'])
+#             eigvecs = eigvecs.to(run_config['DEVICE'])
+#             vertex_area = vertex_area.to(run_config['DEVICE'])
+#
+#             # draw new targets every time a new data is created
+#             targets = self.set_targets()
+#             targets = targets.to(run_config['DEVICE'])[index]
+#
+#         return v.to(run_config['DEVICE']), cls.to(run_config['DEVICE']), eigvals, eigvecs, vertex_area, \
+#                targets, faces, edges
+#
+#     def __len__(self):
+#         return len(self.fns)
+#
+#     def set_targets(self):
+#         # draw random target for each shape
+#         targets = np.zeros(len(self))-1
+#         for i in np.arange(0, len(self)):
+#             target = random.randint(0, 9)
+#             while target == (i % 10):
+#                 target = random.randint(0, 9)
+#             targets[i] = target
+#         targets = torch.from_numpy(targets).long().to(run_config['DEVICE'])
+#         return targets
 
 
 
 class FaustDatasetInMemory(data.Dataset):
 
-    def __init__(self, root, split='train', data_augmentation=False):
+    def __init__(self, run_config, root, split='train', data_augmentation=False):
+        self.run_config = run_config
         self.root = root
         self.split = split
         self.data_augmentation = data_augmentation
+        run_config['DEVICE'] = run_config['DEVICE']
+        CALCULATE_EIGENVECTORS = run_config['CALCULATE_EIGENVECTORS']
 
         # create list of valid files
         self.fns = []
@@ -345,7 +347,7 @@ class FaustDatasetInMemory(data.Dataset):
             self.fns = self.fns[85:]
             self.cls = cls[85:]
 
-        self.cls = torch.from_numpy(self.cls.astype(np.int64)).to(DEVICE)
+        self.cls = torch.from_numpy(self.cls.astype(np.int64)).to(run_config['DEVICE'])
 
         # load all dataset to memory
         self.v = []
@@ -366,11 +368,19 @@ class FaustDatasetInMemory(data.Dataset):
 
 
         # calculate edges from faces for local euclidean similarity
-        if (self.split == 'train') & (LOSS == 'local_euclidean'):
+        if (self.split == 'train') & (self.run_config['LOSS'] == 'local_euclidean'):
             e = edges_from_faces(self.faces)
             edges = torch.from_numpy(e).type(torch.long)
         else:
             edges = 0
+
+        # Calculate Eigenvectors and areas of all the data
+        if CALCULATE_EIGENVECTORS and (data_augmentation == False):
+            for v in self.v:
+                eigvals, eigvecs, vertex_area = eigenpairs(v, self.faces, self.run_config['K'], double_precision=True)
+                self.eigvecs.append(eigvecs)
+                self.vertex_area.append(vertex_area)
+
 
         self.edges = edges
         self.targets = self.set_targets()
@@ -401,19 +411,25 @@ class FaustDatasetInMemory(data.Dataset):
 
 
         # calculate laplacian eigenvectors matrix and areas
-        if not CALCULATE_EIGENVECTORS:
+        if not self.run_config['CALCULATE_EIGENVECTORS']:
             eigvals, eigvecs, vertex_area = 0, 0, 0
         else:
-            eigvals, eigvecs, vertex_area = eigenpairs(v, self.faces, K, double_precision=True)
-            # eigvals = eigvals.to(DEVICE)
-            # eigvecs = eigvecs.to(DEVICE)
-            vertex_area = vertex_area.to(DEVICE)
+
+            if self.data_augmentation == True:
+                eigvals, eigvecs, vertex_area = eigenpairs(v, self.faces, self.run_config['K'], double_precision=True)
+                # eigvals = eigvals.to(run_config['DEVICE'])
+                eigvecs = eigvecs.to(self.run_config['DEVICE'])
+                vertex_area = vertex_area.to(self.run_config['DEVICE'])
+            else:
+                eigvals = 0
+                eigvecs = self.eigvecs[index].to(self.run_config['DEVICE'])
+                vertex_area = self.vertex_area[index].to(self.run_config['DEVICE'])
 
             # draw new targets every time a new data is created
             # targets = self.set_targets()
         targets = self.targets[index]
 
-        return v.to(DEVICE), self.cls[index],  eigvals, eigvecs, vertex_area \
+        return v.to(self.run_config['DEVICE']), self.cls[index],  eigvals, eigvecs, vertex_area \
             , targets, self.faces, self.edges
 
     def __len__(self):
@@ -427,101 +443,104 @@ class FaustDatasetInMemory(data.Dataset):
             while target == (i % 10):
                 target = random.randint(0, 9)
             targets[i] = target
-        targets = torch.from_numpy(targets).long().to(DEVICE)
+        targets = torch.from_numpy(targets).long().to(self.run_config['DEVICE'])
         return targets
 
-class Shrec14Dataset(data.Dataset):
-    def __init__(self, root, split='train', data_augmentation=False):
-        self.root = root
-        self.split = split
-        self.data_augmentation = data_augmentation
-
-        # create list of valid files
-        self.fns = []
-        for file in os.listdir(self.root):
-            if file.endswith(".obj"):
-                self.fns.append(file.split('.')[0])
-        assert len(self.fns) == 400 , "assumed that there are 400 train examples"
-        # sort - very important
-        list.sort(self.fns, key=int)
-        self.fns = [os.path.join(self.root, s + '.obj') for s in self.fns]
-
-        # split tran\test
-        if self.split == 'train':
-            self.fns = self.fns[0:320]
-        elif self.split == 'validation':
-            self.fns = self.fns[320:360]
-        else:
-            self.fns = self.fns[360:]
-
-
-    def __getitem__(self, index):
-        assert index >= 0 & index < 400, "bad index"
-
-        v, f = read_obj_verts(self.fns[index], 15000, 29996)
-        faces = torch.from_numpy(f).type(torch.long).to(DEVICE)
-
-        # calculate edges from faces for local euclidean similarity
-        if (self.split == 'train') & (LOSS == 'local_euclidean'):
-            e = edges_from_faces(f)
-            edges = torch.from_numpy(e).type(torch.long).to(DEVICE)
-        else:
-            edges = 0
-
-        # center
-        v = v - np.expand_dims(np.mean(v, axis=0), 0)  # center
-
-        if self.data_augmentation:
-            # theta = np.random.uniform(0, np.pi * 2)
-            # rotation_matrix = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
-            # v[:, [0, 2]] = v[:, [0, 2]].dot(rotation_matrix)  # random Z rotation
-
-            # random unitary rotation
-            r = random_uniform_rotation()
-            v = v @ r
-            # random translation
-            v += np.random.normal(0, 0.01, size=(1, 3))
-
-        v = torch.from_numpy(v.astype(np.float32))
-        cls = torch.from_numpy(np.array([index % 10]).astype(np.int64))
-
-        # calculate laplacian eigenvectors matrix and areas
-        if TRAINING_CLASSIFIER:
-            eigvals, eigvecs, vertex_area = 0, 0, 0
-            targets = 0
-        else:
-            eigvals, eigvecs, vertex_area = eigenpairs(v, faces, K, double_precision=True)
-            # eigvals = eigvals.to(DEVICE)
-            eigvecs = eigvecs.to(DEVICE)
-            vertex_area = vertex_area.to(DEVICE)
-
-            # draw new targets every time a new data is created
-            targets = self.set_targets()
-            targets = targets.to(DEVICE)[index]
-
-        return v.to(DEVICE), cls.to(DEVICE), eigvals, eigvecs, vertex_area, \
-               targets, faces, edges
-
-    def __len__(self):
-        return len(self.fns)
-
-    def set_targets(self):
-        # draw random target for each shape
-        targets = np.zeros(len(self))-1
-        for i in np.arange(0, len(self)):
-            target = random.randint(0, 9)
-            while target == (i % 10):
-                target = random.randint(0, 9)
-            targets[i] = target
-        targets = torch.from_numpy(targets).long().to(DEVICE)
-        return targets
+# class Shrec14Dataset(data.Dataset):
+#     def __init__(self, root, split='train', data_augmentation=False):
+#         self.root = root
+#         self.split = split
+#         self.data_augmentation = data_augmentation
+#
+#         # create list of valid files
+#         self.fns = []
+#         for file in os.listdir(self.root):
+#             if file.endswith(".obj"):
+#                 self.fns.append(file.split('.')[0])
+#         assert len(self.fns) == 400 , "assumed that there are 400 train examples"
+#         # sort - very important
+#         list.sort(self.fns, key=int)
+#         self.fns = [os.path.join(self.root, s + '.obj') for s in self.fns]
+#
+#         # split tran\test
+#         if self.split == 'train':
+#             self.fns = self.fns[0:320]
+#         elif self.split == 'validation':
+#             self.fns = self.fns[320:360]
+#         else:
+#             self.fns = self.fns[360:]
+#
+#
+#     def __getitem__(self, index):
+#         assert index >= 0 & index < 400, "bad index"
+#
+#         v, f = read_obj_verts(self.fns[index], 15000, 29996)
+#         faces = torch.from_numpy(f).type(torch.long).to(DEVICE)
+#
+#         # calculate edges from faces for local euclidean similarity
+#         if (self.split == 'train') & (LOSS == 'local_euclidean'):
+#             e = edges_from_faces(f)
+#             edges = torch.from_numpy(e).type(torch.long).to(DEVICE)
+#         else:
+#             edges = 0
+#
+#         # center
+#         v = v - np.expand_dims(np.mean(v, axis=0), 0)  # center
+#
+#         if self.data_augmentation:
+#             # theta = np.random.uniform(0, np.pi * 2)
+#             # rotation_matrix = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
+#             # v[:, [0, 2]] = v[:, [0, 2]].dot(rotation_matrix)  # random Z rotation
+#
+#             # random unitary rotation
+#             r = random_uniform_rotation()
+#             v = v @ r
+#             # random translation
+#             v += np.random.normal(0, 0.01, size=(1, 3))
+#
+#         v = torch.from_numpy(v.astype(np.float32))
+#         cls = torch.from_numpy(np.array([index % 10]).astype(np.int64))
+#
+#         # calculate laplacian eigenvectors matrix and areas
+#         if TRAINING_CLASSIFIER:
+#             eigvals, eigvecs, vertex_area = 0, 0, 0
+#             targets = 0
+#         else:
+#             eigvals, eigvecs, vertex_area = eigenpairs(v, faces, K, double_precision=True)
+#             # eigvals = eigvals.to(DEVICE)
+#             eigvecs = eigvecs.to(DEVICE)
+#             vertex_area = vertex_area.to(DEVICE)
+#
+#             # draw new targets every time a new data is created
+#             targets = self.set_targets()
+#             targets = targets.to(DEVICE)[index]
+#
+#         return v.to(DEVICE), cls.to(DEVICE), eigvals, eigvecs, vertex_area, \
+#                targets, faces, edges
+#
+#     def __len__(self):
+#         return len(self.fns)
+#
+#     def set_targets(self):
+#         # draw random target for each shape
+#         targets = np.zeros(len(self))-1
+#         for i in np.arange(0, len(self)):
+#             target = random.randint(0, 9)
+#             while target == (i % 10):
+#                 target = random.randint(0, 9)
+#             targets[i] = target
+#         targets = torch.from_numpy(targets).long().to(DEVICE)
+#         return targets
 
 
 class Shrec14DatasetInMemory(data.Dataset):
-    def __init__(self, root, split='train', data_augmentation=False):
+    def __init__(self, run_config, root, split='train', data_augmentation=False):
+        self.run_config = run_config
         self.root = root
         self.split = split
         self.data_augmentation = data_augmentation
+        run_config['DEVICE'] = run_config['DEVICE']
+        CALCULATE_EIGENVECTORS = run_config['CALCULATE_EIGENVECTORS']
 
         # create list of valid files
         self.fns = []
@@ -539,16 +558,16 @@ class Shrec14DatasetInMemory(data.Dataset):
 
         # split tran\test
         if self.split == 'train':
-            self.fns = self.fns[0:DATASET_TRAIN_SIZE]
-            self.cls = cls[0:DATASET_TRAIN_SIZE]
+            self.fns = self.fns[0:self.run_config['DATASET_TRAIN_SIZE']]
+            self.cls = cls[0:self.run_config['DATASET_TRAIN_SIZE']]
         elif self.split == 'validation':
-            self.fns = self.fns[DATASET_TRAIN_SIZE:360]
-            self.cls = cls[DATASET_TRAIN_SIZE:360]
+            self.fns = self.fns[self.run_config['DATASET_TRAIN_SIZE']:360]
+            self.cls = cls[self.run_config['DATASET_TRAIN_SIZE']:360]
         elif self.split == "test":
             self.fns = self.fns[360:]
             self.cls = cls[360:]
 
-        self.cls = torch.from_numpy(self.cls.astype(np.int64)).to(DEVICE)
+        self.cls = torch.from_numpy(self.cls.astype(np.int64)).to(self.run_config['DEVICE'])
         # load all dataset to memory
         self.v = []
         self.faces = []
@@ -564,9 +583,9 @@ class Shrec14DatasetInMemory(data.Dataset):
             self.faces.append(faces)
 
         # calculate edges from faces for local euclidean similarity
-        if (self.split == 'train') & (LOSS == 'local_euclidean'):
+        if (self.split == 'train') & (self.run_config['LOSS'] == 'local_euclidean'):
             e = edges_from_faces(self.faces)
-            edges = torch.from_numpy(e).type(torch.long).to(DEVICE)
+            edges = torch.from_numpy(e).type(torch.long).to(self.run_config['DEVICE'])
         else:
             edges = 0
 
@@ -597,19 +616,19 @@ class Shrec14DatasetInMemory(data.Dataset):
         v = torch.from_numpy(v.astype(np.float32))
 
         # calculate laplacian eigenvectors matrix and areas
-        if not CALCULATE_EIGENVECTORS:
+        if not self.run_config['CALCULATE_EIGENVECTORS']:
             eigvals, eigvecs, vertex_area = 0, 0, 0
         else:
-            eigvals, eigvecs, vertex_area = eigenpairs(v, self.faces, K, double_precision=True)
+            eigvals, eigvecs, vertex_area = eigenpairs(v, self.faces, self.run_config['K'], double_precision=True)
             # eigvals = eigvals.to(DEVICE)
             # eigvecs = eigvecs.to(DEVICE)
-            vertex_area = vertex_area.to(DEVICE)
+            vertex_area = vertex_area.to(self.run_config['DEVICE'])
 
             # draw new targets every time a new data is created
             # targets = self.set_targets()
         targets = self.targets[index]
 
-        return v.to(DEVICE), self.cls[index], eigvals, eigvecs, vertex_area \
+        return v.to(self.run_config['DEVICE']), self.cls[index], eigvals, eigvecs, vertex_area \
             , targets, self.faces[index], self.edges
 
     def __len__(self):
@@ -623,7 +642,7 @@ class Shrec14DatasetInMemory(data.Dataset):
             while target == (i % 10):
                 target = random.randint(0, 9)
             targets[i] = target
-        targets = torch.from_numpy(targets).long().to(DEVICE)
+        targets = torch.from_numpy(targets).long().to(self.run_config['DEVICE'])
         return targets
 
 
