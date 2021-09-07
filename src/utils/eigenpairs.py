@@ -4,9 +4,6 @@ import torch
 
 from .laplacian import laplacebeltrami_FEM
 
-# variable definitions
-from config import *
-
 
 def eigenpairs(pos:torch.Tensor, faces:torch.Tensor, K:int, double_precision:bool=False):
     r"""Compute first K eigenvalues and eigenvectors for the input mesh.
@@ -30,8 +27,13 @@ def eigenpairs(pos:torch.Tensor, faces:torch.Tensor, K:int, double_precision:boo
     ai, av = area.indices().cpu(), area.values().cpu()
 
     ri, ci = si
+<<<<<<< HEAD
     # S = scipy.sparse.csr_matrix( (sv, (ri, ci)), shape=(n, n))
     # S = S + scipy.sparse.eye(n, dtype=S.dtype) * EPS  # for numerical stability
+=======
+    S = scipy.sparse.csr_matrix( (sv, (ri, ci)), shape=(n, n))
+    S = S + scipy.sparse.eye(n, dtype=S.dtype) * 1e-9  # for numerical stability
+>>>>>>> 4099303... converted config to dictionary to support wandb config version 1
 
     ri, ci = ai
     A = scipy.sparse.csr_matrix( (av, (ri, ci)), shape=(n, n))

@@ -9,9 +9,6 @@ from vista.utils import concat_cell_qualifier, color_to_pyvista_color_params, bu
 # from geom.tool.synthesis import uniform_grid
 # from geom.tool.vis import add_skeleton
 # from numeric.np import l2_norm_over_last_axis
-
-# variable definitions
-from config import *
 pv.set_plot_theme('document')  # Change global behaviour - TODO - move this
 
 # ---------------------------------------------------------------------------------------------------------------------#
@@ -84,7 +81,7 @@ def plot_mesh(v, f=None, n=None, strategy='mesh', grid_on=False, clr='lightcoral
     p.show()
     return p, m
 
-def mesh_append(p, v, f=None, n=None, strategy='mesh', grid_on=False, clr='lightcoral',
+def mesh_append(p, v, run_config, f=None, n=None, strategy='mesh', grid_on=False, clr='lightcoral',
                 normal_clr='lightblue', label=None, smooth_shade_on=False, show_edges=False, cmap=None,
                 normal_scale=1):
     # Align arrays:
@@ -123,7 +120,7 @@ def mesh_append(p, v, f=None, n=None, strategy='mesh', grid_on=False, clr='light
 
         # Add the meshes to the plotter:
     p.add_mesh(pnt_cloud, smooth_shading=smooth_shade_on, scalars=scalars, color=color, cmap=cmap,
-               clim=CLIM, show_edges=show_edges,  # For full mesh visuals - ignored on point cloud plots
+               clim=run_config['CLIM'], show_edges=show_edges,  # For full mesh visuals - ignored on point cloud plots
                render_points_as_spheres=spheres_on, point_size=point_size)  # For sphere visuals - ignored on full mesh
 
     p.camera_position = [(0, 0, 4.5), (0, 0, 0), (0, 1, 0)]
@@ -151,7 +148,7 @@ def mesh_append(p, v, f=None, n=None, strategy='mesh', grid_on=False, clr='light
         p.show_grid()
 
 # noinspection PyIncorrectDocstring
-def plot_mesh_montage(vb, fb=None, nb=None, strategy='mesh', labelb=None, grid_on=False, clrb='lightcoral',
+def plot_mesh_montage(vb, run_config, fb=None, nb=None, strategy='mesh', labelb=None, grid_on=False, clrb='lightcoral',
                       normal_clr='lightblue', smooth_shade_on=True, show_edges=False, normal_scale=1, auto_close=True,
                       camera_pos=((0, 0, 5.5), (0, 0, 0), (0, 1, 0)), lighting=None,link_plots=True,ext_func=None,
                       opacity=1.0, bar=True, slabelb=None, success=None, classifier_success=None,
@@ -229,7 +226,7 @@ def plot_mesh_montage(vb, fb=None, nb=None, strategy='mesh', labelb=None, grid_o
                 labelC = label2C
 
             _, m = add_mesh(p, v=verts, f=faces, n=n, strategy=strategy, title=label, grid_on=grid_on,
-                            normal_scale=normal_scale, camera_pos=camera_pos, cmap=cmap, clim=CLIM,
+                            normal_scale=normal_scale, camera_pos=camera_pos, cmap=cmap, clim=run_config['CLIM'],
                             clr=colors, normal_clr=normal_clr, smooth_shade_on=smooth_shade_on, show_edges=show_edges,
                             lighting=lighting, opacity=Opacity, bar=cbar, slabel=slabel, label_color=labelC)
 
@@ -258,13 +255,13 @@ def plot_projected_vectorfield(v, f, vf, normalize=True, **kwargs):
 # ---------------------------------------------------------------------------------------------------------------------#
 
 
-def add_vectorfield_tangent_projection(p, v, f, vf, normalize=True, **kwargs):
-    if vf.shape[0] == 3 * f.shape[0]:
-        vf = np.reshape(vf, (3, f.shape[0])).T
-    from geom.np.mesh.descriptor import tangent_projection
-    vfp, clr = tangent_projection(v, f, vf, normalize)
-    M = add_mesh(p, v=v, f=f, n=vfp, clr=clr, strategy='mesh', **kwargs)
-    return p, M
+# def add_vectorfield_tangent_projection(p, v, f, vf, normalize=True, **kwargs):
+#     if vf.shape[0] == 3 * f.shape[0]:
+#         vf = np.reshape(vf, (3, f.shape[0])).T
+#     from geom.np.mesh.descriptor import tangent_projection
+#     vfp, clr = tangent_projection(v, f, vf, normalize)
+#     M = add_mesh(p, v=v, f=f, n=vfp, clr=clr, strategy='mesh', **kwargs)
+#     return p, M
 
 
 def add_spheres(p, v, color='black', radius=1, resolution=40, **kwargs):

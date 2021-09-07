@@ -13,12 +13,7 @@ import torch.nn.functional as func
 import random
 import wandb
 
-# variable definitions
-from config import *
-
-
 # repository modules
-sys.path.insert(0, SRC_DIR)
 from utils.ios import write_off
 import vista.adv_plotter
 from vista.adv_plotter import show_perturbation, show_all_perturbations
@@ -33,6 +28,9 @@ from model_trainer_main import load_datasets
 from utils.torch.nn import *
 # from dataset.faust import FaustDataset as FaustData
 from src.deep_adv_3d.train_loop import Trainer
+
+# variable definitions
+from run_config import *
 
 def random_uniform_rotation(dim=3):
     H = np.eye(dim)
@@ -86,19 +84,18 @@ if __name__ == "__main__":
     # set seed for all platforms
     set_determinsitic_run()
 
-    if USE_WANDB:
+    if run_config['USE_WANDB']:
         wandb.init(entity="deepadv3d", project="DeepAdv3D")
 
     model = PointNet(k=10)
-    model = model.to(DEVICE)
+    model = model.to(run_config['DEVICE'])
 
 
     # Data Loading and pre-processing
-    trainLoader, validationLoader, testLoader = load_datasets(dataset=DATASET_NAME, train_batch=TRAIN_BATCH_SIZE,
-                                                              test_batch=TEST_BATCH_SIZE, val_batch=VAL_BATCH_SIZE)
+    trainLoader, validationLoader, testLoader = load_datasets(run_config=run_config)
 
     # classifier_trainer.train(train_data=trainLoader, val_data=validationLoader, test_data=testLoader, classifier=model)
-    train_ins = Trainer(train_data=trainLoader, validation_data=validationLoader, test_data=testLoader,
+    train_ins = Trainer(run_config=run_config, train_data=trainLoader, validation_data=validationLoader, test_data=testLoader,
                             model=model)
 
     train_ins.train()

@@ -12,8 +12,7 @@ import torch
 import torch.nn.functional as func
 import random
 
-# variable definitions
-from config import *
+
 
 # repository modules
 from utils.ios import write_off
@@ -57,8 +56,8 @@ def load_datasets(train_batch=8,test_batch=20):
                                                shuffle=False,
                                                num_workers=10)
     # load data in different format for Adversarial code
-    traindata = dataset.FaustDataset(FAUST, device=DEVICE, train=True, test=False, transform_data=True)
-    testdata = dataset.FaustDataset(FAUST, device=DEVICE, train=False, test=True, transform_data=True)
+    traindata = dataset.FaustDataset(FAUST, device=run_config['DEVICE'], train=True, test=False, transform_data=True)
+    testdata = dataset.FaustDataset(FAUST, device=run_config['DEVICE'], train=False, test=True, transform_data=True)
 
     return trainLoader,testLoader,traindata,testdata
 
@@ -144,11 +143,11 @@ def find_perturbed_shape(to_class, testdata, model, params, max_dim=None, animat
 
 if __name__ == "__main__":
     model = PointNet(k=10, feature_transform=False, global_transform=False)
-    model = model.to(DEVICE)
+    model = model.to(run_config['DEVICE'])
     trainLoader, testLoader, traindata, testdata = load_datasets(train_batch=8, test_batch=20)
 
     # load parameters
-    model.load_state_dict(torch.load(PARAMS_FILE, map_location=DEVICE))
+    model.load_state_dict(torch.load(PARAMS_FILE, map_location=run_config['DEVICE']))
     model.eval()
 
     # ------------------------ hyper parameters ------------------------------

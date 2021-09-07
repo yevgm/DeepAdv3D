@@ -7,88 +7,99 @@
 # + switch last layer to regression layer
 
 # variable definitions
-from config import *
+from run_config import *
 
 # repository modules
 from models.pointnet import PointNet
-from models.deep_adv_3d_model1 import RegressorOriginalPointnet, OshriRegressor, Regressor, RegressorOriginalPointnetEigen
+from models.deep_adv_3d_model1 import RegressorOriginalPointnet, OshriRegressor, RegressorOriginalPointnetEigen
 from deep_adv_3d.train_loop import *
 from dataset.data_loaders import *
 from utils.torch.nn import *
-
-import torch.nn as nn
 import wandb
 
-def load_datasets(dataset, train_batch=8, test_batch=20, val_batch=20):
+def load_datasets(run_config):
+    dataset = run_config['DATASET_NAME']
+    train_batch = run_config['TRAIN_BATCH_SIZE']
+    test_batch = run_config['TEST_BATCH_SIZE']
+    val_batch = run_config['VAL_BATCH_SIZE']
+
     if dataset == 'Faust':
-        dataset_path = FAUST
-        if LOAD_WHOLE_DATA_TO_MEMORY:
+        dataset_path = run_config['FAUST']
+        if run_config['LOAD_WHOLE_DATA_TO_MEMORY']:
             class_inst = FaustDatasetInMemory
         else:
-            class_inst = FaustDataset
+            pass
+            # class_inst = FaustDataset
     elif dataset == 'Shrec14':
-        dataset_path = SHREC14
-        if LOAD_WHOLE_DATA_TO_MEMORY:
-            class_inst = Shrec14DatasetInMemory
+        dataset_path = run_config['SHREC14']
+        if run_config['LOAD_WHOLE_DATA_TO_MEMORY']:
+            # class_inst = Shrec14DatasetInMemory
             pass
         else:
-            class_inst = Shrec14Dataset
+            pass
+            # class_inst = Shrec14Dataset
 
     train_dataset = class_inst(
+        run_config=run_config,
         root=os.path.join(dataset_path, r'raw'),
         split='train',
-        data_augmentation=TRAIN_DATA_AUG)
+        data_augmentation=run_config['TRAIN_DATA_AUG'])
 
     validation_dataset = class_inst(
+        run_config=run_config,
         root=os.path.join(dataset_path, r'raw'),
         split='validation',
-        data_augmentation=VAL_DATA_AUG)
+        data_augmentation=run_config['VAL_DATA_AUG'])
 
     test_dataset = class_inst(
+        run_config=run_config,
         root=os.path.join(dataset_path, r'raw'),
         split='test',
-        data_augmentation=TEST_DATA_AUG)
+        data_augmentation=run_config['TEST_DATA_AUG'])
 
     trainLoader = torch.utils.data.DataLoader(train_dataset,
                                                batch_size=train_batch,
                                                shuffle=True,
-                                               num_workers=NUM_WORKERS)
+                                               num_workers=run_config['NUM_WORKERS'])
     validationLoader = torch.utils.data.DataLoader(validation_dataset,
                                                batch_size=val_batch,
-                                               shuffle=SHUFFLE_VAL_DATA,
-                                               num_workers=NUM_WORKERS)
+                                               shuffle=run_config['SHUFFLE_VAL_DATA'],
+                                               num_workers=run_config['NUM_WORKERS'])
     testLoader = torch.utils.data.DataLoader(test_dataset,
                                                batch_size=test_batch,
-                                               shuffle=SHUFFLE_TEST_DATA,
-                                               num_workers=NUM_WORKERS)
+                                               shuffle=run_config['SHUFFLE_TEST_DATA'],
+                                               num_workers=run_config['NUM_WORKERS'])
 
     return trainLoader, validationLoader, testLoader
 
 
 if __name__ == '__main__':
     # set seed for all platforms
-    set_determinsitic_run()
+    set_determinsitic_run(run_config=run_config)
 
-    if USE_WANDB:
-        wandb.init(entity="deepadv3d", project="DeepAdv3D")
+    config = run_config  # default for debug
+    if run_config['USE_WANDB']:
+        wandb.init(entity="deepadv3d", project="DeepAdv3d_sweeps", config=run_config)
+        run_config['RUN_NAME'] = wandb.run.name
+        config = wandb.config
 
     # Data Loading and pre-processing
-    trainLoader, validationLoader, testLoader = load_datasets(dataset=DATASET_NAME, train_batch=TRAIN_BATCH_SIZE,
-                                                              test_batch=TEST_BATCH_SIZE, val_batch=VAL_BATCH_SIZE)
+    trainLoader, validationLoader, testLoader = load_datasets(run_config=config)
 
     # classifier and model definition
-    classifier = PointNet(k=10)
-    classifier.load_state_dict(torch.load(PARAMS_FILE, map_location=DEVICE))
-    model = RegressorOriginalPointnet()
-    # model = PointNet(k=10)
-    # classifier = None
-    # model = PointNet(k=10)
+    classifier = PointNet(run_config, k=10)
+    classifier.load_state_dict(torch.load(config['PARAMS_FILE'], map_location=config['DEVICE']))
+    model = RegressorOriginalPointnet(config)
+    # model = RegressorOriginalPointnetEigen(config)
+    # model.load_state_dict(torch.load(MODEL_PARAMS_FILE, map_location=run_config['DEVICE']))
     # model = OshriRegressor()
     # model = Regressor(numVertices=6890)
     # model = RegressorOriginalPointnetEigen(K=K)
     train_ins = Trainer(train_data=trainLoader, validation_data=validationLoader, test_data=testLoader,
-                        model=model, classifier=classifier)
+                            model=model, classifier=classifier, run_config=config)
 
     # train network
     train_ins.train()
 
+    if run_config['USE_WANDB']:
+        wandb.finish()
