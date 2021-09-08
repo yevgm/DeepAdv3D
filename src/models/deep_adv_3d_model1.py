@@ -91,7 +91,7 @@ class RegressorOriginalPointnet(nn.Module):
         self.fc2 = nn.Linear(4096, 8192)
         self.dropout = nn.Dropout(p=0.3)
         self.relu = nn.ReLU()
-        self.fc3 = nn.Linear(8192, 6890*3)
+        self.fc3 = nn.Linear(8192, 6892*3)
 
     def forward(self, x):
         # x, trans, trans_feat = self.feat(x)  # x is 1024, trans is exit from TNET1, trans_Feat is exit from tnet2
@@ -99,7 +99,7 @@ class RegressorOriginalPointnet(nn.Module):
         x = F.relu(self.fc1(x))
         x = F.relu(self.dropout(self.fc2(x)))
         x = self.fc3(x)
-        x = x.view(-1, 3, 6890)  # that's the only difference from pointnet, along with layer sizes
+        x = x.view(-1, 3, 6892)  # that's the only difference from pointnet, along with layer sizes
         return x
 
     ################### OSHRI MODEL ###############################

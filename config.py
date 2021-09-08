@@ -48,7 +48,7 @@ LR_SCHEDULER_WAIT =  50 # epochs
 SCHEDULER_STEP_SIZE = 250
 OPTIMIZER = 'AdamW' # 'Adam', 'AdamW', 'sgd'
 
-TRAINING_CLASSIFIER = True  # turn on to switch between classifier train and model train
+TRAINING_CLASSIFIER = False  # turn on to switch between classifier train and model train
 CALCULATE_EIGENVECTORS = False
 LR = 1e-3 # learning rate
 WEIGHT_DECAY = 1e-4 # regularization 1e-4

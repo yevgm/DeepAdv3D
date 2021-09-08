@@ -77,15 +77,15 @@ if __name__ == '__main__':
                                                               test_batch=TEST_BATCH_SIZE, val_batch=VAL_BATCH_SIZE)
 
     # classifier and model definition
-    # classifier = PointNet(k=10)
-    # classifier.load_state_dict(torch.load(PARAMS_FILE, map_location=DEVICE))
-    # model = RegressorOriginalPointnet()
-    model = PointNet(k=10)
+    classifier = PointNet(k=10)
+    classifier.load_state_dict(torch.load(PARAMS_FILE, map_location=DEVICE))
+    model = RegressorOriginalPointnet()
+    # model = PointNet(k=10)
     # model = OshriRegressor()
     # model = Regressor(numVertices=6890)
     # model = RegressorOriginalPointnetEigen(K=K)
     train_ins = Trainer(train_data=trainLoader, validation_data=validationLoader, test_data=testLoader,
-                        model=model, classifier=None)
+                        model=model, classifier=classifier)
 
     # train network
     train_ins.train()
