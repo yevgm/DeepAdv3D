@@ -49,7 +49,7 @@ SCHEDULER_STEP_SIZE = 250
 OPTIMIZER = 'Adam' # 'Adam', 'AdamW', 'sgd'
 
 TRAINING_CLASSIFIER = False  # turn on to switch between classifier train and model train
-CALCULATE_EIGENVECTORS = True
+CALCULATE_EIGENVECTORS = False
 LR = 1e-3 # learning rate
 WEIGHT_DECAY = 1e-4 # regularization 1e-4
 TRAIN_BATCH_SIZE = 32  # number of data examples in one batch

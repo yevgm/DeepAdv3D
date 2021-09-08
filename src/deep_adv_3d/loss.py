@@ -132,9 +132,8 @@ class AdversarialLoss2(torch.nn.Module):
 class L2Similarity(LossFunction):
     def __init__(self, original_pos: torch.Tensor,
                        perturbed_pos: torch.Tensor,
-                       vertex_area: torch.Tensor):
+                       vertex_area: torch.Tensor=None):
         super().__init__(original_pos, perturbed_pos)
-        self.vertex_area = vertex_area
         # check input validity
         if original_pos.shape[-2] != 3:
             raise ValueError("Vertices positions must have shape [b,3,n]")
@@ -146,7 +145,7 @@ class L2Similarity(LossFunction):
         diff = self.perturbed_pos - self.original_pos
         N = self.perturbed_pos.shape[0]  # batch size
         # (sqrt(ai)*(xi-perturbed(xi)) )^2  = ai*(x-perturbed(xi))^2
-        weight_diff = diff * torch.sqrt(self.vertex_area)[:, None, :]
+        weight_diff = diff[:, None, :]
         # this reformulation uses the sub-gradient (hence ensuring a valid behaviour at zero)
         L2 = weight_diff.norm(p="fro")
 
