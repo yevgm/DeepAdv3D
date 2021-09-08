@@ -152,15 +152,15 @@ def report_to_wandb_classifier(epoch, split, epoch_loss, epoch_classified=0):
                 "Train\Epoch Classified": epoch_classified})
 
 
-        print('[Epoch #%d] Train loss: %f, Classified: [%d/70]' % (
-            epoch, epoch_loss, epoch_classified))
+        print('[Epoch #%d] Train loss: %f, Classified: [%d/%d]' % (
+            epoch, epoch_loss, epoch_classified, DATASET_TRAIN_SIZE))
     elif split == 'validation':
         if USE_WANDB:
             wandb.log({
                 "Validation\Epoch Loss": epoch_loss,
                 "Validation\Epoch Classified": epoch_classified})
 
-        print('[Epoch #%d] Validation loss: %f, Classified: [%d/15]' % (
+        print('[Epoch #%d] Validation loss: %f, Classified: [%d/40]' % (
             epoch, epoch_loss, epoch_classified))
     elif split== 'test':
         if USE_WANDB:
@@ -184,8 +184,8 @@ def report_to_wandb_regressor(epoch, split, epoch_loss, epoch_misclassified, mis
                 logdict.update({"Train/Reconstruction Loss": RECON_LOSS_CONST*recon_loss})
             wandb.log(logdict)
 
-        print('[Epoch #%d] Train loss: %f, Misclassified: [%d/70]' % (
-            epoch, epoch_loss, epoch_misclassified))
+        print('[Epoch #%d] Train loss: %f, Misclassified: [%d/%d]' % (
+            epoch, epoch_loss, epoch_misclassified, DATASET_TRAIN_SIZE))
     elif split == 'validation':
         if USE_WANDB:
             logdict = {"Validation\Epoch Loss": epoch_loss, "Validation\Epoch Misclassified": epoch_misclassified}
@@ -195,7 +195,7 @@ def report_to_wandb_regressor(epoch, split, epoch_loss, epoch_misclassified, mis
                 logdict.update({"Validation/Reconstruction Loss": RECON_LOSS_CONST*recon_loss})
             wandb.log(logdict)
 
-        print('[Epoch #%d] Validation loss: %f, Misclassified: [%d/15]' % (
+        print('[Epoch #%d] Validation loss: %f, Misclassified: [%d/40]' % (
             epoch, epoch_loss, epoch_misclassified))
     elif split == 'test':
         if USE_WANDB:

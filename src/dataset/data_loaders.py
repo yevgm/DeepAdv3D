@@ -529,18 +529,26 @@ class Shrec14DatasetInMemory(data.Dataset):
             if file.endswith(".obj"):
                 self.fns.append(file.split('.')[0])
         assert len(self.fns) == 400, "assumed that there are 400 train examples"
+        # Define Classes
+        cls = np.arange(0, 400) % 10
         # sort - very important
-        list.sort(self.fns, key=int)
+        self.fns = [int(x) for x in self.fns]
+        list.sort(self.fns)
+        self.fns = [str(x) for x in self.fns]
         self.fns = [os.path.join(self.root, s + '.obj') for s in self.fns]
 
         # split tran\test
         if self.split == 'train':
-            self.fns = self.fns[0:320]
+            self.fns = self.fns[0:DATASET_TRAIN_SIZE]
+            self.cls = cls[0:DATASET_TRAIN_SIZE]
         elif self.split == 'validation':
-            self.fns = self.fns[320:360]
-        else:
+            self.fns = self.fns[DATASET_TRAIN_SIZE:360]
+            self.cls = cls[DATASET_TRAIN_SIZE:360]
+        elif self.split == "test":
             self.fns = self.fns[360:]
+            self.cls = cls[360:]
 
+        self.cls = torch.from_numpy(self.cls.astype(np.int64)).to(DEVICE)
         # load all dataset to memory
         self.v = []
         self.faces = []
@@ -548,20 +556,22 @@ class Shrec14DatasetInMemory(data.Dataset):
         for index, fn in enumerate(self.fns):
 
             with open(os.path.join(self.root, fn), 'rb') as f:
-                v, f_ = read_obj_verts(self.fns[index], 15000, 29996)
+                v, f_ = read_obj_verts(self.fns[index], 6892, 13780)
             self.v.append(v)
 
             f = np.stack(f_)
-            faces = torch.from_numpy(f).type(torch.long)
-            self.faces.append(faces)
+            self.faces = torch.from_numpy(f).type(torch.long)
+            # self.faces.append(faces)
 
-            # calculate edges from faces for local euclidean similarity
-            if (self.split == 'train') & (LOSS == 'local_euclidean'):
-                e = edges_from_faces(faces)
-                edges = torch.from_numpy(e).type(torch.long).to(DEVICE)
-            else:
-                edges = 0
-            self.edges.append(edges)
+        # calculate edges from faces for local euclidean similarity
+        if (self.split == 'train') & (LOSS == 'local_euclidean'):
+            e = edges_from_faces(self.faces)
+            edges = torch.from_numpy(e).type(torch.long).to(DEVICE)
+        else:
+            edges = 0
+
+        self.edges = edges
+        self.targets = self.set_targets()
 
 
     def __getitem__(self, index):
@@ -581,28 +591,26 @@ class Shrec14DatasetInMemory(data.Dataset):
             v = v @ r
 
             # random translation
-            jitter = np.random.normal(0, 0.01, size=(1, 3))
-            v += jitter
+            # jitter = np.random.normal(0, 0.01, size=(1, 3))
+            # v += jitter
 
         v = torch.from_numpy(v.astype(np.float32))
-        cls = torch.from_numpy(np.array([index % 10]).astype(np.int64))
 
         # calculate laplacian eigenvectors matrix and areas
-        if TRAINING_CLASSIFIER:
+        if not CALCULATE_EIGENVECTORS:
             eigvals, eigvecs, vertex_area = 0, 0, 0
-            targets = 0
         else:
-            eigvals, eigvecs, vertex_area = eigenpairs(v, self.faces[index], K, double_precision=True)
+            eigvals, eigvecs, vertex_area = eigenpairs(v, self.faces, K, double_precision=True)
             # eigvals = eigvals.to(DEVICE)
-            eigvecs = eigvecs.to(DEVICE)
+            # eigvecs = eigvecs.to(DEVICE)
             vertex_area = vertex_area.to(DEVICE)
 
             # draw new targets every time a new data is created
-            targets = self.set_targets()
-            targets = targets.to(DEVICE)[index]
+            # targets = self.set_targets()
+        targets = self.targets[index]
 
-        return v.to(DEVICE), cls.to(DEVICE), eigvals, eigvecs, vertex_area \
-            , targets, self.faces[index].to(DEVICE), self.edges[index]
+        return v.to(DEVICE), self.cls[index], eigvals, eigvecs, vertex_area \
+            , targets, self.faces, self.edges
 
     def __len__(self):
         return len(self.fns)

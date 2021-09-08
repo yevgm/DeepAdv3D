@@ -135,7 +135,7 @@ class Trainer:
 
         loss, orig_vertices, adex, faces = None, None, None, None
         epoch_loss, epoch_misclassified, epoch_classified, epoch_misclass_loss, epoch_recon_loss = 0, 0, 0, 0, 0
-        num_clas, num_misclassified = 0,0
+        num_clas, num_misclassified, misloss, recon_loss = 0,0,0,0
 
         for i, data in enumerate(data, 0):
             orig_vertices, label, _, _, vertex_area, targets, faces, edges = data
@@ -189,15 +189,15 @@ class Trainer:
         # END OF TRAIN
 
         if TRAINING_CLASSIFIER:
-            report_to_wandb_classifier(epoch=epoch, split=split, epoch_loss=epoch_loss / 70,
+            report_to_wandb_classifier(epoch=epoch, split=split, epoch_loss=epoch_loss / DATASET_TRAIN_SIZE,
                                        epoch_classified=epoch_classified)
         else:
-            report_to_wandb_regressor(epoch=epoch, split=split, epoch_loss=epoch_loss / 70,
-                                      epoch_misclassified=epoch_misclassified, misloss=misloss / 70,
-                                      recon_loss=recon_loss / 70)
+            report_to_wandb_regressor(epoch=epoch, split=split, epoch_loss=epoch_loss / DATASET_TRAIN_SIZE,
+                                      epoch_misclassified=epoch_misclassified, misloss=misloss / DATASET_TRAIN_SIZE,
+                                      recon_loss=recon_loss / DATASET_TRAIN_SIZE)
 
         # push to visualizer every epoch - last batch
-        self.push_data_to_plotter(orig_vertices, adex, faces, epoch, split)
+        # self.push_data_to_plotter(orig_vertices, adex, faces, epoch, split)
 
         return loss.item()
 

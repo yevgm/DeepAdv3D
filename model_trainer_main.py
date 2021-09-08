@@ -51,7 +51,7 @@ def load_datasets(dataset, train_batch=8, test_batch=20, val_batch=20):
 
     trainLoader = torch.utils.data.DataLoader(train_dataset,
                                                batch_size=train_batch,
-                                               shuffle=True,
+                                               shuffle=False,
                                                num_workers=NUM_WORKERS)
     validationLoader = torch.utils.data.DataLoader(validation_dataset,
                                                batch_size=val_batch,
@@ -77,14 +77,15 @@ if __name__ == '__main__':
                                                               test_batch=TEST_BATCH_SIZE, val_batch=VAL_BATCH_SIZE)
 
     # classifier and model definition
-    classifier = PointNet(k=10)
-    classifier.load_state_dict(torch.load(PARAMS_FILE, map_location=DEVICE))
-    model = RegressorOriginalPointnet()
+    # classifier = PointNet(k=10)
+    # classifier.load_state_dict(torch.load(PARAMS_FILE, map_location=DEVICE))
+    # model = RegressorOriginalPointnet()
+    model = PointNet(k=10)
     # model = OshriRegressor()
     # model = Regressor(numVertices=6890)
     # model = RegressorOriginalPointnetEigen(K=K)
     train_ins = Trainer(train_data=trainLoader, validation_data=validationLoader, test_data=testLoader,
-                        model=model, classifier=classifier)
+                        model=model, classifier=None)
 
     # train network
     train_ins.train()

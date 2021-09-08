@@ -14,13 +14,13 @@ REPO_ROOT = os.path.dirname(os.path.realpath(__file__))
 MODEL_DATA_DIR = os.path.abspath(os.path.join(REPO_ROOT, "..", "model_data"))
 SRC_DIR = os.path.join(REPO_ROOT, "src")
 FAUST = os.path.join(REPO_ROOT, "datasets", "faust")
-SHREC14 = os.path.join(REPO_ROOT, "datasets", "shrec14")
+SHREC14 = os.path.join(REPO_ROOT, "datasets", "shrec14_downsampled")
 sys.path.insert(0, SRC_DIR)
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   MODEL
 # ----------------------------------------------------------------------------------------------------------------------#
 # classifier:
-PARAMS_FILE = os.path.join(MODEL_DATA_DIR, "FAUST_classifier_august.ckpt")  # FAUST10_pointnet_rot_b128_v2.pt, FAUST10_pointnet_rot_b128.pt, momentum_05.pt, shrec14_71percent_acc_momentum05.pt
+PARAMS_FILE = os.path.join(MODEL_DATA_DIR, "shrec14_no_aug_sep_100percent.ckpt")  # FAUST10_pointnet_rot_b128_v2.pt, FAUST10_pointnet_rot_b128.pt, momentum_05.pt, shrec14_71percent_acc_momentum05.pt
 # model1:
 # MODEL1_PARAMS_DIR = os.path.join(MODEL_DATA_DIR, "model1_params") # .pt will be added in the code
 # PARAM_FILE_NAME = "model_params.pt"
@@ -43,20 +43,21 @@ LOG_GRADIENTS_WANDB = False  # slows down the training significantly.
 #                                                   TRAIN HYPERPARAMETERS
 # ----------------------------------------------------------------------------------------------------------------------#
 UNIVERSAL_RAND_SEED = 143 #143
-EARLY_STOP_WAIT = 240  # epochs
-LR_SCHEDULER_WAIT =  120 # epochs
+EARLY_STOP_WAIT = 150  # epochs
+LR_SCHEDULER_WAIT =  50 # epochs
 SCHEDULER_STEP_SIZE = 250
-OPTIMIZER = 'Adam' # 'Adam', 'AdamW', 'sgd'
+OPTIMIZER = 'AdamW' # 'Adam', 'AdamW', 'sgd'
 
-TRAINING_CLASSIFIER = False  # turn on to switch between classifier train and model train
+TRAINING_CLASSIFIER = True  # turn on to switch between classifier train and model train
 CALCULATE_EIGENVECTORS = False
 LR = 1e-3 # learning rate
 WEIGHT_DECAY = 1e-4 # regularization 1e-4
-TRAIN_BATCH_SIZE = 32  # number of data examples in one batch
+TRAIN_BATCH_SIZE = 40  # number of data examples in one batch
 TEST_BATCH_SIZE = 20
-N_EPOCH = 500  # number of train epochs
+N_EPOCH = 1000  # number of train epochs
 RECON_LOSS_CONST = 100  # ratio between reconstruction loss and missclasificaition loss
 TRAIN_DATA_AUG = False
+DATASET_TRAIN_SIZE = 320
 
 # adversarial example params:
 K = 30  #40 number of laplacian eigenvectors to take. NOTE: up to 70. more then that the model decoder is "broken" - see model
@@ -76,7 +77,7 @@ TEST_DATA_AUG = False
 PLOT_TEST_SAMPLE = False
 TEST_EPOCHS = 1  # valid use only with "TEST_DATA_AUG = True"
 # validation set: 
-VAL_BATCH_SIZE = 20
+VAL_BATCH_SIZE = 40
 SHUFFLE_VAL_DATA = False
 VAL_STEP_EVERY = 1  # epochs
 VAL_DATA_AUG = False
@@ -85,7 +86,7 @@ VAL_DATA_AUG = False
 # ----------------------------------------------------------------------------------------------------------------------#
 NUM_WORKERS = 0
 DATASET_CLASSES = 10
-DATASET_NAME = "Faust" # 'Faust', 'Shrec14'
+DATASET_NAME = "Shrec14" # 'Faust', 'Shrec14'
 EPS = 1e-9  # for numerical stability - used in calculating eigenvectors
 LOAD_WHOLE_DATA_TO_MEMORY = True  # use InMemory of Not in dataset loader stage
 # ----------------------------------------------------------------------------------------------------------------------#
