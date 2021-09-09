@@ -560,8 +560,8 @@ class Shrec14DatasetInMemory(data.Dataset):
             self.v.append(v)
 
             f = np.stack(f_)
-            self.faces = torch.from_numpy(f).type(torch.long)
-            # self.faces.append(faces)
+            faces = torch.from_numpy(f).type(torch.long)
+            self.faces.append(faces)
 
         # calculate edges from faces for local euclidean similarity
         if (self.split == 'train') & (LOSS == 'local_euclidean'):
@@ -610,7 +610,7 @@ class Shrec14DatasetInMemory(data.Dataset):
         targets = self.targets[index]
 
         return v.to(DEVICE), self.cls[index], eigvals, eigvecs, vertex_area \
-            , targets, self.faces, self.edges
+            , targets, self.faces[index], self.edges
 
     def __len__(self):
         return len(self.fns)
