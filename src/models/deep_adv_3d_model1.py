@@ -80,12 +80,38 @@ class Regressor(nn.Module):
         x = x.view(-1, 3, self.numVertices)
         return x
 
+class PointNetfeatModel(nn.Module):
+    def __init__(self):
+        super(PointNetfeatModel, self).__init__()
+        self.conv1 = torch.nn.Conv1d(3, 64, 1)
+        self.conv2 = torch.nn.Conv1d(64, 128, 1)
+        self.conv3 = torch.nn.Conv1d(128, 1024, 1)
+
+        if MODEL_USE_BN:
+            self.bn1 = nn.BatchNorm1d(64)
+            self.bn2 = nn.BatchNorm1d(128)
+        else:
+            self.bn1 = nn.Identity()
+            self.bn2 = nn.Identity()
+
+
+    def forward(self, x):
+        # if len(x.shape)<3:
+        #     x = torch.unsqueeze(x.T, 0) ## fix for geometric data loader
+
+        x = F.relu(self.bn1(self.conv1(x)))  # the first MLP layer (mlp64,64 shared)
+
+        x = F.relu(self.bn2(self.conv2(x)))
+        x = self.conv3(x)
+        x = torch.max(x, 2, keepdim=True)[0]
+        x = x.view(-1, 1024)
+        return x
 
 class RegressorOriginalPointnet(nn.Module):
 
     def __init__(self):
         super(RegressorOriginalPointnet, self).__init__()
-        self.feat = PointNetfeat()
+        self.feat = PointNetfeatModel()
         self.fc1 = nn.Linear(1024, 4096)
         self.relu = nn.ReLU()
         self.fc2 = nn.Linear(4096, 8192)
@@ -93,11 +119,18 @@ class RegressorOriginalPointnet(nn.Module):
         self.relu = nn.ReLU()
         self.fc3 = nn.Linear(8192, 6892*3)
 
+        if MODEL_USE_BN:
+            self.bn1 = nn.BatchNorm1d(4096)
+            self.bn2 = nn.BatchNorm1d(8192)
+        else:
+            self.bn1 = nn.Identity()
+            self.bn2 = nn.Identity()
+
     def forward(self, x):
         # x, trans, trans_feat = self.feat(x)  # x is 1024, trans is exit from TNET1, trans_Feat is exit from tnet2
         x = self.feat(x)  # x is 1024, trans is exit from TNET1, trans_Feat is exit from tnet2
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.dropout(self.fc2(x)))
+        x = F.relu(self.bn1(self.fc1(x)))
+        x = F.relu(self.bn2(self.dropout(self.fc2(x))))
         x = self.fc3(x)
         x = x.view(-1, 3, 6892)  # that's the only difference from pointnet, along with layer sizes
         return x

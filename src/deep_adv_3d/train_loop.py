@@ -197,7 +197,7 @@ class Trainer:
                                       recon_loss=recon_loss / DATASET_TRAIN_SIZE)
 
         # push to visualizer every epoch - last batch
-        self.push_data_to_plotter(orig_vertices, adex, faces, epoch, split)
+        # self.push_data_to_plotter(orig_vertices, adex, faces, epoch, split)
 
         return loss.item()
 
