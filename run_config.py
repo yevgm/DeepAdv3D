@@ -40,6 +40,7 @@ run_config = {
 # ----------------------------------------------------------------------------------------------------------------------#
 	'USE_WANDB': False,
 	'USE_PLOTTER': True,
+	'SAVE_WEIGHTS': False,
 	'LOG_GRADIENTS_WANDB': False,  # slows down the training significantly. 
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   TRAIN HYPERPARAMETERS

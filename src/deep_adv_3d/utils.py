@@ -212,11 +212,12 @@ class ModelCheckpoint(Callback):
 
     def __init__(self, filepath, model, verbose=0,
                  save_top_k=1, save_weights_only=False,
-                 mode='min', period=1, prefix=''):
+                 mode='min', period=1, prefix='', save_model=True):
         super(ModelCheckpoint, self).__init__()
 
         self.model = model
         self.verbose = verbose
+        self.save_model = save_model
         self.filepath = filepath
         self.save_top_k = save_top_k
         self.save_weights_only = save_weights_only
@@ -255,7 +256,8 @@ class ModelCheckpoint(Callback):
         # os.makedirs(dirpath, exist_ok=True)
 
         # delegate the saving to the model
-        torch.save(self.model.state_dict(), filepath)
+        if self.save_model:
+            torch.save(self.model.state_dict(), filepath)
 
     def check_monitor_top_k(self, current):
         less_than_k_models = len(self.best_k_models.keys()) < self.save_top_k

@@ -58,7 +58,7 @@ class Trainer:
         self.early_stopping = EarlyStopping(patience=run_config['EARLY_STOP_WAIT'])  # hardcoded for validation loss early stop
         # checkpoints regulator
         self.init_tensor_board()
-        self.checkpoint_callback = ModelCheckpoint(filepath=self.tensor_log_dir, model=self.model)
+        self.checkpoint_callback = ModelCheckpoint(filepath=self.tensor_log_dir, model=self.model, save_model=run_config['SAVE_WEIGHTS'])
 
         # attributes initializations
         self.optimizer, self.scheduler = None, None
