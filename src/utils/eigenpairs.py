@@ -38,7 +38,6 @@ def eigenpairs(pos:torch.Tensor, faces:torch.Tensor, K:int, double_precision:boo
 
     # eigvals = torch.tensor(eigvals, device=device, dtype=dtype) # not required
     eigvals = 0
-    eigvecs = 0
     eigvecs = torch.tensor(eigvecs, device=device, dtype=dtype, requires_grad=True)
     areas = torch.tensor(A.diagonal(), device=device)
     return eigvals, eigvecs, areas
