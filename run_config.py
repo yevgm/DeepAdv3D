@@ -24,7 +24,7 @@ run_config = {
 #                                                   MODEL
 # ----------------------------------------------------------------------------------------------------------------------#
 # classifier:
-	'PARAMS_FILE':  os.path.join(model_data_dir, "shrec14_no_aug_sep_100percent.ckpt"), #os.path.join(repo_root,'saved_params', "FAUST_classifier_august.ckpt"),  # FAUST10_pointnet_rot_b128_v2.pt, FAUST10_pointnet_rot_b128.pt, momentum_05.pt, shrec14_71percent_acc_momentum05.pt
+	'PARAMS_FILE':  os.path.join(model_data_dir, "FAUST_classifier_august.ckpt"), # shrec14_no_aug_sep_100percent.ckpt  # FAUST10_pointnet_rot_b128_v2.pt, FAUST10_pointnet_rot_b128.pt, momentum_05.pt, shrec14_71percent_acc_momentum05.pt
 	'MODEL_PARAMS_FILE':  os.path.join(repo_root,'saved_params', "eigens_and_augmentation_recon_loss.ckpt"),
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   TENSORBOARD
@@ -38,29 +38,29 @@ run_config = {
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   Weights and biases
 # ----------------------------------------------------------------------------------------------------------------------#
-	'USE_WANDB': False,
-	'USE_PLOTTER': True,
+	'USE_WANDB': True,
+	'USE_PLOTTER': False,
 	'SAVE_WEIGHTS': False,
 	'LOG_GRADIENTS_WANDB': False,  # slows down the training significantly. 
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   TRAIN HYPERPARAMETERS
 # ----------------------------------------------------------------------------------------------------------------------#
 	'UNIVERSAL_RAND_SEED': 143, #143
-	'EARLY_STOP_WAIT': 250, # epochs
-	'LR_SCHEDULER_WAIT':  80, # epochs
+	'EARLY_STOP_WAIT': 120, # epochs
+	'LR_SCHEDULER_WAIT':  60, # epochs
 	'SCHEDULER_STEP_SIZE': 250,
-	'OPTIMIZER': 'AdamW', # 'Adam', 'AdamW', 'sgd'
+	'OPTIMIZER': 'Adam', # 'Adam', 'AdamW', 'sgd'
 
 	'TRAINING_CLASSIFIER': False,  # turn on to switch between classifier train and model train
-	'CALCULATE_EIGENVECTORS': False,
-	'LR': 0.050572566231955045, # learning rate
-	'WEIGHT_DECAY': 0.0844692091146692, # regularization 1e-4
+	'CALCULATE_EIGENVECTORS': True,
+	'LR': 1e-3, # learning rate
+	'WEIGHT_DECAY': 1e-4, # regularization 1e-4
 
-	'TRAIN_BATCH_SIZE': 40,  # number of data examples in one batch
+	'TRAIN_BATCH_SIZE': 32,  # number of data examples in one batch
 	'N_EPOCH': 2000,  # number of train epochs
-	'RECON_LOSS_CONST': 1000,  # ratio between reconstruction loss and missclasificaition loss
+	'RECON_LOSS_CONST': 200,  # ratio between reconstruction loss and missclasificaition loss
 	'TRAIN_DATA_AUG': False,
-	'DROPOUT_PROB': 0.06799470785277999,
+	'DROPOUT_PROB': 0.3,
 
 # Architecture parameters - Do not change after classifier has been trained! number 247 in the sweep
 # parameters: --DROPOUT_PROB=0.06799470785277999 --LATENT_SPACE_FEAT=1024 --LR=0.050572566231955045 --OPTIMIZER=AdamW --POINTNET_LAST_LAYER_SIZE=128 --TRAIN_BATCH_SIZE=70 --WEIGHT_DECAY=0.0844692091146692
@@ -95,8 +95,10 @@ run_config = {
 # ----------------------------------------------------------------------------------------------------------------------#
 	'NUM_WORKERS': 0,
 	'DATASET_CLASSES': 10,
-	'DATASET_TRAIN_SIZE': 320,
-	'DATASET_NAME': "Shrec14", # 'Faust', 'Shrec14'
+	'DATASET_TRAIN_SIZE': 70, # 320
+	'DATASET_VAL_SIZE': 15, # 40
+	'NUM_VERTICES': 6890, # 6892
+	'DATASET_NAME': "Faust", # 'Faust', 'Shrec14'
 	'LOAD_WHOLE_DATA_TO_MEMORY': True,  # use InMemory of Not in dataset loader stage
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   VISTA
@@ -121,7 +123,7 @@ run_config = {
 	'CLS_BATCH_NORM_MOMENTUM': 0.1,  # default is 0.1
 	'CLS_STRICT_PARAM_LOADING': False, # strict = False for dropping running mean and var of train batchnorm
 	# model bn
-	'MODEL_USE_BN': True
+	'MODEL_USE_BN': False
 
 
 }

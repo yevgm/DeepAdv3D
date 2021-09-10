@@ -110,13 +110,14 @@ class RegressorOriginalPointnet(nn.Module):
     def __init__(self, run_config):
         super(RegressorOriginalPointnet, self).__init__()
         self.run_config = run_config
+        self.v_size = run_config['NUM_VERTICES']
         self.feat = PointNetfeatModel(run_config)
         self.fc1 = nn.Linear(1024, 4096)
         self.relu = nn.ReLU()
         self.fc2 = nn.Linear(4096, 8192)
         self.dropout = nn.Dropout(p=0.3)
         self.relu = nn.ReLU()
-        self.fc3 = nn.Linear(8192, 6892*3)
+        self.fc3 = nn.Linear(8192, self.v_size*3)
 
         if self.run_config['MODEL_USE_BN']:
             self.bn1 = nn.BatchNorm1d(4096)
@@ -131,7 +132,7 @@ class RegressorOriginalPointnet(nn.Module):
         x = F.relu(self.bn1(self.fc1(x)))
         x = F.relu(self.bn2(self.dropout(self.fc2(x))))
         x = self.fc3(x)
-        x = x.view(-1, 3, 6892)  # that's the only difference from pointnet, along with layer sizes
+        x = x.view(-1, 3, self.v_size)  # that's the only difference from pointnet, along with layer sizes
         return x
 
     ################### OSHRI MODEL ###############################

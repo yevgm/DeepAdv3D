@@ -241,13 +241,14 @@ class ModelCheckpoint(Callback):
     def _del_model(self, filepath):
         dirpath = os.path.dirname(filepath)
 
-        # make paths
-        os.makedirs(dirpath, exist_ok=True)
+        if self.save_model:
+            # make paths
+            os.makedirs(dirpath, exist_ok=True)
 
-        try:
-            shutil.rmtree(filepath)
-        except OSError:
-            os.remove(filepath)
+            try:
+                shutil.rmtree(filepath)
+            except OSError:
+                os.remove(filepath)
 
     def _save_model(self, filepath):
         # dirpath = os.path.dirname(filepath)

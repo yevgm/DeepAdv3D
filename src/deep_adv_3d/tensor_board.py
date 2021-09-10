@@ -152,8 +152,8 @@ def report_to_wandb_classifier(run_config, epoch, split, epoch_loss, epoch_class
     if split == 'train':
         if run_config['USE_WANDB']:
             wandb.log({
-                "Train\Epoch Loss": epoch_loss,
-                "Train\Epoch Classified": epoch_classified})
+                "Train/Epoch Loss": epoch_loss,
+                "Train/Epoch Classified": epoch_classified})
 
 
         print('[Epoch #%d] Train loss: %f, Classified: [%d/%d]' % (
@@ -161,17 +161,17 @@ def report_to_wandb_classifier(run_config, epoch, split, epoch_loss, epoch_class
     elif split == 'validation':
         if run_config['USE_WANDB']:
             wandb.log({
-                "Validation\Epoch Loss": epoch_loss,
-                "Validation\Epoch Classified": epoch_classified})
+                "Validation/Epoch Loss": epoch_loss,
+                "Validation/Epoch Classified": epoch_classified})
 
-        print('[Epoch #%d] Validation loss: %f, Classified: [%d/40]' % (
-            epoch, epoch_loss, epoch_classified))
+        print('[Epoch #%d] Validation loss: %f, Classified: [%d/%d]' % (
+            epoch, epoch_loss, epoch_classified, run_config['DATASET_VAL_SIZE']))
     elif split== 'test':
 
         if run_config['USE_WANDB']:
             wandb.log({
-                "Test\loss": epoch_loss,
-                "Test\classified": epoch_classified})
+                "Test/loss": epoch_loss,
+                "Test/classified": epoch_classified})
 
             print('Test loss: %f, Classified: [%d/15]' % (epoch_loss, epoch_classified))
             # my_data = [
@@ -187,33 +187,33 @@ def report_to_wandb_regressor(run_config, epoch, split, epoch_loss, epoch_miscla
 
     if split == 'train':
         if run_config['USE_WANDB']:
-            logdict = {"Train\Epoch Loss": epoch_loss, "Train\Epoch Misclassified": epoch_misclassified}
+            logdict = {"Train/Epoch Loss": epoch_loss, "Train/Epoch Misclassified": epoch_misclassified}
             if misloss is not None:
                 logdict.update({"Train/Misclass Loss": misloss})
             if recon_loss is not None:
-                logdict.update({"Train\Reconstruction Loss": recon_loss})
+                logdict.update({"Train/Reconstruction Loss": recon_loss})
             wandb.log(logdict)
 
         print('[Epoch #%d] Train loss: %f, Misclassified: [%d/%d]' % (
             epoch, epoch_loss, epoch_misclassified, run_config['DATASET_TRAIN_SIZE']))
     elif split == 'validation':
         if run_config['USE_WANDB']:
-            logdict = {"Validation\Epoch Loss": epoch_loss, "Validation\Epoch Misclassified": epoch_misclassified}
+            logdict = {"Validation\Epoch Loss": epoch_loss, "Validation/Epoch Misclassified": epoch_misclassified}
             if misloss is not None:
                 logdict.update({"Validation/Misclass Loss": misloss})
             if recon_loss is not None:
 
-                logdict.update({"Validation\Reconstruction Loss": recon_loss})
+                logdict.update({"Validation/Reconstruction Loss": recon_loss})
             wandb.log(logdict)
 
-        print('[Epoch #%d] Validation loss: %f, Misclassified: [%d/40]' % (
-            epoch, epoch_loss, epoch_misclassified))
+        print('[Epoch #%d] Validation loss: %f, Misclassified: [%d/%d]' % (
+            epoch, epoch_loss, epoch_misclassified, run_config['DATASET_VAL_SIZE']))
     elif split == 'test':
 
         if run_config['USE_WANDB']:
             wandb.log({
-                "Test\loss": epoch_loss,
-                "Test\misclassified": epoch_misclassified})
+                "Test/loss": epoch_loss,
+                "Test/misclassified": epoch_misclassified})
 
             print('Test loss: %f, misclassified: [%d/15]' % (epoch_loss, epoch_misclassified))
 

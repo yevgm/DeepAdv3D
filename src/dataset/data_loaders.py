@@ -353,6 +353,8 @@ class FaustDatasetInMemory(data.Dataset):
         self.v = []
         self.faces = []
         self.edges = []
+        self.eigvecs = []
+        self.vertex_area = []
         for index, fn in enumerate(self.fns):
 
             with open(os.path.join(self.root, fn), 'rb') as f:
@@ -360,7 +362,10 @@ class FaustDatasetInMemory(data.Dataset):
             x = plydata['vertex']['x']
             y = plydata['vertex']['y']
             z = plydata['vertex']['z']
-            self.v.append(np.column_stack((x, y, z)))
+            v = np.column_stack((x, y, z))
+            v = v - np.expand_dims(np.mean(v, axis=0), 0)  # center
+            v = torch.from_numpy(v.astype(np.float32))
+            self.v.append(v)
 
             f = np.stack(plydata['face']['vertex_indices'])
             self.faces = torch.from_numpy(f).type(torch.long)
@@ -390,7 +395,7 @@ class FaustDatasetInMemory(data.Dataset):
     def __getitem__(self, index):
 
         # # center and scale
-        v = self.v[index] - np.expand_dims(np.mean(self.v[index], axis=0), 0)  # center
+        v = self.v[index] #- np.expand_dims(np.mean(self.v[index], axis=0), 0)  # center
         # dist = np.max(np.sqrt(np.sum(v ** 2, axis=1)), 0)
         # v = v / dist  # scale
         if self.data_augmentation:
@@ -403,10 +408,9 @@ class FaustDatasetInMemory(data.Dataset):
             v = v @ r
 
             # random translation
-            jitter = np.random.normal(0, 0.01, size=(1, 3))
-            v += jitter
+            # jitter = np.random.normal(0, 0.01, size=(1, 3))
+            # v += jitter
 
-        v = torch.from_numpy(v.astype(np.float32))
         # v = torch.from_numpy(np.random.rand(6890,3).astype(np.float32))  # TODO remove - it is debug!
 
 
@@ -422,7 +426,8 @@ class FaustDatasetInMemory(data.Dataset):
                 vertex_area = vertex_area.to(self.run_config['DEVICE'])
             else:
                 eigvals = 0
-                eigvecs = self.eigvecs[index].to(self.run_config['DEVICE'])
+                eigvecs = 0
+                # eigvecs = self.eigvecs[index].to(self.run_config['DEVICE'])
                 vertex_area = self.vertex_area[index].to(self.run_config['DEVICE'])
 
             # draw new targets every time a new data is created
