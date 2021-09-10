@@ -173,7 +173,7 @@ def report_to_wandb_classifier(run_config, epoch, split, epoch_loss, epoch_class
                 "Test/loss": epoch_loss,
                 "Test/classified": epoch_classified})
 
-            print('Test loss: %f, Classified: [%d/15]' % (epoch_loss, epoch_classified))
+            print('Test loss: %f, Classified: [%d/%d]' % (epoch_loss, epoch_classified, run_config['DATASET_TEST_SIZE']))
             # my_data = [
             #     ["TestLoss", epoch_loss],
             #     ["TestAccuracy", epoch_classified]
@@ -215,7 +215,7 @@ def report_to_wandb_regressor(run_config, epoch, split, epoch_loss, epoch_miscla
                 "Test/loss": epoch_loss,
                 "Test/misclassified": epoch_misclassified})
 
-        print('Test loss: %f, misclassified: [%d/15]' % (epoch_loss, epoch_misclassified))
+        print('Test loss: %f, misclassified: [%d/%d]' % (epoch_loss, epoch_misclassified,  run_config['DATASET_TEST_SIZE']))
 
             # my_data = [
             #     ["Test Loss", epoch_loss],

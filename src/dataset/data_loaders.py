@@ -581,6 +581,8 @@ class Shrec14DatasetInMemory(data.Dataset):
 
             with open(os.path.join(self.root, fn), 'rb') as f:
                 v, f_ = read_obj_verts(self.fns[index], 6892, 13780)
+            v = v - np.expand_dims(np.mean(v, axis=0), 0)  # center
+            v = torch.from_numpy(v.astype(np.float32))
             self.v.append(v)
 
             f = np.stack(f_)
@@ -602,7 +604,7 @@ class Shrec14DatasetInMemory(data.Dataset):
         assert index >= 0 & index < 400, "bad index"
 
         # # center and scale
-        v = self.v[index] - np.expand_dims(np.mean(self.v[index], axis=0), 0)  # center
+        v = self.v[index] # - np.expand_dims(np.mean(self.v[index], axis=0), 0)  # center
         # dist = np.max(np.sqrt(np.sum(v ** 2, axis=1)), 0)
         # v = v / dist  # scale
         if self.data_augmentation:
@@ -618,13 +620,12 @@ class Shrec14DatasetInMemory(data.Dataset):
             # jitter = np.random.normal(0, 0.01, size=(1, 3))
             # v += jitter
 
-        v = torch.from_numpy(v.astype(np.float32))
 
         # calculate laplacian eigenvectors matrix and areas
         if not self.run_config['CALCULATE_EIGENVECTORS']:
             eigvals, eigvecs, vertex_area = 0, 0, 0
         else:
-            eigvals, eigvecs, vertex_area = eigenpairs(v, self.faces, self.run_config['K'], double_precision=True)
+            eigvals, eigvecs, vertex_area = eigenpairs(v, self.faces[index], self.run_config['K'], double_precision=True)
             # eigvals = eigvals.to(DEVICE)
             # eigvecs = eigvecs.to(DEVICE)
             vertex_area = vertex_area.to(self.run_config['DEVICE'])

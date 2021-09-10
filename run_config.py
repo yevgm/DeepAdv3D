@@ -38,7 +38,7 @@ run_config = {
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   Weights and biases
 # ----------------------------------------------------------------------------------------------------------------------#
-	'USE_WANDB': False,
+	'USE_WANDB': True,
 	'USE_PLOTTER': False,
 	'SAVE_WEIGHTS': False,
 	'LOG_GRADIENTS_WANDB': False,  # slows down the training significantly. 
@@ -52,12 +52,12 @@ run_config = {
 	'OPTIMIZER': 'Adam', # 'Adam', 'AdamW', 'sgd'
 
 	'TRAINING_CLASSIFIER': False,  # turn on to switch between classifier train and model train
-	'CALCULATE_EIGENVECTORS': True,
+	'CALCULATE_EIGENVECTORS': False,
 	'LR': 1e-3, # learning rate
 	'WEIGHT_DECAY': 1e-4, # regularization 1e-4
 
-	'TRAIN_BATCH_SIZE': 32,  # number of data examples in one batch
-	'N_EPOCH': 5,  # number of train epochs
+	'TRAIN_BATCH_SIZE': 40,  # number of data examples in one batch
+	'N_EPOCH': 2000,  # number of train epochs
 	'RECON_LOSS_CONST': 200,  # ratio between reconstruction loss and missclasificaition loss
 	'TRAIN_DATA_AUG': False,
 	'DROPOUT_PROB': 0.3,
@@ -80,7 +80,6 @@ run_config = {
 # ----------------------------------------------------------------------------------------------------------------------#
 # Don't forget to update the test parameters to the original train!
 	'SHUFFLE_TEST_DATA': False,
-	'TARGET_CLASS': 5,  # the attack target - still not used\
 	'TEST_DATA_AUG': False,
 	'PLOT_TEST_SAMPLE': False,
 	'TEST_EPOCHS': 1,  # valid use only with "TEST_DATA_AUG = True"
@@ -95,10 +94,11 @@ run_config = {
 # ----------------------------------------------------------------------------------------------------------------------#
 	'NUM_WORKERS': 0,
 	'DATASET_CLASSES': 10,
-	'DATASET_TRAIN_SIZE': 70, # 320
-	'DATASET_VAL_SIZE': 15, # 40
-	'NUM_VERTICES': 6890, # 6892
-	'DATASET_NAME': "Faust", # 'Faust', 'Shrec14'
+	'DATASET_TRAIN_SIZE': 320, # 70
+	'DATASET_VAL_SIZE': 40, # 15
+	'DATASET_TEST_SIZE': 40, # 15
+	'NUM_VERTICES': 6892, # 6892
+	'DATASET_NAME': "Shrec14", # 'Faust', 'Shrec14'
 	'LOAD_WHOLE_DATA_TO_MEMORY': True,  # use InMemory of Not in dataset loader stage
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   VISTA

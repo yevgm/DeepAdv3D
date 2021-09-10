@@ -142,7 +142,7 @@ class L2Similarity(LossFunction):
         diff = self.perturbed_pos - self.original_pos
         N = self.perturbed_pos.shape[0]  # batch size
         # (sqrt(ai)*(xi-perturbed(xi)) )^2  = ai*(x-perturbed(xi))^2
-        weight_diff = diff  * torch.sqrt(self.vertex_area)[:, None, :]
+        weight_diff = diff[:, None, :] #   * torch.sqrt(self.vertex_area)
         # this reformulation uses the sub-gradient (hence ensuring a valid behaviour at zero)
         L2 = weight_diff.norm(p="fro")
 
