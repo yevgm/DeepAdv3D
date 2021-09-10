@@ -24,7 +24,7 @@ run_config = {
 #                                                   MODEL
 # ----------------------------------------------------------------------------------------------------------------------#
 # classifier:
-	'PARAMS_FILE':  os.path.join(model_data_dir, "shrec14_no_aug_sep_100percent.ckpt"), # shrec14_no_aug_sep_100percent.ckpt  # FAUST10_pointnet_rot_b128_v2.pt, FAUST10_pointnet_rot_b128.pt, momentum_05.pt, shrec14_71percent_acc_momentum05.pt
+	'PARAMS_FILE':  os.path.join(repo_root,'saved_params', "shrec14_no_aug_sep_100percent.ckpt"), # shrec14_no_aug_sep_100percent.ckpt  # FAUST10_pointnet_rot_b128_v2.pt, FAUST10_pointnet_rot_b128.pt, momentum_05.pt, shrec14_71percent_acc_momentum05.pt
 	'MODEL_PARAMS_FILE':  os.path.join(repo_root,'saved_params', "eigens_and_augmentation_recon_loss.ckpt"),
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   TENSORBOARD
