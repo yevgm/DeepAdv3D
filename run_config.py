@@ -24,7 +24,7 @@ run_config = {
 #                                                   MODEL
 # ----------------------------------------------------------------------------------------------------------------------#
 # classifier:
-	'PARAMS_FILE':  os.path.join(model_data_dir, "FAUST_classifier_august.ckpt"), # shrec14_no_aug_sep_100percent.ckpt  # FAUST10_pointnet_rot_b128_v2.pt, FAUST10_pointnet_rot_b128.pt, momentum_05.pt, shrec14_71percent_acc_momentum05.pt
+	'PARAMS_FILE':  os.path.join(model_data_dir, "shrec14_no_aug_sep_100percent.ckpt"), # shrec14_no_aug_sep_100percent.ckpt  # FAUST10_pointnet_rot_b128_v2.pt, FAUST10_pointnet_rot_b128.pt, momentum_05.pt, shrec14_71percent_acc_momentum05.pt
 	'MODEL_PARAMS_FILE':  os.path.join(repo_root,'saved_params', "eigens_and_augmentation_recon_loss.ckpt"),
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   TENSORBOARD
@@ -38,7 +38,7 @@ run_config = {
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   Weights and biases
 # ----------------------------------------------------------------------------------------------------------------------#
-	'USE_WANDB': True,
+	'USE_WANDB': False,
 	'USE_PLOTTER': False,
 	'SAVE_WEIGHTS': False,
 	'LOG_GRADIENTS_WANDB': False,  # slows down the training significantly. 
@@ -46,8 +46,8 @@ run_config = {
 #                                                   TRAIN HYPERPARAMETERS
 # ----------------------------------------------------------------------------------------------------------------------#
 	'UNIVERSAL_RAND_SEED': 143, #143
-	'EARLY_STOP_WAIT': 120, # epochs
-	'LR_SCHEDULER_WAIT':  60, # epochs
+	'EARLY_STOP_WAIT': 300, # epochs
+	'LR_SCHEDULER_WAIT':  50, # epochs
 	'SCHEDULER_STEP_SIZE': 250,
 	'OPTIMIZER': 'Adam', # 'Adam', 'AdamW', 'sgd'
 
@@ -58,7 +58,7 @@ run_config = {
 
 	'TRAIN_BATCH_SIZE': 40,  # number of data examples in one batch
 	'N_EPOCH': 2000,  # number of train epochs
-	'RECON_LOSS_CONST': 200,  # ratio between reconstruction loss and missclasificaition loss
+	'RECON_LOSS_CONST': 100,  # ratio between reconstruction loss and missclasificaition loss
 	'TRAIN_DATA_AUG': False,
 	'DROPOUT_PROB': 0.3,
 

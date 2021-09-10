@@ -198,7 +198,7 @@ def report_to_wandb_regressor(run_config, epoch, split, epoch_loss, epoch_miscla
             epoch, epoch_loss, epoch_misclassified, run_config['DATASET_TRAIN_SIZE']))
     elif split == 'validation':
         if run_config['USE_WANDB']:
-            logdict = {"Validation\Epoch Loss": epoch_loss, "Validation/Epoch Misclassified": epoch_misclassified}
+            logdict = {"Validation/Epoch Loss": epoch_loss, "Validation/Epoch Misclassified": epoch_misclassified}
             if misloss is not None:
                 logdict.update({"Validation/Misclass Loss": misloss})
             if recon_loss is not None:

@@ -8,19 +8,11 @@ from deep_adv_3d.loss import *
 from deep_adv_3d.utils import *
 from deep_adv_3d.tensor_board import *
 from vista.subprocess_plotter import AdversarialPlotter
-from utils.gradflow_check import *
-from vista.geom_vis import plot_mesh
 
 # debug imports
-# from graphviz import Digraph, Source
-import re
 import torch
 import wandb
 import torch.nn.functional as F
-from torch.autograd import Variable
-from torch.autograd import Variable
-import torchvision.models as models
-# from torchviz import make_dot
 
 class Trainer:
 
@@ -127,7 +119,7 @@ class Trainer:
         elif split == 'validation':
             data = self.validation_data
         else:
-            raise('Split not specified')
+            raise Exception('Split not specified')
 
         loss, orig_vertices, adex, faces = None, None, None, None
         epoch_loss, epoch_misclassified, epoch_classified, epoch_misclass_loss, epoch_recon_loss = 0, 0, 0, 0, 0
