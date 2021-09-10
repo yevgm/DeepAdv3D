@@ -38,7 +38,7 @@ run_config = {
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   Weights and biases
 # ----------------------------------------------------------------------------------------------------------------------#
-	'USE_WANDB': False,
+	'USE_WANDB': True,
 	'USE_PLOTTER': False,
 	'SAVE_WEIGHTS': False,
 	'LOG_GRADIENTS_WANDB': False,  # slows down the training significantly. 
