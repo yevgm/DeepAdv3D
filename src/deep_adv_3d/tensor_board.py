@@ -215,7 +215,7 @@ def report_to_wandb_regressor(run_config, epoch, split, epoch_loss, epoch_miscla
                 "Test/loss": epoch_loss,
                 "Test/misclassified": epoch_misclassified})
 
-            print('Test loss: %f, misclassified: [%d/15]' % (epoch_loss, epoch_misclassified))
+        print('Test loss: %f, misclassified: [%d/15]' % (epoch_loss, epoch_misclassified))
 
             # my_data = [
             #     ["Test Loss", epoch_loss],

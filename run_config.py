@@ -38,7 +38,7 @@ run_config = {
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   Weights and biases
 # ----------------------------------------------------------------------------------------------------------------------#
-	'USE_WANDB': True,
+	'USE_WANDB': False,
 	'USE_PLOTTER': False,
 	'SAVE_WEIGHTS': False,
 	'LOG_GRADIENTS_WANDB': False,  # slows down the training significantly. 
@@ -57,7 +57,7 @@ run_config = {
 	'WEIGHT_DECAY': 1e-4, # regularization 1e-4
 
 	'TRAIN_BATCH_SIZE': 32,  # number of data examples in one batch
-	'N_EPOCH': 2000,  # number of train epochs
+	'N_EPOCH': 5,  # number of train epochs
 	'RECON_LOSS_CONST': 200,  # ratio between reconstruction loss and missclasificaition loss
 	'TRAIN_DATA_AUG': False,
 	'DROPOUT_PROB': 0.3,

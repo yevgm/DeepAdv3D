@@ -184,12 +184,12 @@ class Trainer:
         # END OF TRAIN
 
         if self.run_config['TRAINING_CLASSIFIER']:
-            report_to_wandb_classifier(run_config=self.run_config, epoch=epoch, split=split, epoch_loss=epoch_loss / 70,
+            report_to_wandb_classifier(run_config=self.run_config, epoch=epoch, split=split, epoch_loss=epoch_loss / self.run_config['DATASET_TRAIN_SIZE'],
                                        epoch_classified=epoch_classified)
         else:
-            report_to_wandb_regressor(run_config=self.run_config, epoch=epoch, split=split, epoch_loss=epoch_loss / 70,
-                                      epoch_misclassified=epoch_misclassified, misloss=misloss / 70,
-                                      recon_loss=recon_loss / 70)
+            report_to_wandb_regressor(run_config=self.run_config, epoch=epoch, split=split, epoch_loss=epoch_loss / self.run_config['DATASET_TRAIN_SIZE'],
+                                      epoch_misclassified=epoch_misclassified, misloss=misloss / self.run_config['DATASET_TRAIN_SIZE'],
+                                      recon_loss=recon_loss / self.run_config['DATASET_TRAIN_SIZE'])
 
         # push to visualizer every epoch - last batch
         if self.run_config['USE_PLOTTER']:
@@ -206,7 +206,7 @@ class Trainer:
             epoch_loss, epoch_misclassified, epoch_classified = 0, 0, 0
 
             for i, data in enumerate(data, 0):
-                orig_vertices, label, _, _, _, targets, faces, edges = data
+                orig_vertices, label, _, _, vertex_area, targets, faces, edges = data
                 orig_vertices = orig_vertices.transpose(2, 1)
 
                 if not self.run_config['TRAINING_CLASSIFIER']:
@@ -216,7 +216,8 @@ class Trainer:
 
                     perturbed_logits = self.classifier(adex)  # no grad is already implemented in the constructor
 
-                    loss = self.calculate_loss(perturbed_logits=perturbed_logits, labels=label, targets=targets)
+                    loss, missloss, recon_loss = self.calculate_loss(orig_vertices=orig_vertices, perturbed_logits=perturbed_logits,
+                                               labels=label, targets=targets, adex=adex, vertex_area=vertex_area)
                     pred_choice = perturbed_logits.data.max(1)[1]
                     # num_misclass = (~pred_choice.eq(label)).sum().cpu()  # for untargeted attack such as crossentropy
                     num_misclass = (pred_choice.eq(targets)).sum().cpu()  # for targeted attack
@@ -231,9 +232,11 @@ class Trainer:
 
 
         if self.run_config['TRAINING_CLASSIFIER']:
-            report_to_wandb_classifier(run_config=self.run_config, epoch=0, split="test", epoch_loss=loss.item() / 15, epoch_classified=num_clas.item())
+            report_to_wandb_classifier(run_config=self.run_config, epoch=0, split="test",
+                                       epoch_loss=loss.item() / self.run_config['DATASET_VAL_SIZE'], epoch_classified=num_clas.item())
         else:
-            report_to_wandb_regressor(run_config=self.run_config, epoch=0, split="test", epoch_loss=loss.item() / 15, epoch_misclassified=num_misclass.item())
+            report_to_wandb_regressor(run_config=self.run_config, epoch=0, split="test",
+                                      epoch_loss=loss.item() / self.run_config['DATASET_VAL_SIZE'], epoch_misclassified=num_misclass.item())
 
 
 
