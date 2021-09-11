@@ -24,7 +24,7 @@ run_config = {
 #                                                   MODEL
 # ----------------------------------------------------------------------------------------------------------------------#
 # classifier:
-	'PARAMS_FILE':  os.path.join(repo_root,'saved_params', "shrec14_no_aug_sep_100percent.ckpt"), # shrec14_no_aug_sep_100percent.ckpt  # FAUST10_pointnet_rot_b128_v2.pt, FAUST10_pointnet_rot_b128.pt, momentum_05.pt, shrec14_71percent_acc_momentum05.pt
+	'PARAMS_FILE':  os.path.join(repo_root,'saved_params', "FAUST_classifier_august.ckpt"), # shrec14_no_aug_sep_100percent.ckpt  # FAUST10_pointnet_rot_b128_v2.pt, FAUST10_pointnet_rot_b128.pt, momentum_05.pt, shrec14_71percent_acc_momentum05.pt
 	'MODEL_PARAMS_FILE':  os.path.join(repo_root,'saved_params', "eigens_and_augmentation_recon_loss.ckpt"),
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   TENSORBOARD
@@ -56,7 +56,7 @@ run_config = {
 	'LR': 1e-3, # learning rate
 	'WEIGHT_DECAY': 1e-4, # regularization 1e-4
 
-	'TRAIN_BATCH_SIZE': 40,  # number of data examples in one batch
+	'TRAIN_BATCH_SIZE': 35,  # number of data examples in one batch
 	'N_EPOCH': 2000,  # number of train epochs
 	'RECON_LOSS_CONST': 100,  # ratio between reconstruction loss and missclasificaition loss
 	'TRAIN_DATA_AUG': False,
@@ -97,8 +97,8 @@ run_config = {
 	'DATASET_TRAIN_SIZE': 320, # 70
 	'DATASET_VAL_SIZE': 40, # 15
 	'DATASET_TEST_SIZE': 40, # 15
-	'NUM_VERTICES': 6892, # 6892
-	'DATASET_NAME': "Shrec14", # 'Faust', 'Shrec14'
+	'NUM_VERTICES': 6890, # 6892
+	'DATASET_NAME': "Faust", # 'Faust', 'Shrec14'
 	'LOAD_WHOLE_DATA_TO_MEMORY': True,  # use InMemory of Not in dataset loader stage
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   VISTA
@@ -123,7 +123,7 @@ run_config = {
 	'CLS_BATCH_NORM_MOMENTUM': 0.1,  # default is 0.1
 	'CLS_STRICT_PARAM_LOADING': False, # strict = False for dropping running mean and var of train batchnorm
 	# model bn
-	'MODEL_USE_BN': False
+	'MODEL_USE_BN': True
 
 
 }

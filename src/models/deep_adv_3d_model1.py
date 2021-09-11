@@ -111,27 +111,42 @@ class RegressorOriginalPointnet(nn.Module):
         super(RegressorOriginalPointnet, self).__init__()
         self.run_config = run_config
         self.v_size = run_config['NUM_VERTICES']
+        self.dropout_p = run_config['DROPOUT_PROB']
         self.feat = PointNetfeatModel(run_config)
-        self.fc1 = nn.Linear(1024, 4096)
-        self.relu = nn.ReLU()
-        self.fc2 = nn.Linear(4096, 8192)
-        self.dropout = nn.Dropout(p=0.3)
-        self.relu = nn.ReLU()
-        self.fc3 = nn.Linear(8192, self.v_size*3)
+        self.fc1 = nn.Linear(1024, 2048)
+
+        self.drop1 = nn.Dropout(p=self.dropout_p)
+        self.fc2 = nn.Linear(2048, 4096)
+
+        self.drop2 = nn.Dropout(p=self.dropout_p)
+        self.fc3 = nn.Linear(4096, 8192)
+
+        self.drop3 = nn.Dropout(p=self.dropout_p)
+        self.fc4 = nn.Linear(8192, 6890*3)
+
+        # self.drop4 = nn.Dropout(p=self.dropout_p)
+        # self.fc5 = nn.Linear(16384, 6890*3)
 
         if self.run_config['MODEL_USE_BN']:
-            self.bn1 = nn.BatchNorm1d(4096)
-            self.bn2 = nn.BatchNorm1d(8192)
+            self.bn1 = nn.BatchNorm1d(2048)
+            self.bn2 = nn.BatchNorm1d(4096)
+            self.bn3 = nn.BatchNorm1d(8192)
+            # self.bn4 = nn.BatchNorm1d(16384)
+
         else:
             self.bn1 = nn.Identity()
             self.bn2 = nn.Identity()
+            self.bn3 = nn.Identity()
+            # self.bn4 = nn.Identity()
 
     def forward(self, x):
         # x, trans, trans_feat = self.feat(x)  # x is 1024, trans is exit from TNET1, trans_Feat is exit from tnet2
         x = self.feat(x)  # x is 1024, trans is exit from TNET1, trans_Feat is exit from tnet2
-        x = F.relu(self.bn1(self.fc1(x)))
-        x = F.relu(self.bn2(self.dropout(self.fc2(x))))
-        x = self.fc3(x)
+        x = self.drop1(F.relu(self.bn1(self.fc1(x))))
+        x = self.drop2(F.relu(self.bn2((self.fc2(x)))))
+        x = self.drop3(F.relu(self.bn3((self.fc3(x)))))
+        # x = self.drop4(F.relu(self.bn4((self.fc4(x)))))
+        x = self.fc4(x)
         x = x.view(-1, 3, self.v_size)  # that's the only difference from pointnet, along with layer sizes
         return x
 
