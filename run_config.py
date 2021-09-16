@@ -38,8 +38,8 @@ run_config = {
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   Weights and biases
 # ----------------------------------------------------------------------------------------------------------------------#
-	'USE_WANDB': True,
-	'USE_PLOTTER': False,
+	'USE_WANDB': False,
+	'USE_PLOTTER': True,
 	'SAVE_WEIGHTS': False,
 	'LOG_GRADIENTS_WANDB': False,  # slows down the training significantly. 
 # ----------------------------------------------------------------------------------------------------------------------#
@@ -49,18 +49,20 @@ run_config = {
 	'EARLY_STOP_WAIT': 300, # epochs
 	'LR_SCHEDULER_WAIT':  50, # epochs
 	'SCHEDULER_STEP_SIZE': 250,
-	'OPTIMIZER': 'Adam', # 'Adam', 'AdamW', 'sgd'
+	'OPTIMIZER': 'AdamW', # 'Adam', 'AdamW', 'sgd'
 
 	'TRAINING_CLASSIFIER': False,  # turn on to switch between classifier train and model train
 	'CALCULATE_EIGENVECTORS': False,
-	'LR': 1e-3, # learning rate
-	'WEIGHT_DECAY': 1e-4, # regularization 1e-4
+	'CALCULATE_EDGES': True,
+	'LR': 0.009946416145260538, # learning rate
+	'WEIGHT_DECAY': 0.6909434612344018, # regularization 1e-4
 
 	'TRAIN_BATCH_SIZE': 35,  # number of data examples in one batch
 	'N_EPOCH': 2000,  # number of train epochs
-	'RECON_LOSS_CONST': 100,  # ratio between reconstruction loss and missclasificaition loss
+	'RECON_LOSS_CONST': 1391.4670364977283,  # ratio between reconstruction loss and missclasificaition loss 1391.4670364977283
+	'EDGE_LOSS_CONST': 1,
 	'TRAIN_DATA_AUG': False,
-	'DROPOUT_PROB': 0.3,
+	'DROPOUT_PROB': 0.6931962740122515,
 
 # Architecture parameters - Do not change after classifier has been trained! number 247 in the sweep
 # parameters: --DROPOUT_PROB=0.06799470785277999 --LATENT_SPACE_FEAT=1024 --LR=0.050572566231955045 --OPTIMIZER=AdamW --POINTNET_LAST_LAYER_SIZE=128 --TRAIN_BATCH_SIZE=70 --WEIGHT_DECAY=0.0844692091146692
@@ -94,9 +96,9 @@ run_config = {
 # ----------------------------------------------------------------------------------------------------------------------#
 	'NUM_WORKERS': 0,
 	'DATASET_CLASSES': 10,
-	'DATASET_TRAIN_SIZE': 320, # 70
-	'DATASET_VAL_SIZE': 40, # 15
-	'DATASET_TEST_SIZE': 40, # 15
+	'DATASET_TRAIN_SIZE': 70, # 70
+	'DATASET_VAL_SIZE': 15, # 15
+	'DATASET_TEST_SIZE': 15, # 15
 	'NUM_VERTICES': 6890, # 6892
 	'DATASET_NAME': "Faust", # 'Faust', 'Shrec14'
 	'LOAD_WHOLE_DATA_TO_MEMORY': True,  # use InMemory of Not in dataset loader stage

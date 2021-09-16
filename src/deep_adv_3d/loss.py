@@ -147,7 +147,21 @@ class L2Similarity(LossFunction):
         L2 = weight_diff.norm(p="fro")
 
         return L2 / N
+#
+class EdgeLoss(LossFunction):
+    def __init__(self):
+        super().__init__()
 
+    def __call__(self, e, pos, ppos):
+        out = 0
+        for b in range(e.shape[0]):
+            e_single = e[b, :, :]
+            ppos_single = ppos[b, :, :]
+            pos_single = pos[b, :, :]
+            reconstructed_norm = torch.linalg.norm(ppos_single[e_single[:, 0]] - ppos_single[e_single[:, 1]], axis=1)
+            original_norm = torch.linalg.norm(pos_single[e_single[:, 0]] - pos_single[e_single[:, 1]], axis=1)
+            out = out + (( (reconstructed_norm / original_norm) - 1).abs()).mean()
+        return out
 
 # class LocalEuclideanSimilarity(LossFunction):
 #     def __init__(self, original_pos: torch.Tensor,

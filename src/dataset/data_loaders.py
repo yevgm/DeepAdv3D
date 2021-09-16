@@ -368,13 +368,12 @@ class FaustDatasetInMemory(data.Dataset):
             self.v.append(v)
 
             f = np.stack(plydata['face']['vertex_indices'])
-            self.faces = torch.from_numpy(f).type(torch.long)
             # self.faces.append(faces)
 
 
         # calculate edges from faces for local euclidean similarity
-        if (self.split == 'train') & (self.run_config['LOSS'] == 'local_euclidean'):
-            e = edges_from_faces(self.faces)
+        if self.run_config['CALCULATE_EDGES'] :
+            e = edges_from_faces(f)
             edges = torch.from_numpy(e).type(torch.long)
         else:
             edges = 0
@@ -388,6 +387,7 @@ class FaustDatasetInMemory(data.Dataset):
 
 
         self.edges = edges
+        self.faces = torch.from_numpy(f).type(torch.long)
         self.targets = self.set_targets()
 
 
@@ -406,6 +406,7 @@ class FaustDatasetInMemory(data.Dataset):
             # random unitary rotation
             r = random_uniform_rotation()
             v = v @ r
+            v = v.float()
 
             # random translation
             # jitter = np.random.normal(0, 0.01, size=(1, 3))
@@ -433,6 +434,7 @@ class FaustDatasetInMemory(data.Dataset):
             # draw new targets every time a new data is created
             # targets = self.set_targets()
         targets = self.targets[index]
+
 
         return v.to(self.run_config['DEVICE']), self.cls[index],  eigvals, eigvecs, vertex_area \
             , targets, self.faces, self.edges

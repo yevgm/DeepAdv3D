@@ -149,7 +149,7 @@ class Trainer:
                 # print('Classified: ',num_clas)
                 loss, misloss, recon_loss = self.calculate_loss(perturbed_logits=perturbed_logits, labels=label,
                                                                 targets=targets, orig_vertices=orig_vertices,
-                                                                adex=adex, vertex_area=vertex_area)
+                                                                adex=adex, vertex_area=vertex_area, edges=edges)
                 pred_choice = perturbed_logits.data.max(1)[1]
                 # num_misclassified = (~pred_choice.eq(label)).sum().cpu()  # for untargeted attack such as crossentropy
                 num_misclassified = (pred_choice.eq(targets)).sum().cpu()  # for targeted attack
@@ -233,8 +233,9 @@ class Trainer:
 
 
     def calculate_loss(self, perturbed_logits, labels, orig_vertices=None, adex=None, vertex_area=None, targets=None,
-                       epoch=None):
+                       epoch=None, edges=None):
         recon_const = self.run_config['RECON_LOSS_CONST']
+        edge_loss_const = self.run_config['EDGE_LOSS_CONST']
         # only misclassification loss
         if self.run_config['CHOOSE_LOSS'] == 1:
             misclassification_loss = AdversarialLoss()
@@ -257,14 +258,17 @@ class Trainer:
 
             if self.run_config['LOSS'] == 'l2':
                 reconstruction_loss = L2Similarity(orig_vertices, adex, vertex_area)
+                edge_loss = EdgeLoss()
             else:
                 raise('Not implemented reonstruction loss')
 
             recon_loss = reconstruction_loss()
-            loss = missloss + recon_const * recon_loss
+            edge_loss = edge_loss(edges, orig_vertices.transpose(2,1), adex.transpose(2,1))
+            loss = missloss + recon_const * recon_loss + edge_loss_const * edge_loss
 
             missloss_out = missloss.item()
             recon_loss_out = recon_loss.item()
+            print(f'misloss: {missloss_out} recon_loss: {recon_loss} edge_loss: {edge_loss}')
             return loss, missloss_out, recon_loss_out
 
         return loss
