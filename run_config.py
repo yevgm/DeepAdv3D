@@ -49,7 +49,7 @@ run_config = {
 	'EARLY_STOP_WAIT': 1000, # epochs
 	'LR_SCHEDULER_WAIT':  100, # epochs  # 50
 	'SCHEDULER_STEP_SIZE': 250,
-	'OPTIMIZER': 'AdamW', # 'Adam', 'AdamW', 'sgd'
+	'OPTIMIZER': 'Adam', # 'Adam', 'AdamW', 'sgd'
 
 	'TRAINING_CLASSIFIER': False,  # turn on to switch between classifier train and model train
 	'CALCULATE_EIGENVECTORS': True,
