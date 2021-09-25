@@ -2,7 +2,11 @@
 import utils
 import torch
 from utils.misc import kNN
-
+from deep_adv_3d.laplacian import Laplacian, LaplacianFunc
+# from deep_adv_3d.ido_laplacian import laplacian_batch
+from pytorch3d.loss.mesh_laplacian_smoothing import mesh_laplacian_smoothing
+from pytorch3d.loss.mesh_edge_loss import mesh_edge_loss
+from pytorch3d.structures.meshes import Meshes
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   Loss Functions
 # ----------------------------------------------------------------------------------------------------------------------#
@@ -163,6 +167,94 @@ class EdgeLoss(LossFunction):
             out = out + (( (reconstructed_norm / original_norm) - 1).abs()).mean()
         return out
 
+
+class LaplacianLoss(LossFunction):
+    """
+        Encourages minimal mean curvature shapes.
+        """
+    def __init__(self, faces, vert, toref=True):
+        # Input:
+        #  faces: B x F x 3
+        self.toref = toref
+        self.curve_gt = 0
+        self.faces =  faces #torch.autograd.Variable(faces)
+        # V x V
+        self.laplacian = Laplacian()
+        # self.Lx = None
+        # # verts = torch.autograd.Variable(vert, requires_grad=True)
+        # tmp = self.laplacian.apply(vert, self.faces)
+        # self.curve_gt = torch.norm(tmp.view(-1, tmp.size(2)), p=2, dim=1).float()
+        # if not self.toref:
+        #     self.curve_gt = self.curve_gt * 0
+
+
+
+    def __call__(self, verts):
+        # vert = torch.autograd.Variable(verts, requires_grad=True)
+        self.Lx = self.laplacian.apply(verts, self.faces)
+        # Reshape to BV x 3
+        Lx = self.Lx.view(-1, self.Lx.size(2))
+        loss = (torch.norm(Lx, p=2, dim=1).float() - self.curve_gt).mean()
+        return loss
+
+# class LaplacianLossNoBackward(object):
+#     """
+#     Encourages minimal mean curvature shapes.
+#     """
+#
+#     def __init__(self, faces, vert, toref=True):
+#         # Input:
+#         #  faces: B x F x 3
+#         self.toref = toref
+#         # V x V
+#         self.curve_gt = 0
+#         # self.Lx = None
+#         # # tmp = LaplacianFunc(vert, faces)
+#         # L, _ = laplacian_batch(vert, faces)
+#         # tmp = torch.bmm(L, vert)
+#         # self.curve_gt = torch.norm(tmp.view(-1, tmp.size(2)), p=2, dim=1).float()
+#         # if not self.toref:
+#         #     self.curve_gt = self.curve_gt * 0
+#
+#     def __call__(self, verts, faces):
+#         L, _ = laplacian_batch(verts, faces)
+#         Lx = torch.bmm(L, verts)
+#         # Reshape to BV x 3
+#         Lx = Lx.view(-1, Lx.size(2))
+#         loss = (torch.norm(Lx, p=2, dim=1).float() - self.curve_gt).mean()
+#         return loss
+
+class MeshLaplacianSmoothing(LossFunction):
+    """
+    Encourages minimal mean curvature shapes.
+    """
+    def __call__(self, verts, faces):
+        verts_list = []
+        faces_list = []
+        for b in range(verts.shape[0]):
+            verts_list.append(verts[b,:,:])
+            faces_list.append(faces[b, :, :])
+
+        meshes = Meshes(verts_list, faces_list)
+        loss = mesh_laplacian_smoothing(meshes=meshes, method='uniform')
+        return loss
+
+
+class MeshEdgeLoss(LossFunction):
+    """
+    Encourages minimal mean curvature shapes.
+    """
+    def __call__(self, verts, faces):
+        verts_list = []
+        faces_list = []
+        for b in range(verts.shape[0]):
+            verts_list.append(verts[b,:,:])
+            faces_list.append(faces[b, :, :])
+
+        meshes = Meshes(verts_list, faces_list)
+        loss = mesh_edge_loss(meshes=meshes)
+        return loss
+
 # class LocalEuclideanSimilarity(LossFunction):
 #     def __init__(self, original_pos: torch.Tensor,
 #                        perturbed_pos: torch.Tensor,
@@ -200,3 +292,41 @@ class EdgeLoss(LossFunction):
 #         dist_r = torch.norm(Xr - ppos.view(self.batch_size, n, 1, 3), p=2, dim=-1)
 #         dist_loss = torch.nn.functional.mse_loss(dist, dist_r, reduction="mean")
 #         return dist_loss
+
+class ChamferDistance(LossFunction):
+    def __init__(self):
+        super().__init__()
+
+    def __call__(self,  original_pos: torch.Tensor,
+                 perturbed_pos: torch.Tensor,
+                 vertex_area: torch.Tensor=None):
+
+        dist1, dist2, idx1, idx2 = self.dist_chamfer_aux(original_pos, perturbed_pos)  # mean over points
+        out = torch.mean(dist1) + torch.mean(dist2)
+        return out
+
+    def dist_chamfer_aux(self,  original_pos: torch.Tensor,
+                       perturbed_pos: torch.Tensor):
+        """
+        :param a: Pointclouds Batch x nul_points x dim
+        :param b:  Pointclouds Batch x nul_points x dim
+        :return:
+        -closest point on b of points from a
+        -closest point on a of points from b
+        -idx of closest point on b of points from a
+        -idx of closest point on a of points from b
+        Works for pointcloud of any dimension
+        """
+        a = original_pos
+        b = perturbed_pos
+        x, y = a.double(), b.double()
+        bs, num_points_x, points_dim = x.size()
+        bs, num_points_y, points_dim = y.size()
+
+        xx = torch.pow(x, 2).sum(2)
+        yy = torch.pow(y, 2).sum(2)
+        zz = torch.bmm(x, y.transpose(2, 1))
+        rx = xx.unsqueeze(1).expand(bs, num_points_y, num_points_x)  # Diagonal elements xx
+        ry = yy.unsqueeze(1).expand(bs, num_points_x, num_points_y)  # Diagonal elements yy
+        P = rx.transpose(2, 1) + ry - 2 * zz
+        return torch.min(P, 2)[0].float(), torch.min(P, 1)[0].float(), torch.min(P, 2)[1].int(), torch.min(P, 1)[1].int()

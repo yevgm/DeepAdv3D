@@ -17,6 +17,9 @@ from utils.transforms import random_uniform_rotation
 from utils.eigenpairs import eigenpairs
 from utils.misc import edges_from_faces
 from utils.ios import read_obj_verts
+from pytorch3d.structures.meshes import Meshes
+import scipy
+import scipy.sparse.linalg  as slinalg
 
 
 # ----------------------------------------------------------------------------------------------------------------------#
@@ -371,23 +374,38 @@ class FaustDatasetInMemory(data.Dataset):
             # self.faces.append(faces)
 
 
-        # calculate edges from faces for local euclidean similarity
+        # calculate edges from faces
         if self.run_config['CALCULATE_EDGES'] :
             e = edges_from_faces(f)
             edges = torch.from_numpy(e).type(torch.long)
         else:
             edges = 0
 
+        self.faces = torch.from_numpy(f).type(torch.long)
+
         # Calculate Eigenvectors and areas of all the data
         if CALCULATE_EIGENVECTORS and (data_augmentation == False):
             for v in self.v:
-                eigvals, eigvecs, vertex_area = eigenpairs(v, self.faces, self.run_config['K'], double_precision=True)
+                mesh = Meshes([v], [self.faces])
+                L = mesh.laplacian_packed()
+
+                L = L.coalesce()
+                Li, Lv = L.indices().cpu(), L.values().cpu()
+                ri, ci = Li
+                n = run_config['NUM_VERTICES']
+                L = scipy.sparse.csr_matrix((Lv, (ri, ci)), shape=(n, n))
+
+                eigvals, eigvecs = slinalg.eigs(L, k=run_config['K'], sigma=-1e-6)
+                eigvecs = eigvecs.real
+                eigvecs = torch.tensor(eigvecs)
+
+                # test
+                # eigvals, eigvecs, vertex_area = eigenpairs(v, self.faces, self.run_config['K'], double_precision=True)
+
                 self.eigvecs.append(eigvecs)
-                self.vertex_area.append(vertex_area)
 
 
         self.edges = edges
-        self.faces = torch.from_numpy(f).type(torch.long)
         self.targets = self.set_targets()
 
 
@@ -427,9 +445,10 @@ class FaustDatasetInMemory(data.Dataset):
                 vertex_area = vertex_area.to(self.run_config['DEVICE'])
             else:
                 eigvals = 0
-                eigvecs = 0
-                # eigvecs = self.eigvecs[index].to(self.run_config['DEVICE'])
-                vertex_area = self.vertex_area[index].to(self.run_config['DEVICE'])
+                # eigvecs = 0
+                eigvecs = self.eigvecs[index].to(self.run_config['DEVICE'])
+                # vertex_area = self.vertex_area[index].to(self.run_config['DEVICE'])
+                vertex_area = 0
 
             # draw new targets every time a new data is created
             # targets = self.set_targets()

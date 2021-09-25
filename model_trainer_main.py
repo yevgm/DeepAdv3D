@@ -11,7 +11,7 @@ from run_config import *
 
 # repository modules
 from models.pointnet import PointNet
-from models.deep_adv_3d_model1 import RegressorOriginalPointnet, OshriRegressor, RegressorOriginalPointnetEigen
+from models.deep_adv_3d_model1 import RegressorOriginalPointnet, OshriRegressor, RegressorOriginalPointnetEigen, RegressorEigenSeptember, RegressorEigenSeptemberDeep
 from deep_adv_3d.train_loop import *
 from dataset.data_loaders import *
 from utils.torch.nn import *
@@ -79,9 +79,9 @@ if __name__ == '__main__':
 
     config = run_config  # default for debug
     if run_config['USE_WANDB']:
-        wandb.init(entity="deepadv3d", project="DeepAdv3d_sweeps", config=run_config)
+        wandb.init(entity="deepadv3d", project="DeepAdv3d", config=run_config)
         run_config['RUN_NAME'] = wandb.run.name
-        config = wandb.config
+        config = wandb.config._items
 
     # Data Loading and pre-processing
     trainLoader, validationLoader, testLoader = load_datasets(run_config=config)
@@ -89,7 +89,8 @@ if __name__ == '__main__':
     # classifier and model definition
     classifier = PointNet(config, k=10)
     classifier.load_state_dict(torch.load(config['PARAMS_FILE'], map_location=config['DEVICE']))
-    model = RegressorOriginalPointnet(config)
+    # model = RegressorOriginalPointnet(config)
+    model = RegressorEigenSeptember(config)
     # model = RegressorOriginalPointnetEigen(config)
     # model.load_state_dict(torch.load(MODEL_PARAMS_FILE, map_location=run_config['DEVICE']))
     # model = OshriRegressor()
