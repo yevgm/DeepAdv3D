@@ -46,8 +46,8 @@ run_config = {
 #                                                   TRAIN HYPERPARAMETERS
 # ----------------------------------------------------------------------------------------------------------------------#
 	'UNIVERSAL_RAND_SEED': 143, #143
-	'EARLY_STOP_WAIT': 1000, # epochs
-	'LR_SCHEDULER_WAIT':  100, # epochs  # 50
+	'EARLY_STOP_WAIT': 200, # epochs
+	'LR_SCHEDULER_WAIT':  50, # epochs  # 50
 	'SCHEDULER_STEP_SIZE': 250,
 	'OPTIMIZER': 'Adam', # 'Adam', 'AdamW', 'sgd'
 
@@ -58,7 +58,7 @@ run_config = {
 	'WEIGHT_DECAY': 0.6909434612344018, # regularization 1e-4, 0.6909434612344018
 
 	'TRAIN_BATCH_SIZE': 5,  # number of data examples in one batch
-	'N_EPOCH': 2000,  # number of train epochs
+	'N_EPOCH': 1500,  # number of train epochs
 	'RECON_LOSS_CONST':10,  # ratio between reconstruction loss and missclasificaition loss 1391.4670364977283
 	'LAPLACIAN_LOSS_CONST': 10000,
 	'EDGE_LOSS_CONST': 1e-15,
