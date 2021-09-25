@@ -38,8 +38,8 @@ run_config = {
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   Weights and biases
 # ----------------------------------------------------------------------------------------------------------------------#
-	'USE_WANDB': False,
-	'USE_PLOTTER': True,
+	'USE_WANDB': True,
+	'USE_PLOTTER': False,
 	'SAVE_WEIGHTS': False,
 	'LOG_GRADIENTS_WANDB': False,  # slows down the training significantly. 
 # ----------------------------------------------------------------------------------------------------------------------#
@@ -57,9 +57,9 @@ run_config = {
 	'LR': 0.009946416145260538 , # learning rate 0.009946416145260538 
 	'WEIGHT_DECAY': 0.6909434612344018, # regularization 1e-4, 0.6909434612344018
 
-	'TRAIN_BATCH_SIZE': 7,  # number of data examples in one batch
+	'TRAIN_BATCH_SIZE': 5,  # number of data examples in one batch
 	'N_EPOCH': 2000,  # number of train epochs
-	'RECON_LOSS_CONST':150,  # ratio between reconstruction loss and missclasificaition loss 1391.4670364977283
+	'RECON_LOSS_CONST':10,  # ratio between reconstruction loss and missclasificaition loss 1391.4670364977283
 	'LAPLACIAN_LOSS_CONST': 10000,
 	'EDGE_LOSS_CONST': 1e-15,
 	'TRAIN_DATA_AUG': False,
@@ -72,12 +72,12 @@ run_config = {
 	'LATENT_SPACE_FEAT': 1024,
 	'MODEL_LAST_LAYER_SIZE': 256,  # Important: the model transfers 512 to this, and this to K*3, so it cant be too large nor too small
 	# adversarial example params:
-	'K': 40,  #40 number of laplacian eigenvectors to take. NOTE: up to 70. more then that the model decoder is "broken" - see model
+	'K': 70,  #40 number of laplacian eigenvectors to take. NOTE: up to 70. more then that the model decoder is "broken" - see model
 	'LOSS': 'EUCLIDEAN',  # 'l2', 'local_euclidean' (not working in batches!), 'EUCLIDEAN' (batches)
-	'CHOOSE_LOSS': 3,  ## 1 for only misclassification, 2 for only reconstruction, 3 - both
+	'CHOOSE_LOSS': 2,  ## 1 for only misclassification, 2 for only reconstruction, 3 - both
 	# local euclidean loss params:
 	'CUTOFF': 5,  # 40
-	'NEIGHBORS': 20,  # 140
+	'NEIGHBORS': 30,  # 140
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   TEST
 # ----------------------------------------------------------------------------------------------------------------------#
@@ -126,7 +126,7 @@ run_config = {
 	'CLS_BATCH_NORM_MOMENTUM': 0.1,  # default is 0.1
 	'CLS_STRICT_PARAM_LOADING': False, # strict = False for dropping running mean and var of train batchnorm
 	# model bn
-	'MODEL_USE_BN': True
+	'MODEL_USE_BN': False
 
 
 }

@@ -309,7 +309,7 @@ def LocalEuclideanBatch(original_pos: torch.Tensor, perturbed_pos: torch.Tensor,
         diff = knn_out_orig - knn_out_adex
         l2 = diff.norm(p="fro")
 
-        return l2
+        return l2 / neighborhood
 
 def batch_knn(x, k):
     inner = -2 * torch.matmul(x.transpose(2, 1), x)

@@ -79,7 +79,7 @@ if __name__ == '__main__':
 
     config = run_config  # default for debug
     if run_config['USE_WANDB']:
-        wandb.init(entity="deepadv3d", project="DeepAdv3d", config=run_config)
+        wandb.init(entity="deepadv3d", project="DeepAdv3d_sweeps", config=run_config)
         run_config['RUN_NAME'] = wandb.run.name
         config = wandb.config._items
 
