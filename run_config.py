@@ -57,7 +57,7 @@ run_config = {
 	'LR': 0.009946416145260538 , # learning rate 0.009946416145260538 
 	'WEIGHT_DECAY': 0.6909434612344018, # regularization 1e-4, 0.6909434612344018
 
-	'TRAIN_BATCH_SIZE': 70,  # number of data examples in one batch
+	'TRAIN_BATCH_SIZE': 7,  # number of data examples in one batch
 	'N_EPOCH': 2000,  # number of train epochs
 	'RECON_LOSS_CONST':150,  # ratio between reconstruction loss and missclasificaition loss 1391.4670364977283
 	'LAPLACIAN_LOSS_CONST': 10000,
@@ -73,7 +73,7 @@ run_config = {
 	'MODEL_LAST_LAYER_SIZE': 256,  # Important: the model transfers 512 to this, and this to K*3, so it cant be too large nor too small
 	# adversarial example params:
 	'K': 40,  #40 number of laplacian eigenvectors to take. NOTE: up to 70. more then that the model decoder is "broken" - see model
-	'LOSS': 'l2',  # 'l2', 'local_euclidean'
+	'LOSS': 'EUCLIDEAN',  # 'l2', 'local_euclidean' (not working in batches!), 'EUCLIDEAN' (batches)
 	'CHOOSE_LOSS': 3,  ## 1 for only misclassification, 2 for only reconstruction, 3 - both
 	# local euclidean loss params:
 	'CUTOFF': 5,  # 40

@@ -253,6 +253,10 @@ class Trainer:
         elif self.run_config['CHOOSE_LOSS'] == 2:
             if self.run_config['LOSS'] == 'l2':
                 reconstruction_loss = L2Similarity(orig_vertices, adex, vertex_area)
+            elif self.run_config['LOSS'] == 'EUCLIDEAN':
+                reconstruction_loss = LocalEuclideanBatch(original_pos=orig_vertices, perturbed_pos=adex,
+                                                          run_config=self.run_config)
+                return reconstruction_loss, 0, reconstruction_loss
             else:
                 raise('Not implemented reonstruction loss')
 
@@ -265,13 +269,17 @@ class Trainer:
 
             if self.run_config['LOSS'] == 'l2':
                 reconstruction_loss = L2Similarity(orig_vertices, adex, vertex_area)
+                recon_loss = reconstruction_loss()
                 # edge_loss = EdgeLoss()
                 # chamfer_loss = ChamferDistance()
                 # laplacian_loss = LaplacianLoss(faces=faces, vert=adex.transpose(2, 1), toref=False)
+            elif self.run_config['LOSS'] == 'EUCLIDEAN':
+                recon_loss = LocalEuclideanBatch(original_pos=orig_vertices, perturbed_pos=adex,
+                                                          run_config=self.run_config)
             else:
                 raise('Not implemented reonstruction loss')
 
-            recon_loss = reconstruction_loss()
+
 
             # edge_loss = edge_loss(edges, orig_vertices.transpose(2,1), adex.transpose(2,1))
             # laplace_loss = laplacian_loss(verts=adex.transpose(2, 1))
@@ -283,7 +291,7 @@ class Trainer:
             # chamfer_loss = chamfer_loss(original_pos=orig_vertices, perturbed_pos=adex, vertex_area=vertex_area)
             # loss = missloss + recon_const * recon_loss + edge_loss_const * edge_loss + laplacian_loss_const * laplace_loss
             # loss = edge_loss
-            loss = missloss + recon_const * ( recon_loss)
+            loss = missloss + recon_const * recon_loss
             # loss = laplace_loss
             # print(f'laplacian loss : {loss} reconstraction : {laplace_loss}')
             # missloss_out = missloss.item()

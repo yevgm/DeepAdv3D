@@ -293,40 +293,30 @@ class MeshEdgeLoss(LossFunction):
 #         dist_loss = torch.nn.functional.mse_loss(dist, dist_r, reduction="mean")
 #         return dist_loss
 
-class ChamferDistance(LossFunction):
-    def __init__(self):
-        super().__init__()
+def LocalEuclideanBatch(original_pos: torch.Tensor, perturbed_pos: torch.Tensor, run_config):
+        # check input validity
+        # if original_pos.shape[-1] != 3:
+        #     raise ValueError("Vertices positions must have shape [b,3,n]")
+        # if perturbed_pos.shape[-1] != 3:
+        #     raise ValueError("Vertices positions must have shape [b,3,n]")
 
-    def __call__(self,  original_pos: torch.Tensor,
-                 perturbed_pos: torch.Tensor,
-                 vertex_area: torch.Tensor=None):
+        neighborhood = run_config['NEIGHBORS']
+        batch_size = original_pos.shape[0]
 
-        dist1, dist2, idx1, idx2 = self.dist_chamfer_aux(original_pos, perturbed_pos)  # mean over points
-        out = torch.mean(dist1) + torch.mean(dist2)
-        return out
+        knn_out_orig = batch_knn(x=original_pos, k=neighborhood) # (batch_size, num_points, k)
+        knn_out_adex = batch_knn(x=perturbed_pos, k=neighborhood)  # (batch_size, num_points, k)
 
-    def dist_chamfer_aux(self,  original_pos: torch.Tensor,
-                       perturbed_pos: torch.Tensor):
-        """
-        :param a: Pointclouds Batch x nul_points x dim
-        :param b:  Pointclouds Batch x nul_points x dim
-        :return:
-        -closest point on b of points from a
-        -closest point on a of points from b
-        -idx of closest point on b of points from a
-        -idx of closest point on a of points from b
-        Works for pointcloud of any dimension
-        """
-        a = original_pos
-        b = perturbed_pos
-        x, y = a.double(), b.double()
-        bs, num_points_x, points_dim = x.size()
-        bs, num_points_y, points_dim = y.size()
+        diff = knn_out_orig - knn_out_adex
+        l2 = diff.norm(p="fro")
 
-        xx = torch.pow(x, 2).sum(2)
-        yy = torch.pow(y, 2).sum(2)
-        zz = torch.bmm(x, y.transpose(2, 1))
-        rx = xx.unsqueeze(1).expand(bs, num_points_y, num_points_x)  # Diagonal elements xx
-        ry = yy.unsqueeze(1).expand(bs, num_points_x, num_points_y)  # Diagonal elements yy
-        P = rx.transpose(2, 1) + ry - 2 * zz
-        return torch.min(P, 2)[0].float(), torch.min(P, 1)[0].float(), torch.min(P, 2)[1].int(), torch.min(P, 1)[1].int()
+        return l2
+
+def batch_knn(x, k):
+    inner = -2 * torch.matmul(x.transpose(2, 1), x)
+    xx = torch.sum(x ** 2, dim=1, keepdim=True)
+    pairwise_distance = -xx - inner - xx.transpose(2, 1)
+    # TODO - Shouldn't this be the bottom k?
+    # TODO - Looking at this again, pariwise distance looks negative, and perhaps works after all
+    # We should make sure this is the case...
+    idx = pairwise_distance.topk(k=k, dim=-1)[0]  # (batch_size, num_points, k)
+    return idx
