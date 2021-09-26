@@ -82,7 +82,7 @@ class Trainer:
                     self.early_stopping.on_train_end()
                     if self.run_config['USE_PLOTTER']:
                         self.plt.finalize()
-                    self.evaluate()
+                    # self.evaluate()  # TODO: uncomment for test
                     exit()
 
             self.scheduler.step(val_loss)
@@ -203,13 +203,19 @@ class Trainer:
             epoch_loss, epoch_misclassified, epoch_classified = 0, 0, 0
 
             for i, data in enumerate(data, 0):
-                orig_vertices, label, _, _, vertex_area, targets, faces, edges = data
+                # orig_vertices, label, _, _, vertex_area, targets, faces, edges = data
+                orig_vertices, label, _, eigvecs, vertex_area, targets, faces, edges = data
                 orig_vertices = orig_vertices.transpose(2, 1)
 
                 if not self.run_config['TRAINING_CLASSIFIER']:
-                    perturbation = self.model(orig_vertices)
+                    # perturbation = self.model(orig_vertices)
+                    eigen_space_v = self.model(orig_vertices)
+                    eigvecs = eigvecs.to(torch.float32)
+
+
                     # create the adversarial example
-                    adex = orig_vertices + perturbation
+                    adex = orig_vertices + torch.bmm(eigvecs, eigen_space_v.transpose(2, 1)).transpose(2, 1)
+                    # adex = orig_vertices + perturbation
 
                     perturbed_logits = self.classifier(adex)  # no grad is already implemented in the constructor
 
@@ -297,7 +303,7 @@ class Trainer:
             # missloss_out = missloss.item()
             # recon_loss_out = recon_loss.item()
             # print(f'misloss: {missloss_out} recon_loss: {recon_loss} laplace: {laplace_loss}')
-            return loss,0,0 # missloss_out, recon_loss_out
+            return loss, missloss, recon_loss # missloss_out, recon_loss_out
 
         return loss
 
