@@ -38,7 +38,7 @@ run_config = {
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   Weights and biases
 # ----------------------------------------------------------------------------------------------------------------------#
-	'USE_WANDB': True,
+	'USE_WANDB': False,
 	'USE_PLOTTER': False,
 	'SAVE_WEIGHTS': False,
 	'LOG_GRADIENTS_WANDB': False,  # slows down the training significantly. 
@@ -52,12 +52,12 @@ run_config = {
 	'OPTIMIZER': 'Adam', # 'Adam', 'AdamW', 'sgd'
 
 	'TRAINING_CLASSIFIER': False,  # turn on to switch between classifier train and model train
-	'CALCULATE_EIGENVECTORS': True,
+	'CALCULATE_EIGENVECTORS': False,
 	'CALCULATE_EDGES': True,
-	'LR': 0.009946416145260538 , # learning rate 0.009946416145260538 
+	'LR': 1e-3 , # learning rate 0.009946416145260538 
 	'WEIGHT_DECAY': 0.6909434612344018, # regularization 1e-4, 0.6909434612344018
 
-	'TRAIN_BATCH_SIZE': 5,  # number of data examples in one batch
+	'TRAIN_BATCH_SIZE': 2,  # number of data examples in one batch
 	'N_EPOCH': 3,  # number of train epochs
 	'RECON_LOSS_CONST':400,  # ratio between reconstruction loss and missclasificaition loss 1391.4670364977283
 	'LAPLACIAN_LOSS_CONST': 10000,
@@ -72,7 +72,7 @@ run_config = {
 	'LATENT_SPACE_FEAT': 1024,
 	'MODEL_LAST_LAYER_SIZE': 256,  # Important: the model transfers 512 to this, and this to K*3, so it cant be too large nor too small
 	# adversarial example params:
-	'K': 70,  #40 number of laplacian eigenvectors to take. NOTE: up to 70. more then that the model decoder is "broken" - see model
+	'K': 40,  #40 number of laplacian eigenvectors to take. NOTE: up to 70. more then that the model decoder is "broken" - see model
 	'LOSS': 'EUCLIDEAN',  # 'l2', 'local_euclidean' (not working in batches!), 'EUCLIDEAN' (batches)
 	'CHOOSE_LOSS': 3,  ## 1 for only misclassification, 2 for only reconstruction, 3 - both
 	# local euclidean loss params:
