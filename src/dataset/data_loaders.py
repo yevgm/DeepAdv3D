@@ -386,21 +386,21 @@ class FaustDatasetInMemory(data.Dataset):
         # Calculate Eigenvectors and areas of all the data
         if CALCULATE_EIGENVECTORS and (data_augmentation == False):
             for v in self.v:
-                mesh = Meshes([v], [self.faces])
-                L = mesh.laplacian_packed()
-
-                L = L.coalesce()
-                Li, Lv = L.indices().cpu(), L.values().cpu()
-                ri, ci = Li
-                n = run_config['NUM_VERTICES']
-                L = scipy.sparse.csr_matrix((Lv, (ri, ci)), shape=(n, n))
-
-                eigvals, eigvecs = slinalg.eigs(L, k=run_config['K'], sigma=-1e-6)
-                eigvecs = eigvecs.real
-                eigvecs = torch.tensor(eigvecs)
+                # mesh = Meshes([v], [self.faces])
+                # L = mesh.laplacian_packed()
+                #
+                # L = L.coalesce()
+                # Li, Lv = L.indices().cpu(), L.values().cpu()
+                # ri, ci = Li
+                # n = run_config['NUM_VERTICES']
+                # L = scipy.sparse.csr_matrix((Lv, (ri, ci)), shape=(n, n))
+                #
+                # eigvals, eigvecs = slinalg.eigs(L, k=run_config['K'], sigma=-1e-6)
+                # eigvecs = eigvecs.real
+                # eigvecs = torch.tensor(eigvecs)
 
                 # test
-                # eigvals, eigvecs, vertex_area = eigenpairs(v, self.faces, self.run_config['K'], double_precision=True)
+                eigvals, eigvecs, vertex_area = eigenpairs(v, self.faces, self.run_config['K'], double_precision=True)
 
                 self.eigvecs.append(eigvecs)
 
