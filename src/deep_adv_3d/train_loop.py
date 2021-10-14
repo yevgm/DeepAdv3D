@@ -7,7 +7,7 @@ from datetime import datetime
 from deep_adv_3d.loss import *
 from deep_adv_3d.utils import *
 from deep_adv_3d.tensor_board import *
-from vista.subprocess_plotter import AdversarialPlotter
+# from vista.subprocess_plotter import AdversarialPlotter
 
 # debug imports
 import torch
@@ -55,9 +55,9 @@ class Trainer:
         # attributes initializations
         self.optimizer, self.scheduler = None, None
 
-        # plotter init
-        if run_config['USE_PLOTTER']:
-            self.plt = AdversarialPlotter(run_config)
+        # # plotter init
+        # if run_config['USE_PLOTTER']:
+        #     self.plt = AdversarialPlotter(run_config)
 
 
     def train(self):
@@ -80,8 +80,8 @@ class Trainer:
                 stop_training = self.early_stopping.on_epoch_end(epoch=epoch, monitored_value=val_loss)
                 if stop_training:
                     self.early_stopping.on_train_end()
-                    if self.run_config['USE_PLOTTER']:
-                        self.plt.finalize()
+                    # if self.run_config['USE_PLOTTER']:
+                        # self.plt.finalize()
                     # self.evaluate()  # TODO: uncomment for test
                     exit()
 
@@ -188,9 +188,9 @@ class Trainer:
                                       recon_loss=recon_loss / self.run_config['DATASET_TRAIN_SIZE'])
 
         # push to visualizer every epoch - last batch
-        if self.run_config['USE_PLOTTER']:
-            # self.push_data_to_plotter(orig_vertices, eigvecs.transpose(2,1), faces, epoch, split)
-            self.push_data_to_plotter(orig_vertices, adex, faces, epoch, split)
+        # if self.run_config['USE_PLOTTER']:
+        #     # self.push_data_to_plotter(orig_vertices, eigvecs.transpose(2,1), faces, epoch, split)
+        #     self.push_data_to_plotter(orig_vertices, adex, faces, epoch, split)
 
         return loss.item()
 
