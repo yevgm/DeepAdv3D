@@ -335,9 +335,9 @@ class Trainer:
         VIS_N_MESH_SETS = self.run_config['VIS_N_MESH_SETS']
         save_to_drive = self.run_config['SAVE_EXAMPLES_TO_DRIVE']
         if split == 'train':
-            data_dict = self.prepare_plotter_dict(orig_vertices[:VIS_N_MESH_SETS, :, :],
-                                                      adex[:VIS_N_MESH_SETS, :, :],
-                                                      faces[:VIS_N_MESH_SETS, :, :])
+            data_dict = self.prepare_plotter_dict(orig_vertices[:VIS_N_MESH_SETS, :, :].detach().clone(),
+                                                      adex[:VIS_N_MESH_SETS, :, :].detach().clone(),
+                                                      faces[:VIS_N_MESH_SETS, :, :].detach().clone())
             if save_to_drive == False:
                 # cache data to use later at validation step
                 self.plt.cache(data_dict)
@@ -345,9 +345,9 @@ class Trainer:
                 self.train_cache = data_dict
 
         elif split == 'validation':
-            val_data_dict = self.prepare_plotter_dict(orig_vertices[:VIS_N_MESH_SETS, :, :],
-                                                      adex[:VIS_N_MESH_SETS, :, :],
-                                                      faces[:VIS_N_MESH_SETS, :, :])
+            val_data_dict = self.prepare_plotter_dict(orig_vertices[:VIS_N_MESH_SETS, :, :].detach().clone(),
+                                                      adex[:VIS_N_MESH_SETS, :, :].detach().clone(),
+                                                      faces[:VIS_N_MESH_SETS, :, :].detach().clone())
 
             if save_to_drive == False:
                 new_data = (self.plt.uncache(), val_data_dict)
