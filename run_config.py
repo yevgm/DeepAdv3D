@@ -74,7 +74,7 @@ run_config = {
 	'MODEL_LAST_LAYER_SIZE': 256,  # Important: the model transfers 512 to this, and this to K*3, so it cant be too large nor too small
 	# adversarial example params:
 	'K': 40,  #40 number of laplacian eigenvectors to take. NOTE: up to 70. more then that the model decoder is "broken" - see model
-	'LOSS': 'l2',  # 'l2', 'local_euclidean' (not working in batches!), 'EUCLIDEAN' (batches)
+	'LOSS': 'EUCLIDEAN',  # 'l2', 'local_euclidean' (not working in batches!), 'EUCLIDEAN' (batches)
 	'CHOOSE_LOSS': 3,  ## 1 for only misclassification, 2 for only reconstruction, 3 - both
 	# local euclidean loss params:
 	'CUTOFF': 5,  # 40
