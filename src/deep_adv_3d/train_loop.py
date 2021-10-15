@@ -383,26 +383,26 @@ class Trainer:
             val_orig_num = self.val_cache['orig_vertices'].shape[0]
 
             for i in range(train_orig_num):
-                fp = os.path.join(save_examples_dir, 'train_orig_{}.obj'.format(i + 1))
+                fp = os.path.join(save_examples_dir, 'train_orig_{}.ply'.format(i + 1))
                 with open(fp, 'w'):
                     mesh.write_mesh(fp=fp,
                                     v=self.train_cache['orig_vertices'][i].T,
                                     f=self.train_cache['faces'][i])
 
-                fp = os.path.join(save_examples_dir, 'train_adex_{}.obj'.format(i + 1))
+                fp = os.path.join(save_examples_dir, 'train_adex_{}.ply'.format(i + 1))
                 with open(fp, 'w'):
                     mesh.write_mesh(fp=fp,
                                     v=self.train_cache['adexs'][i].T,
                                     f=self.train_cache['faces'][i])
 
             for i in range(val_orig_num):
-                fp = os.path.join(save_examples_dir, 'val_orig_{}.obj'.format(i + 1))
+                fp = os.path.join(save_examples_dir, 'val_orig_{}.ply'.format(i + 1))
                 with open(fp, 'w'):
                     mesh.write_mesh(fp=fp,
                                     v=self.val_cache['orig_vertices'][i].T,
                                     f=self.val_cache['faces'][i])
 
-                fp = os.path.join(save_examples_dir, 'val_adex_{}.obj'.format(i + 1))
+                fp = os.path.join(save_examples_dir, 'val_adex_{}.ply'.format(i + 1))
                 with open(fp, 'w'):
                     mesh.write_mesh(fp=fp,
                                     v=self.val_cache['adexs'][i].T,
