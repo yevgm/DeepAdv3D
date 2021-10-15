@@ -58,7 +58,7 @@ run_config = {
 	'LR': 1e-3 , # learning rate 0.009946416145260538 
 	'WEIGHT_DECAY': 0.6909434612344018, # regularization 1e-4, 0.6909434612344018
 
-	'TRAIN_BATCH_SIZE': 35,  # number of data examples in one batch
+	'TRAIN_BATCH_SIZE': 10,  # number of data examples in one batch
 	'N_EPOCH': 1500,  # number of train epochs
 	'RECON_LOSS_CONST':200,  # ratio between reconstruction loss and missclasificaition loss 1391.4670364977283
 	'LAPLACIAN_LOSS_CONST': 10000,
