@@ -53,14 +53,14 @@ run_config = {
 	'OPTIMIZER': 'Adam', # 'Adam', 'AdamW', 'sgd'
 
 	'TRAINING_CLASSIFIER': False,  # turn on to switch between classifier train and model train
-	'CALCULATE_EIGENVECTORS': True,
+	'CALCULATE_EIGENVECTORS': False,
 	'CALCULATE_EDGES': True,
 	'LR': 1e-3 , # learning rate 0.009946416145260538 
 	'WEIGHT_DECAY': 0.6909434612344018, # regularization 1e-4, 0.6909434612344018
 
-	'TRAIN_BATCH_SIZE': 16,  # number of data examples in one batch
-	'N_EPOCH': 2,  # number of train epochs
-	'RECON_LOSS_CONST':400,  # ratio between reconstruction loss and missclasificaition loss 1391.4670364977283
+	'TRAIN_BATCH_SIZE': 35,  # number of data examples in one batch
+	'N_EPOCH': 1500,  # number of train epochs
+	'RECON_LOSS_CONST':200,  # ratio between reconstruction loss and missclasificaition loss 1391.4670364977283
 	'LAPLACIAN_LOSS_CONST': 10000,
 	'EDGE_LOSS_CONST': 1e-15,
 	'TRAIN_DATA_AUG': False,

@@ -57,7 +57,7 @@ class Trainer:
         self.optimizer, self.scheduler = None, None
 
         # cache adversarial examples
-        self.train_cache, self.val_cache = [], []
+        self.train_cache, self.val_cache = None, None
 
         # plotter init
         # if run_config['USE_PLOTTER']:
@@ -138,13 +138,13 @@ class Trainer:
 
 
             if not self.run_config['TRAINING_CLASSIFIER']:
-                # perturbation = self.model(orig_vertices)
-                eigen_space_v = self.model(orig_vertices)
+                perturbation = self.model(orig_vertices)
+                # eigen_space_v = self.model(orig_vertices)
                 # create the adversarial example
-                # adex = orig_vertices + perturbation
+                adex = orig_vertices + perturbation
                 # adex = perturbation
                 # eigvecs = eigvecs.to(torch.float32)
-                adex = orig_vertices + torch.bmm(eigvecs, eigen_space_v.transpose(2, 1)).transpose(2, 1)  # with addition
+                # adex = orig_vertices + torch.bmm(eigvecs, eigen_space_v.transpose(2, 1)).transpose(2, 1)  # with addition
                 # adex = torch.bmm(eigvecs, eigen_space_v.transpose(2, 1)).transpose(2, 1)  # no addition
 
                 perturbed_logits = self.classifier(adex)  # no grad is already implemented in the constructor
@@ -195,9 +195,9 @@ class Trainer:
                                       recon_loss=recon_loss / self.run_config['DATASET_TRAIN_SIZE'])
 
         # push to visualizer every epoch - last batch
-        # if self.run_config['USE_PLOTTER']:
-        #     # self.push_data_to_plotter(orig_vertices, eigvecs.transpose(2,1), faces, epoch, split)
-        #     self.push_data_to_plotter(orig_vertices, adex, faces, epoch, split)
+        if self.run_config['USE_PLOTTER'] or self.run_config['SAVE_EXAMPLES_TO_DRIVE']:
+            # self.push_data_to_plotter(orig_vertices, eigvecs.transpose(2,1), faces, epoch, split)
+            self.push_data_to_plotter(orig_vertices, adex, faces, epoch, split)
 
         return loss.item()
 
@@ -372,7 +372,10 @@ class Trainer:
                 run_name = 'test_run'
             save_examples_dir = os.path.abspath(
                 os.path.join(self.run_config['REPO_ROOT'], '..', 'adex_sweep', run_name))
+            output_dir = os.path.abspath(os.path.join(self.run_config['REPO_ROOT'], '..', 'adex_sweep'))
 
+            if not os.path.isdir(output_dir):
+                os.mkdir(output_dir)
             if not os.path.isdir(save_examples_dir):
                 os.mkdir(save_examples_dir)
 
@@ -383,26 +386,26 @@ class Trainer:
                 fp = os.path.join(save_examples_dir, 'train_orig_{}.obj'.format(i + 1))
                 with open(fp, 'w'):
                     mesh.write_mesh(fp=fp,
-                                    v=self.train_cache['orig_vertices'][i],
+                                    v=self.train_cache['orig_vertices'][i].T,
                                     f=self.train_cache['faces'][i])
 
                 fp = os.path.join(save_examples_dir, 'train_adex_{}.obj'.format(i + 1))
                 with open(fp, 'w'):
                     mesh.write_mesh(fp=fp,
-                                    v=self.train_cache['adexs'][i],
+                                    v=self.train_cache['adexs'][i].T,
                                     f=self.train_cache['faces'][i])
 
             for i in range(val_orig_num):
                 fp = os.path.join(save_examples_dir, 'val_orig_{}.obj'.format(i + 1))
                 with open(fp, 'w'):
                     mesh.write_mesh(fp=fp,
-                                    v=self.val_cache['orig_vertices'][i],
+                                    v=self.val_cache['orig_vertices'][i].T,
                                     f=self.val_cache['faces'][i])
 
                 fp = os.path.join(save_examples_dir, 'val_adex_{}.obj'.format(i + 1))
                 with open(fp, 'w'):
                     mesh.write_mesh(fp=fp,
-                                    v=self.val_cache['adexs'][i],
+                                    v=self.val_cache['adexs'][i].T,
                                     f=self.val_cache['faces'][i])
 
 

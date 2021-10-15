@@ -16,6 +16,9 @@ from deep_adv_3d.train_loop import *
 from dataset.data_loaders import *
 from utils.torch.nn import *
 import wandb
+# fix for 2Right
+import os
+os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 def load_datasets(run_config):
     dataset = run_config['DATASET_NAME']
@@ -89,8 +92,8 @@ if __name__ == '__main__':
     # classifier and model definition
     classifier = PointNet(config, k=10)
     classifier.load_state_dict(torch.load(config['PARAMS_FILE'], map_location=config['DEVICE']))
-    # model = RegressorOriginalPointnet(config)
-    model = RegressorEigenSeptember(config)
+    model = RegressorOriginalPointnet(config)
+    # model = RegressorEigenSeptember(config)
     # model = RegressorOriginalPointnetEigen(config)
     # model.load_state_dict(torch.load(MODEL_PARAMS_FILE, map_location=run_config['DEVICE']))
     # model = OshriRegressor()

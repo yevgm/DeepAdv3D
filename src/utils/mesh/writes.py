@@ -10,6 +10,7 @@ import os
 
 def write_mesh(fp, v, f=None):
     filename, ext = os.path.splitext(fp)
+    ext = ext[1:]
 
     if ext == 'off':
         return write_off(fp, v, f)
