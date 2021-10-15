@@ -75,7 +75,7 @@ run_config = {
 	# adversarial example params:
 	'K': 40,  #40 number of laplacian eigenvectors to take. NOTE: up to 70. more then that the model decoder is "broken" - see model
 	'LOSS': 'EUCLIDEAN',  # 'l2', 'local_euclidean' (not working in batches!), 'EUCLIDEAN' (batches)
-	'CHOOSE_LOSS': 3,  ## 1 for only misclassification, 2 for only reconstruction, 3 - both
+	'CHOOSE_LOSS': 2,  ## 1 for only misclassification, 2 for only reconstruction, 3 - both
 	# local euclidean loss params:
 	'CUTOFF': 5,  # 40
 	'NEIGHBORS': 70,  # 140
