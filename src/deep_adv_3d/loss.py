@@ -312,8 +312,9 @@ def LocalEuclideanBatch(original_pos: torch.Tensor, perturbed_pos: torch.Tensor,
         return l2 / neighborhood
 
 def batch_knn(x, k):
-    print('x shape:{}'.format(x.shape))
-    inner = -2 * torch.matmul(x.transpose(2, 1), x)
+    # print('x shape:{}'.format(x.shape))
+    # inner = -2 * torch.matmul(x.transpose(2, 1), x)
+    inner = -2 * torch.bmm(x.transpose(2, 1), x)
     xx = torch.sum(x ** 2, dim=1, keepdim=True)
     pairwise_distance = -xx - inner - xx.transpose(2, 1)
     # TODO - Shouldn't this be the bottom k?
