@@ -7,6 +7,7 @@ from datetime import datetime
 from deep_adv_3d.loss import *
 from deep_adv_3d.utils import *
 from deep_adv_3d.tensor_board import *
+import utils.mesh as mesh
 # from vista.subprocess_plotter import AdversarialPlotter
 
 # debug imports
@@ -55,7 +56,10 @@ class Trainer:
         # attributes initializations
         self.optimizer, self.scheduler = None, None
 
-        # # plotter init
+        # cache adversarial examples
+        self.train_cache, self.val_cache = [], []
+
+        # plotter init
         # if run_config['USE_PLOTTER']:
         #     self.plt = AdversarialPlotter(run_config)
 
@@ -79,16 +83,18 @@ class Trainer:
                 # check if training is finished
                 stop_training = self.early_stopping.on_epoch_end(epoch=epoch, monitored_value=val_loss)
                 if stop_training:
+                    self.save_adex_to_drive()
                     self.early_stopping.on_train_end()
                     # if self.run_config['USE_PLOTTER']:
-                        # self.plt.finalize()
+                    #     self.plt.finalize()
                     # self.evaluate()  # TODO: uncomment for test
                     exit()
 
             self.scheduler.step(val_loss)
 
-        if self.run_config['USE_PLOTTER']:
-            self.plt.finalize()
+        # if self.run_config['USE_PLOTTER']:
+        #     self.plt.finalize()
+        self.save_adex_to_drive()
         self.evaluate()
 
 
@@ -132,12 +138,13 @@ class Trainer:
 
 
             if not self.run_config['TRAINING_CLASSIFIER']:
-                perturbation = self.model(orig_vertices)
+                # perturbation = self.model(orig_vertices)
+                eigen_space_v = self.model(orig_vertices)
                 # create the adversarial example
-                adex = orig_vertices + perturbation
+                # adex = orig_vertices + perturbation
                 # adex = perturbation
                 # eigvecs = eigvecs.to(torch.float32)
-                # adex = orig_vertices + torch.bmm(eigvecs, eigen_space_v.transpose(2, 1)).transpose(2, 1)  # with addition
+                adex = orig_vertices + torch.bmm(eigvecs, eigen_space_v.transpose(2, 1)).transpose(2, 1)  # with addition
                 # adex = torch.bmm(eigvecs, eigen_space_v.transpose(2, 1)).transpose(2, 1)  # no addition
 
                 perturbed_logits = self.classifier(adex)  # no grad is already implemented in the constructor
@@ -323,21 +330,79 @@ class Trainer:
         self.tensor_log_dir = generate_new_results_dir(date=d, run_config=self.run_config)
         self.writer = SummaryWriter(self.tensor_log_dir, flush_secs=self.run_config['FLUSH_RESULTS'])
 
+
     def push_data_to_plotter(self, orig_vertices, adex, faces, epoch, split):
         VIS_N_MESH_SETS = self.run_config['VIS_N_MESH_SETS']
-
+        save_to_drive = self.run_config['SAVE_EXAMPLES_TO_DRIVE']
         if split == 'train':
-            data_dict = self.plt.prepare_plotter_dict(orig_vertices[:VIS_N_MESH_SETS, :, :],
+            data_dict = self.prepare_plotter_dict(orig_vertices[:VIS_N_MESH_SETS, :, :],
                                                       adex[:VIS_N_MESH_SETS, :, :],
                                                       faces[:VIS_N_MESH_SETS, :, :])
-            # cache data to use later at validation step
-            self.plt.cache(data_dict)
-        elif split == 'validation':
-            val_data_dict = self.plt.prepare_plotter_dict(orig_vertices[:VIS_N_MESH_SETS, :, :],
-                                                      adex[:VIS_N_MESH_SETS, :, :],
-                                                      faces[:VIS_N_MESH_SETS, :, :])
-            new_data = (self.plt.uncache(), val_data_dict)
-            self.plt.push(new_epoch=epoch, new_data=new_data)
+            if save_to_drive == False:
+                # cache data to use later at validation step
+                self.plt.cache(data_dict)
+            else:
+                self.train_cache = data_dict
 
+        elif split == 'validation':
+            val_data_dict = self.prepare_plotter_dict(orig_vertices[:VIS_N_MESH_SETS, :, :],
+                                                      adex[:VIS_N_MESH_SETS, :, :],
+                                                      faces[:VIS_N_MESH_SETS, :, :])
+
+            if save_to_drive == False:
+                new_data = (self.plt.uncache(), val_data_dict)
+                self.plt.push(new_epoch=epoch, new_data=new_data)
+            else:
+                self.val_cache = val_data_dict
+
+    def prepare_plotter_dict(self, orig_vertices, adexs, faces):
+
+        max_b_idx = self.run_config['VIS_N_MESH_SETS']
+        dict = {'orig_vertices': orig_vertices.detach().cpu().numpy()[:max_b_idx, :, :],
+                'adexs': adexs.detach().cpu().numpy()[:max_b_idx, :, :],
+                'faces': faces.detach().cpu().numpy()[:max_b_idx]}
+        return dict
+
+
+    def save_adex_to_drive(self):
+        if self.run_config['SAVE_EXAMPLES_TO_DRIVE']:
+            if self.run_config['USE_WANDB']:
+                run_name = self.run_config['RUN_NAME']
+            else:
+                run_name = 'test_run'
+            save_examples_dir = os.path.abspath(
+                os.path.join(self.run_config['REPO_ROOT'], '..', 'adex_sweep', run_name))
+
+            if not os.path.isdir(save_examples_dir):
+                os.mkdir(save_examples_dir)
+
+            train_orig_num = self.train_cache['orig_vertices'].shape[0]
+            val_orig_num = self.val_cache['orig_vertices'].shape[0]
+
+            for i in range(train_orig_num):
+                fp = os.path.join(save_examples_dir, 'train_orig_{}.obj'.format(i + 1))
+                with open(fp, 'w'):
+                    mesh.write_mesh(fp=fp,
+                                    v=self.train_cache['orig_vertices'][i],
+                                    f=self.train_cache['faces'][i])
+
+                fp = os.path.join(save_examples_dir, 'train_adex_{}.obj'.format(i + 1))
+                with open(fp, 'w'):
+                    mesh.write_mesh(fp=fp,
+                                    v=self.train_cache['adexs'][i],
+                                    f=self.train_cache['faces'][i])
+
+            for i in range(val_orig_num):
+                fp = os.path.join(save_examples_dir, 'val_orig_{}.obj'.format(i + 1))
+                with open(fp, 'w'):
+                    mesh.write_mesh(fp=fp,
+                                    v=self.val_cache['orig_vertices'][i],
+                                    f=self.val_cache['faces'][i])
+
+                fp = os.path.join(save_examples_dir, 'val_adex_{}.obj'.format(i + 1))
+                with open(fp, 'w'):
+                    mesh.write_mesh(fp=fp,
+                                    v=self.val_cache['adexs'][i],
+                                    f=self.val_cache['faces'][i])
 
 
