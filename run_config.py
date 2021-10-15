@@ -60,7 +60,7 @@ run_config = {
 
 	'TRAIN_BATCH_SIZE': 25,  # number of data examples in one batch
 	'N_EPOCH': 1500,  # number of train epochs
-	'RECON_LOSS_CONST':200,  # ratio between reconstruction loss and missclasificaition loss 1391.4670364977283
+	'RECON_LOSS_CONST':600,  # ratio between reconstruction loss and missclasificaition loss 1391.4670364977283
 	'LAPLACIAN_LOSS_CONST': 10000,
 	'EDGE_LOSS_CONST': 1e-15,
 	'TRAIN_DATA_AUG': False,
@@ -75,10 +75,10 @@ run_config = {
 	# adversarial example params:
 	'K': 40,  #40 number of laplacian eigenvectors to take. NOTE: up to 70. more then that the model decoder is "broken" - see model
 	'LOSS': 'EUCLIDEAN',  # 'l2', 'local_euclidean' (not working in batches!), 'EUCLIDEAN' (batches)
-	'CHOOSE_LOSS': 2,  ## 1 for only misclassification, 2 for only reconstruction, 3 - both
+	'CHOOSE_LOSS': 3,  ## 1 for only misclassification, 2 for only reconstruction, 3 - both
 	# local euclidean loss params:
 	'CUTOFF': 5,  # 40
-	'NEIGHBORS': 70,  # 140
+	'NEIGHBORS': 140,  # 140
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   TEST
 # ----------------------------------------------------------------------------------------------------------------------#
