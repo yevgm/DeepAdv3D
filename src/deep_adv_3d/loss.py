@@ -314,7 +314,7 @@ def batch_knn(x, k):
     xx = torch.sum(x ** 2, dim=1, keepdim=True)
     pairwise_distance = xx - 2 * inner + xx.transpose(2, 1)
 
-    value, idx = pairwise_distance.topk(k=k, dim=-1, largest=False)[0]  # (batch_size, num_points, k), [0] for values, [1] for indices
+    value, idx = pairwise_distance.topk(k=k, dim=-1, largest=False)  # (batch_size, num_points, k), [0] for values, [1] for indices
     return value, idx
 
 def dist_from_given_indices(x, indices):
