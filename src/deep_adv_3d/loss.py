@@ -301,23 +301,26 @@ def LocalEuclideanBatch(original_pos: torch.Tensor, perturbed_pos: torch.Tensor,
         #     raise ValueError("Vertices positions must have shape [b,3,n]")
 
         neighborhood = run_config['NEIGHBORS']
-        batch_size = original_pos.shape[0]
+        knn_orig_dist, knn_orig_idx = batch_knn(x=original_pos, k=neighborhood)  # (batch_size, num_points, k)
+        knn_adex_dist = dist_from_given_indices(x=perturbed_pos, indices=knn_orig_idx)
 
-        knn_out_orig = batch_knn(x=original_pos, k=neighborhood) # (batch_size, num_points, k)
-        knn_out_adex = batch_knn(x=perturbed_pos, k=neighborhood)  # (batch_size, num_points, k)
-
-        diff = knn_out_orig - knn_out_adex
+        diff = knn_orig_dist - knn_adex_dist
         l2 = diff.norm(p="fro")
 
         return l2 / neighborhood
 
 def batch_knn(x, k):
-    inner = -2 * torch.matmul(x.transpose(2, 1), x)
-    # inner = -2 * torch.bmm(x.transpose(2, 1), x)
+    inner = torch.matmul(x.transpose(2, 1), x)
     xx = torch.sum(x ** 2, dim=1, keepdim=True)
-    pairwise_distance = -xx - inner - xx.transpose(2, 1)
-    # TODO - Shouldn't this be the bottom k?
-    # TODO - Looking at this again, pariwise distance looks negative, and perhaps works after all
-    # We should make sure this is the case...
-    idx = pairwise_distance.topk(k=k, dim=-1)[0]  # (batch_size, num_points, k)
-    return idx
+    pairwise_distance = xx - 2 * inner + xx.transpose(2, 1)
+
+    value, idx = pairwise_distance.topk(k=k, dim=-1, largest=False)[0]  # (batch_size, num_points, k), [0] for values, [1] for indices
+    return value, idx
+
+def dist_from_given_indices(x, indices):
+    inner = torch.matmul(x.transpose(2, 1), x)
+    xx = torch.sum(x ** 2, dim=1, keepdim=True)
+    pairwise_distance = xx - 2 * inner + xx.transpose(2, 1)
+
+    value = torch.gather(pairwise_distance, dim=1, index=indices)
+    return value
