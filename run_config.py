@@ -60,7 +60,7 @@ run_config = {
 
 	'TRAIN_BATCH_SIZE': 25,  # number of data examples in one batch
 	'N_EPOCH': 1500,  # number of train epochs
-	'RECON_LOSS_CONST':600,  # ratio between reconstruction loss and missclasificaition loss 1391.4670364977283
+	'RECON_LOSS_CONST':2000,  # ratio between reconstruction loss and missclasificaition loss 1391.4670364977283
 	'LAPLACIAN_LOSS_CONST': 10000,
 	'EDGE_LOSS_CONST': 1e-15,
 	'TRAIN_DATA_AUG': False,
@@ -127,7 +127,7 @@ run_config = {
 	'CLS_BATCH_NORM_MOMENTUM': 0.1,  # default is 0.1
 	'CLS_STRICT_PARAM_LOADING': False, # strict = False for dropping running mean and var of train batchnorm
 	# model bn
-	'MODEL_USE_BN': True
+	'MODEL_USE_BN': False
 
 
 }
