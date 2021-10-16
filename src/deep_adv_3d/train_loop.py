@@ -138,13 +138,13 @@ class Trainer:
 
 
             if not self.run_config['TRAINING_CLASSIFIER']:
-                perturbation = self.model(orig_vertices)
-                # eigen_space_v = self.model(orig_vertices)
+                # perturbation = self.model(orig_vertices)
+                eigen_space_v = self.model(orig_vertices)
                 # create the adversarial example
-                adex = orig_vertices + perturbation
+                # adex = orig_vertices + perturbation
                 # adex = perturbation
                 # eigvecs = eigvecs.to(torch.float32)
-                # adex = orig_vertices + torch.bmm(eigvecs, eigen_space_v.transpose(2, 1)).transpose(2, 1)  # with addition
+                adex = orig_vertices + torch.bmm(eigvecs, eigen_space_v.transpose(2, 1)).transpose(2, 1)  # with addition
                 # adex = torch.bmm(eigvecs, eigen_space_v.transpose(2, 1)).transpose(2, 1)  # no addition
 
                 perturbed_logits = self.classifier(adex)  # no grad is already implemented in the constructor
