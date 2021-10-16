@@ -322,5 +322,5 @@ def dist_from_given_indices(x, indices):
     xx = torch.sum(x ** 2, dim=1, keepdim=True)
     pairwise_distance = xx - 2 * inner + xx.transpose(2, 1)
 
-    value = torch.gather(pairwise_distance, dim=1, index=indices)
+    value = torch.gather(pairwise_distance, dim=2, index=indices)
     return value
