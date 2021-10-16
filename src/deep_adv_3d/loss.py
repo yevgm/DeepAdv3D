@@ -293,6 +293,14 @@ class MeshEdgeLoss(LossFunction):
 #         dist_loss = torch.nn.functional.mse_loss(dist, dist_r, reduction="mean")
 #         return dist_loss
 
+def CenterOfMassLoss(original_pos: torch.Tensor, perturbed_pos: torch.Tensor, run_config):
+    orig_center = torch.sum(original_pos, dim=2, keepdim=True)
+    adex_center = torch.sum(perturbed_pos, dim=2, keepdim=True)
+    diff = orig_center - adex_center
+    loss = diff.norm(p="fro")
+    return loss
+
+
 def LocalEuclideanBatch(original_pos: torch.Tensor, perturbed_pos: torch.Tensor, run_config):
         # check input validity
         # if original_pos.shape[-1] != 3:

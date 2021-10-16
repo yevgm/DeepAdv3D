@@ -304,7 +304,10 @@ class Trainer:
             # chamfer_loss = chamfer_loss(original_pos=orig_vertices, perturbed_pos=adex, vertex_area=vertex_area)
             # loss = missloss + recon_const * recon_loss + edge_loss_const * edge_loss + laplacian_loss_const * laplace_loss
             # loss = edge_loss
-            loss = missloss + recon_const * recon_loss
+            # center of mass loss
+            center_loss = CenterOfMassLoss(original_pos=orig_vertices, perturbed_pos=adex,
+                                                          run_config=self.run_config)
+            loss = missloss + recon_const * recon_loss + 10 * center_loss
             # loss = laplace_loss
             # print(f'laplacian loss : {loss} reconstraction : {laplace_loss}')
             # missloss_out = missloss.item()
