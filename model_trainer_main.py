@@ -95,6 +95,7 @@ if __name__ == '__main__':
     # model = RegressorOriginalPointnet(config)
     model = RegressorEigenSeptember(config)
     model = nn.DataParallel(model)
+    classifier = nn.DataParallel(classifier)
     # model = RegressorOriginalPointnetEigen(config)
     # model.load_state_dict(torch.load(MODEL_PARAMS_FILE, map_location=run_config['DEVICE']))
     # model = OshriRegressor()
