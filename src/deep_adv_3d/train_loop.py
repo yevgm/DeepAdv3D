@@ -307,7 +307,7 @@ class Trainer:
             # center of mass loss
             center_loss = CenterOfMassLoss(original_pos=orig_vertices, perturbed_pos=adex,
                                                           run_config=self.run_config)
-            loss = missloss + recon_const * recon_loss + 10 * center_loss
+            loss = missloss + recon_const * (recon_loss + center_loss)
             # loss = laplace_loss
             # print(f'laplacian loss : {loss} reconstraction : {laplace_loss}')
             # missloss_out = missloss.item()
