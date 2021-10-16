@@ -60,7 +60,7 @@ run_config = {
 
 	'TRAIN_BATCH_SIZE': 25,  # number of data examples in one batch
 	'N_EPOCH': 1500,  # number of train epochs
-	'RECON_LOSS_CONST':600,  # ratio between reconstruction loss and missclasificaition loss 1391.4670364977283
+	'RECON_LOSS_CONST':1000,  # ratio between reconstruction loss and missclasificaition loss 1391.4670364977283
 	'LAPLACIAN_LOSS_CONST': 10000,
 	'EDGE_LOSS_CONST': 1e-15,
 	'TRAIN_DATA_AUG': False,
@@ -78,7 +78,7 @@ run_config = {
 	'CHOOSE_LOSS': 3,  ## 1 for only misclassification, 2 for only reconstruction, 3 - both
 	# local euclidean loss params:
 	'CUTOFF': 5,  # 40
-	'NEIGHBORS': 5,  # 140
+	'NEIGHBORS': 80,  # 140
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   TEST
 # ----------------------------------------------------------------------------------------------------------------------#
