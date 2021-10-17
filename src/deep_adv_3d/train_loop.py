@@ -158,7 +158,7 @@ class Trainer:
                 # print('logits: ',pred_choice_orig)
                 # print('labels: ', label.squeeze())
                 # print('Classified: ',num_clas)
-                loss, misloss, recon_loss, center_loss = self.calculate_loss(perturbed_logits=perturbed_logits, labels=label,
+                loss, misloss, recon_loss = self.calculate_loss(perturbed_logits=perturbed_logits, labels=label,
                                                                 targets=targets, orig_vertices=orig_vertices,
                                                                 adex=adex, vertex_area=vertex_area, edges=edges,
                                                                 faces=faces, epoch=epoch)
@@ -184,7 +184,7 @@ class Trainer:
             epoch_misclassified = epoch_misclassified + num_misclassified
             epoch_misclass_loss = epoch_misclass_loss + misloss
             epoch_recon_loss = epoch_recon_loss + recon_loss
-            epoch_center_loss = epoch_center_loss + center_loss
+            # epoch_center_loss = epoch_center_loss + center_loss
 
         # END OF TRAIN
 
@@ -194,8 +194,7 @@ class Trainer:
         else:
             report_to_wandb_regressor(run_config=self.run_config, epoch=epoch, split=split, epoch_loss=epoch_loss / self.run_config['DATASET_TRAIN_SIZE'],
                                       epoch_misclassified=epoch_misclassified, misloss=epoch_misclass_loss / self.run_config['DATASET_TRAIN_SIZE'],
-                                      recon_loss=epoch_recon_loss / self.run_config['DATASET_TRAIN_SIZE'],
-                                      center_loss=epoch_center_loss / self.run_config['DATASET_TRAIN_SIZE'])
+                                      recon_loss=epoch_recon_loss / self.run_config['DATASET_TRAIN_SIZE'])
 
         # push to visualizer every epoch - last batch
         if self.run_config['USE_PLOTTER'] or self.run_config['SAVE_EXAMPLES_TO_DRIVE']:
@@ -309,15 +308,15 @@ class Trainer:
             # loss = missloss + recon_const * recon_loss + edge_loss_const * edge_loss + laplacian_loss_const * laplace_loss
             # loss = edge_loss
             # center of mass loss
-            center_loss = CenterOfMassLoss(original_pos=orig_vertices, perturbed_pos=adex,
-                                                          run_config=self.run_config)
-            loss = missloss + recon_const * recon_loss + center_loss_const * center_loss
+            # center_loss = CenterOfMassLoss(original_pos=orig_vertices, perturbed_pos=adex,
+            #                                               run_config=self.run_config)
+            loss = missloss + recon_const * recon_loss   #+ center_loss_const * center_loss
             # loss = laplace_loss
             # print(f'laplacian loss : {loss} reconstraction : {laplace_loss}')
             # missloss_out = missloss.item()
             # recon_loss_out = recon_loss.item()
             # print(f'misloss: {missloss_out} recon_loss: {recon_loss} laplace: {laplace_loss}')
-            return loss, missloss, recon_loss, center_loss
+            return loss, missloss, recon_loss
 
         return loss
 
