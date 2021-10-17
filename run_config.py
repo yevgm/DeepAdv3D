@@ -63,6 +63,7 @@ run_config = {
 	'RECON_LOSS_CONST':400,  # ratio between reconstruction loss and missclasificaition loss 1391.4670364977283
 	'LAPLACIAN_LOSS_CONST': 10000,
 	'EDGE_LOSS_CONST': 1e-15,
+	'CENTER_LOSS_CONST': 1 / 200,
 	'TRAIN_DATA_AUG': False,
 	'DROPOUT_PROB': 0.3, # 0.6931962740122515
 

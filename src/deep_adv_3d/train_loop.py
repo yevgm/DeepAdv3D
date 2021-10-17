@@ -129,7 +129,8 @@ class Trainer:
 
         loss, orig_vertices, adex, faces = None, None, None, None
         epoch_loss, epoch_misclassified, epoch_classified, epoch_misclass_loss, epoch_recon_loss = 0, 0, 0, 0, 0
-        num_clas, num_misclassified, misloss, recon_loss = 0, 0, 0, 0
+        epoch_center_loss = 0
+        num_clas, num_misclassified, misloss, recon_loss, center_loss = 0, 0, 0, 0, 0
 
         for i, data in enumerate(data, 0):
             # orig_vertices, label, _, _, vertex_area, targets, faces, edges = data
@@ -157,7 +158,7 @@ class Trainer:
                 # print('logits: ',pred_choice_orig)
                 # print('labels: ', label.squeeze())
                 # print('Classified: ',num_clas)
-                loss, misloss, recon_loss = self.calculate_loss(perturbed_logits=perturbed_logits, labels=label,
+                loss, misloss, recon_loss, center_loss = self.calculate_loss(perturbed_logits=perturbed_logits, labels=label,
                                                                 targets=targets, orig_vertices=orig_vertices,
                                                                 adex=adex, vertex_area=vertex_area, edges=edges,
                                                                 faces=faces, epoch=epoch)
@@ -183,6 +184,7 @@ class Trainer:
             epoch_misclassified = epoch_misclassified + num_misclassified
             epoch_misclass_loss = epoch_misclass_loss + misloss
             epoch_recon_loss = epoch_recon_loss + recon_loss
+            epoch_center_loss = epoch_center_loss + center_loss
 
         # END OF TRAIN
 
@@ -191,8 +193,9 @@ class Trainer:
                                        epoch_classified=epoch_classified)
         else:
             report_to_wandb_regressor(run_config=self.run_config, epoch=epoch, split=split, epoch_loss=epoch_loss / self.run_config['DATASET_TRAIN_SIZE'],
-                                      epoch_misclassified=epoch_misclassified, misloss=misloss / self.run_config['DATASET_TRAIN_SIZE'],
-                                      recon_loss=recon_loss / self.run_config['DATASET_TRAIN_SIZE'])
+                                      epoch_misclassified=epoch_misclassified, misloss=epoch_misclass_loss / self.run_config['DATASET_TRAIN_SIZE'],
+                                      recon_loss=epoch_recon_loss / self.run_config['DATASET_TRAIN_SIZE'],
+                                      center_loss=epoch_center_loss / self.run_config['DATASET_TRAIN_SIZE'])
 
         # push to visualizer every epoch - last batch
         if self.run_config['USE_PLOTTER'] or self.run_config['SAVE_EXAMPLES_TO_DRIVE']:
@@ -255,6 +258,7 @@ class Trainer:
         recon_const = self.run_config['RECON_LOSS_CONST']
         edge_loss_const = self.run_config['EDGE_LOSS_CONST']
         laplacian_loss_const = self.run_config['LAPLACIAN_LOSS_CONST']
+        center_loss_const = self.run_config['CENTER_LOSS_CONST']
 
         # only misclassification loss
         if self.run_config['CHOOSE_LOSS'] == 1:
@@ -307,13 +311,13 @@ class Trainer:
             # center of mass loss
             center_loss = CenterOfMassLoss(original_pos=orig_vertices, perturbed_pos=adex,
                                                           run_config=self.run_config)
-            loss = missloss + recon_const * (recon_loss + (1 / 200) * center_loss)
+            loss = missloss + recon_const * recon_loss + center_loss_const * center_loss
             # loss = laplace_loss
             # print(f'laplacian loss : {loss} reconstraction : {laplace_loss}')
             # missloss_out = missloss.item()
             # recon_loss_out = recon_loss.item()
             # print(f'misloss: {missloss_out} recon_loss: {recon_loss} laplace: {laplace_loss}')
-            return loss, missloss, recon_loss # missloss_out, recon_loss_out
+            return loss, missloss, recon_loss, center_loss
 
         return loss
 
