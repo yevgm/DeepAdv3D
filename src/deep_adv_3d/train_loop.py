@@ -146,7 +146,7 @@ class Trainer:
                 # adex = perturbation
                 # eigvecs = eigvecs.to(torch.float32)
                 adex = orig_vertices + torch.bmm(eigvecs, eigen_space_v.transpose(2, 1)).transpose(2, 1)  # with addition
-
+                adex = adex - adex.mean(dim=2).reshape(-1, 3, 1)
                 # adex = torch.bmm(eigvecs, eigen_space_v.transpose(2, 1)).transpose(2, 1)  # no addition
 
                 perturbed_logits = self.classifier(adex)  # no grad is already implemented in the constructor
@@ -159,7 +159,7 @@ class Trainer:
                 # print('logits: ',pred_choice_orig)
                 # print('labels: ', label.squeeze())
                 # print('Classified: ',num_clas)
-                loss, misloss, recon_loss, chamfer = self.calculate_loss(perturbed_logits=perturbed_logits, labels=label,
+                loss, misloss, recon_loss = self.calculate_loss(perturbed_logits=perturbed_logits, labels=label,
                                                                 targets=targets, orig_vertices=orig_vertices,
                                                                 adex=adex, vertex_area=vertex_area, edges=edges,
                                                                 faces=faces, epoch=epoch)
@@ -195,8 +195,7 @@ class Trainer:
         else:
             report_to_wandb_regressor(run_config=self.run_config, epoch=epoch, split=split, epoch_loss=epoch_loss / self.run_config['DATASET_TRAIN_SIZE'],
                                       epoch_misclassified=epoch_misclassified, misloss=epoch_misclass_loss / self.run_config['DATASET_TRAIN_SIZE'],
-                                      recon_loss=epoch_recon_loss / self.run_config['DATASET_TRAIN_SIZE'],
-                                      chamfer_loss=epoch_chamfer_loss / self.run_config['DATASET_TRAIN_SIZE'])
+                                      recon_loss=epoch_recon_loss / self.run_config['DATASET_TRAIN_SIZE'])
 
         # push to visualizer every epoch - last batch
         if self.run_config['USE_PLOTTER'] or self.run_config['SAVE_EXAMPLES_TO_DRIVE']:
@@ -297,7 +296,7 @@ class Trainer:
                                                           run_config=self.run_config)
                 # l2_loss = L2Similarity(orig_vertices, adex, vertex_area)
                 # l2 = l2_loss()
-                chamfer = chamfer_distance(original_pos=orig_vertices, perturbed_pos=adex)
+                # chamfer = chamfer_distance(original_pos=orig_vertices, perturbed_pos=adex)
             else:
                 raise('Not implemented reonstruction loss')
 
@@ -316,13 +315,13 @@ class Trainer:
             # center of mass loss
             # center_loss = CenterOfMassLoss(original_pos=orig_vertices, perturbed_pos=adex,
             #                                               run_config=self.run_config)
-            loss = missloss + recon_const * recon_loss + l2_const * chamfer   #+ center_loss_const * center_loss
+            loss = missloss + recon_const * recon_loss #+ l2_const * chamfer   #+ center_loss_const * center_loss
             # loss = laplace_loss
             # print(f'laplacian loss : {loss} reconstraction : {laplace_loss}')
             # missloss_out = missloss.item()
             # recon_loss_out = recon_loss.item()
             # print(f'misloss: {missloss_out} recon_loss: {recon_loss} laplace: {laplace_loss}')
-            return loss, missloss, recon_loss, chamfer
+            return loss, missloss, recon_loss  #, chamfer
 
         return loss
 
