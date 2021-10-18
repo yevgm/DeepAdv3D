@@ -255,6 +255,7 @@ class Trainer:
     def calculate_loss(self, perturbed_logits, labels, orig_vertices=None, adex=None, vertex_area=None, targets=None,
                        epoch=None, edges=None, faces=None):
         recon_const = self.run_config['RECON_LOSS_CONST']
+        l2_const = self.run_config['L2_LOSS_CONST']
         edge_loss_const = self.run_config['EDGE_LOSS_CONST']
         laplacian_loss_const = self.run_config['LAPLACIAN_LOSS_CONST']
         center_loss_const = self.run_config['CENTER_LOSS_CONST']
@@ -292,6 +293,8 @@ class Trainer:
             elif self.run_config['LOSS'] == 'EUCLIDEAN':
                 recon_loss = LocalEuclideanBatch(original_pos=orig_vertices, perturbed_pos=adex,
                                                           run_config=self.run_config)
+                l2_loss = L2Similarity(orig_vertices, adex, vertex_area)
+                l2 = l2_loss()
             else:
                 raise('Not implemented reonstruction loss')
 
@@ -310,7 +313,7 @@ class Trainer:
             # center of mass loss
             # center_loss = CenterOfMassLoss(original_pos=orig_vertices, perturbed_pos=adex,
             #                                               run_config=self.run_config)
-            loss = missloss + recon_const * recon_loss   #+ center_loss_const * center_loss
+            loss = missloss + recon_const * recon_loss + l2_const * l2   #+ center_loss_const * center_loss
             # loss = laplace_loss
             # print(f'laplacian loss : {loss} reconstraction : {laplace_loss}')
             # missloss_out = missloss.item()
