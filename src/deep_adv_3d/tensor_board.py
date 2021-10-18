@@ -184,7 +184,7 @@ def report_to_wandb_classifier(run_config, epoch, split, epoch_loss, epoch_class
 
 
 def report_to_wandb_regressor(run_config, epoch, split, epoch_loss, epoch_misclassified, misloss=None, recon_loss=None
-                              , center_loss=None):
+                              , chamfer_loss=None):
 
     if split == 'train':
         if run_config['USE_WANDB']:
@@ -193,8 +193,8 @@ def report_to_wandb_regressor(run_config, epoch, split, epoch_loss, epoch_miscla
                 logdict.update({"Train/Misclass Loss": misloss})
             if recon_loss is not None:
                 logdict.update({"Train/Reconstruction Loss": recon_loss})
-            if center_loss is not None:
-                logdict.update({"Train/Center Loss": center_loss})
+            if chamfer_loss is not None:
+                logdict.update({"Train/Chamfer Loss": chamfer_loss})
             wandb.log(logdict)
 
         print('[Epoch #%d] Train loss: %f, Misclassified: [%d/%d]' % (
@@ -206,8 +206,8 @@ def report_to_wandb_regressor(run_config, epoch, split, epoch_loss, epoch_miscla
                 logdict.update({"Validation/Misclass Loss": misloss})
             if recon_loss is not None:
                 logdict.update({"Validation/Reconstruction Loss": recon_loss})
-            if center_loss is not None:
-                logdict.update({"Validation/Center Loss": center_loss})
+            if chamfer_loss is not None:
+                logdict.update({"Validation/Chamfer Loss": chamfer_loss})
             wandb.log(logdict)
 
         print('[Epoch #%d] Validation loss: %f, Misclassified: [%d/%d]' % (
