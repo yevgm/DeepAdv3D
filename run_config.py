@@ -55,18 +55,18 @@ run_config = {
 	'TRAINING_CLASSIFIER': False,  # turn on to switch between classifier train and model train
 	'CALCULATE_EIGENVECTORS': True,
 	'CALCULATE_EDGES': True,    
-	'LR': 0.0009164231961292208 , 
+	'LR': 1e-3 , 
 	'WEIGHT_DECAY': 0.9752358770242772, # regularization 1e-4, 0.6909434612344018
 
 	'TRAIN_BATCH_SIZE': 32,  # number of data examples in one batch
 	'N_EPOCH': 1500,  # number of train epochs
-	'RECON_LOSS_CONST':588.051541927794,  # ratio between reconstruction loss and missclasificaition loss 1391.4670364977283
+	'RECON_LOSS_CONST':1000,  # ratio between reconstruction loss and missclasificaition loss 1391.4670364977283
 	'LAPLACIAN_LOSS_CONST': 10000,
 	'EDGE_LOSS_CONST': 1e-15,
 	'L2_LOSS_CONST': 10,
 	'CENTER_LOSS_CONST': 1 / 200,
 	'TRAIN_DATA_AUG': False,
-	'DROPOUT_PROB': 0.16878743194462456, 
+	'DROPOUT_PROB': 0.3, 
 
 # Architecture parameters - Do not change after classifier has been trained! number 247 in the sweep
 # parameters: --DROPOUT_PROB=0.06799470785277999 --LATENT_SPACE_FEAT=1024 --LR=0.050572566231955045 --OPTIMIZER=AdamW --POINTNET_LAST_LAYER_SIZE=128 --TRAIN_BATCH_SIZE=70 --WEIGHT_DECAY=0.0844692091146692
@@ -75,7 +75,7 @@ run_config = {
 	'LATENT_SPACE_FEAT': 1024,
 	'MODEL_LAST_LAYER_SIZE': 256,  # Important: the model transfers 512 to this, and this to K*3, so it cant be too large nor too small
 	# adversarial example params:
-	'K': 56,  #40 number of laplacian eigenvectors to take. NOTE: up to 70. more then that the model decoder is "broken" - see model
+	'K': 10,  #40 number of laplacian eigenvectors to take. NOTE: up to 70. more then that the model decoder is "broken" - see model
 	'LOSS': 'EUCLIDEAN',  # 'l2', 'local_euclidean' (not working in batches!), 'EUCLIDEAN' (batches)
 	'CHOOSE_LOSS': 3,  ## 1 for only misclassification, 2 for only reconstruction, 3 - both
 	# local euclidean loss params:
