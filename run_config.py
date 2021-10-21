@@ -58,7 +58,7 @@ run_config = {
 	'LR': 0.0009164231961292208 , 
 	'WEIGHT_DECAY': 0.9752358770242772, # regularization 1e-4, 0.6909434612344018
 
-	'TRAIN_BATCH_SIZE': 35,  # number of data examples in one batch
+	'TRAIN_BATCH_SIZE': 32,  # number of data examples in one batch
 	'N_EPOCH': 1500,  # number of train epochs
 	'RECON_LOSS_CONST':588.051541927794,  # ratio between reconstruction loss and missclasificaition loss 1391.4670364977283
 	'LAPLACIAN_LOSS_CONST': 10000,
@@ -124,7 +124,7 @@ run_config = {
 #                                                   DEBUG
 # ----------------------------------------------------------------------------------------------------------------------#
 	# classifier bn
-	'CLS_USE_BN': True,
+	'CLS_USE_BN': False,
 	'CLS_BATCH_NORM_USE_STATISTICS': False,
 	'CLS_BATCH_NORM_MOMENTUM': 0.1,  # default is 0.1
 	'CLS_STRICT_PARAM_LOADING': False, # strict = False for dropping running mean and var of train batchnorm
