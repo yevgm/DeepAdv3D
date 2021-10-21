@@ -597,7 +597,7 @@ class Shrec14DatasetInMemory(data.Dataset):
         # load all dataset to memory
         self.v = []
         self.faces = []
-        self.edges = []
+        self.eigvecs = []
         for index, fn in enumerate(self.fns):
 
             with open(os.path.join(self.root, fn), 'rb') as f:
@@ -610,16 +610,21 @@ class Shrec14DatasetInMemory(data.Dataset):
             faces = torch.from_numpy(f).type(torch.long)
             self.faces.append(faces)
 
-        # calculate edges from faces for local euclidean similarity
-        if (self.split == 'train') & (self.run_config['LOSS'] == 'local_euclidean'):
-            e = edges_from_faces(self.faces)
-            edges = torch.from_numpy(e).type(torch.long).to(self.run_config['DEVICE'])
-        else:
-            edges = 0
+        # Calculate Eigenvectors and areas of all the data
+        if CALCULATE_EIGENVECTORS and (data_augmentation == False):
+            for idx, v in enumerate(self.v):
+                eigvals, eigvecs, vertex_area = eigenpairs(v, self.faces[idx], self.run_config['K'],
+                                                           double_precision=True)
+                eigvecs = eigvecs.to(self.run_config['DEVICE'])
 
-        self.edges = edges
+                self.eigvecs.append(eigvecs)
+
         self.targets = self.set_targets()
 
+        # load to cuda
+        for idx, v in enumerate(self.v):
+            self.v[idx] = self.v[idx].to(run_config['DEVICE'])
+            self.faces[idx] = self.faces[idx].to(run_config['DEVICE'])
 
     def __getitem__(self, index):
         assert index >= 0 & index < 400, "bad index"
@@ -646,17 +651,23 @@ class Shrec14DatasetInMemory(data.Dataset):
         if not self.run_config['CALCULATE_EIGENVECTORS']:
             eigvals, eigvecs, vertex_area = 0, 0, 0
         else:
-            eigvals, eigvecs, vertex_area = eigenpairs(v, self.faces[index], self.run_config['K'], double_precision=True)
-            # eigvals = eigvals.to(DEVICE)
-            # eigvecs = eigvecs.to(DEVICE)
-            vertex_area = vertex_area.to(self.run_config['DEVICE'])
-
+            if self.data_augmentation == True:
+                eigvals, eigvecs, vertex_area = eigenpairs(v, self.faces[index], self.run_config['K'], double_precision=True)
+                # eigvals = eigvals.to(DEVICE)
+                # eigvecs = eigvecs.to(DEVICE)
+                vertex_area = vertex_area.to(self.run_config['DEVICE'])
+            else:
+                eigvals = 0
+                # eigvecs = 0
+                eigvecs = self.eigvecs[index]
+                # vertex_area = self.vertex_area[index].to(self.run_config['DEVICE'])
+                vertex_area = 0
             # draw new targets every time a new data is created
             # targets = self.set_targets()
         targets = self.targets[index]
 
-        return v.to(self.run_config['DEVICE']), self.cls[index], eigvals, eigvecs, vertex_area \
-            , targets, self.faces[index], self.edges
+        return v, self.cls[index], eigvals, eigvecs, vertex_area \
+            , targets, self.faces[index], 0
 
     def __len__(self):
         return len(self.fns)

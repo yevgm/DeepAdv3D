@@ -24,7 +24,7 @@ run_config = {
 #                                                   MODEL
 # ----------------------------------------------------------------------------------------------------------------------#
 # classifier:
-	'PARAMS_FILE':  os.path.join(repo_root,'saved_params', "FAUST_classifier_Oct_jitter_13val.ckpt"), # shrec14_no_aug_sep_100percent.ckpt  # FAUST10_pointnet_rot_b128_v2.pt, FAUST10_pointnet_rot_b128.pt, momentum_05.pt, shrec14_71percent_acc_momentum05.pt
+	'PARAMS_FILE':  os.path.join(repo_root,'saved_params', "shrec14_no_aug_sep_100percent.ckpt"), # FAUST_classifier_Oct_jitter_13val.ckpt, shrec14_no_aug_sep_100percent.ckpt  # FAUST10_pointnet_rot_b128_v2.pt, FAUST10_pointnet_rot_b128.pt, momentum_05.pt, shrec14_71percent_acc_momentum05.pt
 	'MODEL_PARAMS_FILE':  os.path.join(repo_root,'saved_params', "eigens_and_augmentation_recon_loss.ckpt"),
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   TENSORBOARD
@@ -54,19 +54,19 @@ run_config = {
 
 	'TRAINING_CLASSIFIER': False,  # turn on to switch between classifier train and model train
 	'CALCULATE_EIGENVECTORS': True,
-	'CALCULATE_EDGES': True,
-	'LR': 1e-3 , # learning rate 0.009946416145260538 
-	'WEIGHT_DECAY': 1e-4, # regularization 1e-4, 0.6909434612344018
+	'CALCULATE_EDGES': True,    
+	'LR': 0.0009164231961292208 , 
+	'WEIGHT_DECAY': 0.9752358770242772, # regularization 1e-4, 0.6909434612344018
 
 	'TRAIN_BATCH_SIZE': 35,  # number of data examples in one batch
 	'N_EPOCH': 1500,  # number of train epochs
-	'RECON_LOSS_CONST':400,  # ratio between reconstruction loss and missclasificaition loss 1391.4670364977283
+	'RECON_LOSS_CONST':588.051541927794,  # ratio between reconstruction loss and missclasificaition loss 1391.4670364977283
 	'LAPLACIAN_LOSS_CONST': 10000,
 	'EDGE_LOSS_CONST': 1e-15,
 	'L2_LOSS_CONST': 10,
 	'CENTER_LOSS_CONST': 1 / 200,
 	'TRAIN_DATA_AUG': False,
-	'DROPOUT_PROB': 0.3, # 0.6931962740122515
+	'DROPOUT_PROB': 0.16878743194462456, 
 
 # Architecture parameters - Do not change after classifier has been trained! number 247 in the sweep
 # parameters: --DROPOUT_PROB=0.06799470785277999 --LATENT_SPACE_FEAT=1024 --LR=0.050572566231955045 --OPTIMIZER=AdamW --POINTNET_LAST_LAYER_SIZE=128 --TRAIN_BATCH_SIZE=70 --WEIGHT_DECAY=0.0844692091146692
@@ -75,12 +75,12 @@ run_config = {
 	'LATENT_SPACE_FEAT': 1024,
 	'MODEL_LAST_LAYER_SIZE': 256,  # Important: the model transfers 512 to this, and this to K*3, so it cant be too large nor too small
 	# adversarial example params:
-	'K': 40,  #40 number of laplacian eigenvectors to take. NOTE: up to 70. more then that the model decoder is "broken" - see model
+	'K': 56,  #40 number of laplacian eigenvectors to take. NOTE: up to 70. more then that the model decoder is "broken" - see model
 	'LOSS': 'EUCLIDEAN',  # 'l2', 'local_euclidean' (not working in batches!), 'EUCLIDEAN' (batches)
 	'CHOOSE_LOSS': 3,  ## 1 for only misclassification, 2 for only reconstruction, 3 - both
 	# local euclidean loss params:
 	'CUTOFF': 5,  # 40
-	'NEIGHBORS': 30,  # 140
+	'NEIGHBORS': 36,  # 140
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   TEST
 # ----------------------------------------------------------------------------------------------------------------------#
@@ -100,11 +100,11 @@ run_config = {
 # ----------------------------------------------------------------------------------------------------------------------#
 	'NUM_WORKERS': 0,
 	'DATASET_CLASSES': 10,
-	'DATASET_TRAIN_SIZE': 70, # 70
-	'DATASET_VAL_SIZE': 15, # 15
-	'DATASET_TEST_SIZE': 15, # 15
-	'NUM_VERTICES': 6890, # 6892
-	'DATASET_NAME': "Faust", # 'Faust', 'Shrec14'
+	'DATASET_TRAIN_SIZE': 320, # 70
+	'DATASET_VAL_SIZE': 40, # 15
+	'DATASET_TEST_SIZE': 40, # 15
+	'NUM_VERTICES': 6892, # 6892
+	'DATASET_NAME': "Shrec14", # 'Faust', 'Shrec14'
 	'LOAD_WHOLE_DATA_TO_MEMORY': True,  # use InMemory of Not in dataset loader stage
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   VISTA
