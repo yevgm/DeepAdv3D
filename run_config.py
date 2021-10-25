@@ -24,7 +24,7 @@ run_config = {
 #                                                   MODEL
 # ----------------------------------------------------------------------------------------------------------------------#
 # classifier:
-	'PARAMS_FILE':  os.path.join(repo_root,'saved_params', "shrec14_no_aug_sep_100percent.ckpt"), # FAUST_classifier_Oct_jitter_13val.ckpt, shrec14_no_aug_sep_100percent.ckpt  # FAUST10_pointnet_rot_b128_v2.pt, FAUST10_pointnet_rot_b128.pt, momentum_05.pt, shrec14_71percent_acc_momentum05.pt
+	'PARAMS_FILE':  os.path.join(repo_root,'saved_params', "FAUST_classifier_Oct_jitter_13val.ckpt"), # FAUST_classifier_Oct_jitter_13val.ckpt, shrec14_no_aug_sep_100percent.ckpt  # FAUST10_pointnet_rot_b128_v2.pt, FAUST10_pointnet_rot_b128.pt, momentum_05.pt, shrec14_71percent_acc_momentum05.pt
 	'MODEL_PARAMS_FILE':  os.path.join(repo_root,'saved_params', "eigens_and_augmentation_recon_loss.ckpt"),
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   TENSORBOARD
@@ -55,10 +55,10 @@ run_config = {
 	'TRAINING_CLASSIFIER': False,  # turn on to switch between classifier train and model train
 	'CALCULATE_EIGENVECTORS': True,
 	'CALCULATE_EDGES': True,    
-	'LR': 0.0005987830871425777 , 
-	'WEIGHT_DECAY': 0.3445369039156983, # regularization 1e-4, 0.6909434612344018
+	'LR': 0.0002096804358437231 , 
+	'WEIGHT_DECAY': 0.16597974037631852, # regularization 1e-4, 0.6909434612344018
 
-	'TRAIN_BATCH_SIZE': 32,  # number of data examples in one batch
+	'TRAIN_BATCH_SIZE': 35,  # number of data examples in one batch
 	'N_EPOCH': 1500,  # number of train epochs
 	'RECON_LOSS_CONST':215.62312689558067,  # ratio between reconstruction loss and missclasificaition loss 1391.4670364977283
 	'LAPLACIAN_LOSS_CONST': 10000,
@@ -66,7 +66,7 @@ run_config = {
 	'L2_LOSS_CONST': 10,
 	'CENTER_LOSS_CONST': 1 / 200,
 	'TRAIN_DATA_AUG': False,
-	'DROPOUT_PROB': 0.13917691533502918, 
+	'DROPOUT_PROB': 0.022514719946475196, 
 
 # Architecture parameters - Do not change after classifier has been trained! number 247 in the sweep
 # parameters: --DROPOUT_PROB=0.06799470785277999 --LATENT_SPACE_FEAT=1024 --LR=0.050572566231955045 --OPTIMIZER=AdamW --POINTNET_LAST_LAYER_SIZE=128 --TRAIN_BATCH_SIZE=70 --WEIGHT_DECAY=0.0844692091146692
@@ -100,11 +100,11 @@ run_config = {
 # ----------------------------------------------------------------------------------------------------------------------#
 	'NUM_WORKERS': 0,
 	'DATASET_CLASSES': 10,
-	'DATASET_TRAIN_SIZE': 320, # 70
-	'DATASET_VAL_SIZE': 40, # 15
-	'DATASET_TEST_SIZE': 40, # 15
-	'NUM_VERTICES': 6892, # 6892
-	'DATASET_NAME': "Shrec14", # 'Faust', 'Shrec14'
+	'DATASET_TRAIN_SIZE': 70, # 70
+	'DATASET_VAL_SIZE': 15, # 15
+	'DATASET_TEST_SIZE': 15, # 15
+	'NUM_VERTICES': 6890, # 6892
+	'DATASET_NAME': "Faust", # 'Faust', 'Shrec14'
 	'LOAD_WHOLE_DATA_TO_MEMORY': True,  # use InMemory of Not in dataset loader stage
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   VISTA

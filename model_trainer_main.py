@@ -92,8 +92,8 @@ if __name__ == '__main__':
     # classifier and model definition
     classifier = PointNet(config, k=10)
     classifier.load_state_dict(torch.load(config['PARAMS_FILE'], map_location=config['DEVICE']))
-    # model = RegressorOriginalPointnet(config)
-    model = RegressorEigenSeptember(config)
+    model = RegressorOriginalPointnet(config)
+    # model = RegressorEigenSeptember(config)
     # model = nn.DataParallel(model)
     # classifier = nn.DataParallel(classifier)
     # model = RegressorOriginalPointnetEigen(config)

@@ -85,6 +85,7 @@ class Trainer:
                 if stop_training:
                     self.save_adex_to_drive()
                     self.early_stopping.on_train_end()
+                    torch.save(self.model.state_dict(), os.path.join(os.path.dirname(self.tensor_log_dir), '_last.pt'))
                     # if self.run_config['USE_PLOTTER']:
                     #     self.plt.finalize()
                     # self.evaluate()  # TODO: uncomment for test
@@ -95,6 +96,7 @@ class Trainer:
         # if self.run_config['USE_PLOTTER']:
         #     self.plt.finalize()
         self.save_adex_to_drive()
+        torch.save(self.model.state_dict(), os.path.join(os.path.dirname(self.tensor_log_dir), '_last.pt'))
         self.evaluate()
 
 
@@ -139,14 +141,14 @@ class Trainer:
 
 
             if not self.run_config['TRAINING_CLASSIFIER']:
-                # perturbation = self.model(orig_vertices)
-                eigen_space_v = self.model(orig_vertices)
+                perturbation = self.model(orig_vertices)
+                # eigen_space_v = self.model(orig_vertices)
                 # create the adversarial example
-                # adex = orig_vertices + perturbation
+                adex = orig_vertices + perturbation
                 # adex = perturbation
                 # eigvecs = eigvecs.to(torch.float32)
-                adex = orig_vertices + torch.bmm(eigvecs, eigen_space_v.transpose(2, 1)).transpose(2, 1)  # with addition
-                adex = adex - adex.mean(dim=2).reshape(-1, 3, 1)
+                # adex = orig_vertices + torch.bmm(eigvecs, eigen_space_v.transpose(2, 1)).transpose(2, 1)  # with addition
+                # adex = adex - adex.mean(dim=2).reshape(-1, 3, 1)
                 # adex = torch.bmm(eigvecs, eigen_space_v.transpose(2, 1)).transpose(2, 1)  # no addition
 
                 perturbed_logits = self.classifier(adex)  # no grad is already implemented in the constructor
@@ -292,8 +294,10 @@ class Trainer:
                 # chamfer_loss = ChamferDistance()
                 # laplacian_loss = LaplacianLoss(faces=faces, vert=adex.transpose(2, 1), toref=False)
             elif self.run_config['LOSS'] == 'EUCLIDEAN':
-                recon_loss = LocalEuclideanBatch(original_pos=orig_vertices, perturbed_pos=adex,
-                                                          run_config=self.run_config)
+                # recon_loss = LocalEuclideanBatch(original_pos=orig_vertices, perturbed_pos=adex,
+                #                                           run_config=self.run_config)
+                edgeloss = MeshEdgeLoss()
+                recon_loss = edgeloss()
                 # l2_loss = L2Similarity(orig_vertices, adex, vertex_area)
                 # l2 = l2_loss()
                 # chamfer = chamfer_distance(original_pos=orig_vertices, perturbed_pos=adex)
