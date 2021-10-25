@@ -47,7 +47,7 @@ run_config = {
 #                                                   TRAIN HYPERPARAMETERS
 # ----------------------------------------------------------------------------------------------------------------------#
 	'UNIVERSAL_RAND_SEED': 143, #143
-	'EARLY_STOP_WAIT': 200, # epochs
+	'EARLY_STOP_WAIT': 100, # epochs
 	'LR_SCHEDULER_WAIT':  50, # epochs  # 50
 	'SCHEDULER_STEP_SIZE': 250,
 	'OPTIMIZER': 'Adam', # 'Adam', 'AdamW', 'sgd'
@@ -60,7 +60,7 @@ run_config = {
 
 	'TRAIN_BATCH_SIZE': 35,  # number of data examples in one batch
 	'N_EPOCH': 1500,  # number of train epochs
-	'RECON_LOSS_CONST':215.62312689558067,  # ratio between reconstruction loss and missclasificaition loss 1391.4670364977283
+	'RECON_LOSS_CONST':30,  # ratio between reconstruction loss and missclasificaition loss 1391.4670364977283
 	'LAPLACIAN_LOSS_CONST': 10000,
 	'EDGE_LOSS_CONST': 1e-15,
 	'L2_LOSS_CONST': 10,
@@ -124,7 +124,7 @@ run_config = {
 #                                                   DEBUG
 # ----------------------------------------------------------------------------------------------------------------------#
 	# classifier bn
-	'CLS_USE_BN': False,
+	'CLS_USE_BN': True,
 	'CLS_BATCH_NORM_USE_STATISTICS': False,
 	'CLS_BATCH_NORM_MOMENTUM': 0.1,  # default is 0.1
 	'CLS_STRICT_PARAM_LOADING': False, # strict = False for dropping running mean and var of train batchnorm

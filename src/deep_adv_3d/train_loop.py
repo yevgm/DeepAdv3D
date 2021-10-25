@@ -296,8 +296,9 @@ class Trainer:
             elif self.run_config['LOSS'] == 'EUCLIDEAN':
                 # recon_loss = LocalEuclideanBatch(original_pos=orig_vertices, perturbed_pos=adex,
                 #                                           run_config=self.run_config)
-                edgeloss = MeshEdgeLoss()
-                recon_loss = edgeloss()
+                # edgeloss = MeshEdgeLoss()
+                # recon_loss = edgeloss(adex, faces)
+                edge_loss = EdgeLoss()
                 # l2_loss = L2Similarity(orig_vertices, adex, vertex_area)
                 # l2 = l2_loss()
                 # chamfer = chamfer_distance(original_pos=orig_vertices, perturbed_pos=adex)
@@ -305,8 +306,7 @@ class Trainer:
                 raise('Not implemented reonstruction loss')
 
 
-
-            # edge_loss = edge_loss(edges, orig_vertices.transpose(2,1), adex.transpose(2,1))
+            recon_loss = edge_loss(edges, orig_vertices.transpose(2,1), adex.transpose(2,1))
             # laplace_loss = laplacian_loss(verts=adex.transpose(2, 1))
             # laplacian_mesh_loss_object = MeshLaplacianSmoothing()
             # mesh_edge_loss = MeshEdgeLoss()

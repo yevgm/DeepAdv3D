@@ -381,7 +381,7 @@ class FaustDatasetInMemory(data.Dataset):
         else:
             edges = 0
 
-        self.faces = torch.from_numpy(f).type(torch.long)
+        self.faces = torch.from_numpy(f).type(torch.long).to(run_config['DEVICE'])
 
         # Calculate Eigenvectors and areas of all the data
         if CALCULATE_EIGENVECTORS and (data_augmentation == False):

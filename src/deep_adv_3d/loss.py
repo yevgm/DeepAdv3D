@@ -162,8 +162,8 @@ class EdgeLoss(LossFunction):
             e_single = e[b, :, :]
             ppos_single = ppos[b, :, :]
             pos_single = pos[b, :, :]
-            reconstructed_norm = torch.linalg.norm(ppos_single[e_single[:, 0]] - ppos_single[e_single[:, 1]], axis=1)
-            original_norm = torch.linalg.norm(pos_single[e_single[:, 0]] - pos_single[e_single[:, 1]], axis=1)
+            reconstructed_norm = torch.norm(ppos_single[e_single[:, 0]] - ppos_single[e_single[:, 1]])
+            original_norm = torch.norm(pos_single[e_single[:, 0]] - pos_single[e_single[:, 1]])
             out = out + (( (reconstructed_norm / original_norm) - 1).abs()).mean()
         return out
 
@@ -248,8 +248,8 @@ class MeshEdgeLoss(LossFunction):
         verts_list = []
         faces_list = []
         for b in range(verts.shape[0]):
-            verts_list.append(verts[b,:,:])
-            faces_list.append(faces[b, :, :])
+            verts_list.append(verts[b,:,:].T)
+            faces_list.append(faces[b, :, :].T)
 
         meshes = Meshes(verts_list, faces_list)
         loss = mesh_edge_loss(meshes=meshes)
