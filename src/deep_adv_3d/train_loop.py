@@ -85,7 +85,7 @@ class Trainer:
                 if stop_training:
                     self.save_adex_to_drive()
                     self.early_stopping.on_train_end()
-                    torch.save(self.model.state_dict(), os.path.join(os.path.dirname(self.tensor_log_dir), '_last.pt'))
+                    torch.save(self.model.state_dict(), os.path.join(self.tensor_log_dir, '_last.pt'))
                     # if self.run_config['USE_PLOTTER']:
                     #     self.plt.finalize()
                     # self.evaluate()  # TODO: uncomment for test
@@ -96,7 +96,7 @@ class Trainer:
         # if self.run_config['USE_PLOTTER']:
         #     self.plt.finalize()
         self.save_adex_to_drive()
-        torch.save(self.model.state_dict(), os.path.join(os.path.dirname(self.tensor_log_dir), '_last.pt'))
+        torch.save(self.model.state_dict(), os.path.join(self.tensor_log_dir, '_last.pt'))
         self.evaluate()
 
 
