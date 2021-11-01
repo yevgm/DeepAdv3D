@@ -11,7 +11,7 @@ from run_config import *
 
 # repository modules
 from models.pointnet import PointNet
-from models.deep_adv_3d_model1 import RegressorOriginalPointnet, OshriRegressor, RegressorOriginalPointnetEigen, RegressorEigenSeptember, RegressorEigenSeptemberDeep
+from models.deep_adv_3d_model1 import RegressorOriginalPointnet, RegressorEigenSeptember
 from deep_adv_3d.train_loop import *
 from dataset.data_loaders import *
 from utils.torch.nn import *
@@ -25,6 +25,7 @@ def load_datasets(run_config):
     train_batch = run_config['TRAIN_BATCH_SIZE']
     test_batch = run_config['TEST_BATCH_SIZE']
     val_batch = run_config['VAL_BATCH_SIZE']
+
 
     if dataset == 'Faust':
         dataset_path = run_config['FAUST']
@@ -96,6 +97,7 @@ if __name__ == '__main__':
     model = RegressorEigenSeptember(config)
     train_ins = Trainer(train_data=trainLoader, validation_data=validationLoader, test_data=testLoader,
                             model=model, classifier=classifier, run_config=config)
+
 
     # train network
     train_ins.train()
