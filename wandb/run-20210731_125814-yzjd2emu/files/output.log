@@ -1,6 +1,0 @@
-Traceback (most recent call last):
-  File "C:/Users/ido.igip1/Anaconda3/DeepAdv3D/model_trainer_main.py", line 100, in <module>
-    model=model, classifier=classifier)
-  File "C:\Users\ido.igip1\Anaconda3\DeepAdv3D\src\deep_adv_3d\train_loop.py", line 58, in __init__
-    self.checkpoint_callback = ModelCheckpoint(filepath=self.tensor_log_dir, model=self.model)
-AttributeError: 'Trainer' object has no attribute 'tensor_log_dir'
