@@ -48,22 +48,3 @@ def set_determinsitic_run(run_config, seed=None):
     # https://discuss.pytorch.org/t/what-is-the-differenc-between-cudnn-deterministic-and-cudnn-benchmark/38054
 
 
-# ----------------------------------------------------------------------------------------------------------------------
-#
-# ----------------------------------------------------------------------------------------------------------------------
-if __name__ == '__main__':
-    pass
-    # dir = r'C:\Users\idoim\Desktop\ShapeCompletion\results'
-    # t = TensorboardSupervisor()
-    # time.sleep(10)
-    # list_of_proccesses = findProcessIdByName('tensorboard.main')
-    # print(list_of_proccesses)
-    # for process in list_of_proccesses:
-    #     os.kill(process['pid'], signal.SIGTERM)
-    # t.finalize()
-    # print('DONE!')
-    # import torch
-    # import torchvision
-    #
-    # model = torchvision.models.resnet50(False)
-    # pymodel = PytorchNet.monkeypatch(model)

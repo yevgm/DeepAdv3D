@@ -5,79 +5,6 @@ from torch.autograd import Variable
 import torch.nn.functional as F
 from src.models.pointnet import PointNetfeat
 
-
-# class Encoder(nn.Module):
-#     def __init__(self, firstDim = 64):
-#         super(Encoder, self).__init__()
-#         self.conv1 = torch.nn.Conv1d(3, firstDim, 1)  # default 3, 64
-#         if MODEL_USE_BN:
-#             self.bn1 = nn.BatchNorm1d(firstDim, momentum=MODEL_BATCH_NORM_MOMENTUM, track_running_stats=MODEL_BATCH_NORM_USE_STATISTICS)  # default 64
-#         else:
-#             self.bn1 = nn.Identity()
-#         self.conv2 = torch.nn.Conv1d(firstDim, 2*firstDim, 1)  # default 64, 128
-#         if MODEL_USE_BN:
-#             self.bn2 = nn.BatchNorm1d(2*firstDim, momentum=MODEL_BATCH_NORM_MOMENTUM, track_running_stats=MODEL_BATCH_NORM_USE_STATISTICS)  # default 128
-#         else:
-#             self.bn2 = nn.Identity()
-#         self.conv3 = torch.nn.Conv1d(2*firstDim, 16*firstDim, 1)  # default 128,1024
-#         if MODEL_USE_BN:
-#             self.bn3 = nn.BatchNorm1d(16*firstDim, momentum=MODEL_BATCH_NORM_MOMENTUM, track_running_stats=MODEL_BATCH_NORM_USE_STATISTICS)  # default 1024
-#         else:
-#             self.bn3 = nn.Identity()
-#
-#     def forward(self, x):
-#         x = F.leaky_relu(self.bn1(self.conv1(x)))  # the first MLP layer (mlp64,64 shared)
-#         x = F.leaky_relu(self.bn2(self.conv2(x)))
-#         x = self.bn3(self.conv3(x))
-#         x = torch.max(x, 2, keepdim=True)[0]
-#         x = x.view(-1, 1024)
-#         return x
-#
-#
-# class Decoder(nn.Module):
-#
-#     def __init__(self, in_feat, outDim):
-#         super(Decoder, self).__init__()
-#
-#         self.fc1 = nn.Linear(in_feat, 4 * in_feat)  # 1024, 2048
-#         if MODEL_USE_BN:
-#             self.bn1 = nn.BatchNorm1d(4 * in_feat, momentum=MODEL_BATCH_NORM_MOMENTUM, track_running_stats=MODEL_BATCH_NORM_USE_STATISTICS)  # 2048
-#         else:
-#             self.bn1 = nn.Identity()
-#
-#         self.fc2 = nn.Linear(4 * in_feat, 8 * in_feat)  # 2048, 8192
-#         if MODEL_USE_DROPOUT:
-#             self.dropout = nn.Dropout(p=0.3)
-#         else:
-#             self.dropout = nn.Identity()
-#         if MODEL_USE_BN:
-#             self.bn2 = nn.BatchNorm1d(8 * in_feat, momentum=MODEL_BATCH_NORM_MOMENTUM, track_running_stats=MODEL_BATCH_NORM_USE_STATISTICS)  # 8192
-#         else:
-#             self.bn2 = nn.Identity()
-#         self.fc3 = nn.Linear(8 * in_feat, outDim)  # 8192, outDim , 6890 is for faust
-#
-#     def forward(self, x):
-#         x = F.leaky_relu(self.bn1(self.fc1(x)))
-#         x = F.leaky_relu(self.bn2(self.dropout(self.fc2(x))))
-#         x = self.fc3(x)
-#         return x
-#
-#
-# class Regressor(nn.Module):
-#
-#     def __init__(self, numVertices, firstDim=64):
-#         super(Regressor, self).__init__()
-#         self.numVertices = numVertices
-#         self.outDim = 3*numVertices
-#         self.enc = Encoder(firstDim)
-#         self.dec = Decoder(in_feat=1024,outDim=self.outDim)
-#
-#     def forward(self, x):
-#         x = self.enc(x)
-#         x = self.dec(x)
-#         x = x.view(-1, 3, self.numVertices)
-#         return x
-
 class PointNetfeatModel(nn.Module):
     def __init__(self, run_config):
         super(PointNetfeatModel, self).__init__()
@@ -124,20 +51,15 @@ class RegressorOriginalPointnet(nn.Module):
         self.drop3 = nn.Dropout(p=self.dropout_p)
         self.fc4 = nn.Linear(8192, 6890*3)
 
-        # self.drop4 = nn.Dropout(p=self.dropout_p)
-        # self.fc5 = nn.Linear(16384, 6890*3)
-
         if self.run_config['MODEL_USE_BN']:
             self.bn1 = nn.BatchNorm1d(2048)
             self.bn2 = nn.BatchNorm1d(4096)
             self.bn3 = nn.BatchNorm1d(8192)
-            # self.bn4 = nn.BatchNorm1d(16384)
 
         else:
             self.bn1 = nn.Identity()
             self.bn2 = nn.Identity()
             self.bn3 = nn.Identity()
-            # self.bn4 = nn.Identity()
 
     def forward(self, x):
         # x, trans, trans_feat = self.feat(x)  # x is 1024, trans is exit from TNET1, trans_Feat is exit from tnet2
@@ -145,196 +67,12 @@ class RegressorOriginalPointnet(nn.Module):
         x = self.drop1(F.relu(self.bn1(self.fc1(x))))
         x = self.drop2(F.relu(self.bn2((self.fc2(x)))))
         x = self.drop3(F.relu(self.bn3((self.fc3(x)))))
-        # x = self.drop4(F.relu(self.bn4((self.fc4(x)))))
         x = self.fc4(x)
         x = x.view(-1, 3, self.v_size)  # that's the only difference from pointnet, along with layer sizes
         return x
 
-    ################### OSHRI MODEL ###############################
-
-class DensePointNetFeatures(nn.Module):
-    def __init__(self, code_size, in_channels):
-        super().__init__()
-        self.conv1 = nn.Conv1d(in_channels, 64, 1)
-        self.conv2 = nn.Conv1d(in_channels + 64, 128, 1)
-        self.conv3 = nn.Conv1d(in_channels + 64 + 128, code_size, 1)
-        self.bn1 = nn.BatchNorm1d(64)
-        self.bn2 = nn.BatchNorm1d(128)
-        self.bn3 = nn.BatchNorm1d(code_size)
-
-    def init_weights(self):
-        conv_mu = 0.0
-        conv_sigma = 0.02
-        bn_gamma_mu = 1.0
-        bn_gamma_sigma = 0.02
-        bn_betta_bias = 0.0
-
-        for m in self.modules():
-            if isinstance(m, nn.Conv1d):
-                nn.init.normal_(m.weight, mean=conv_mu, std=conv_sigma)
-            elif isinstance(m, nn.BatchNorm1d):
-                nn.init.normal_(m.weight, mean=bn_gamma_mu, std=bn_gamma_sigma)  # weight=gamma, bias=betta
-                nn.init.constant_(m.bias, bn_betta_bias)
-
-    # noinspection PyTypeChecker
-    def forward(self, x):
-        # Input: Batch of Point Clouds : [b x num_vertices X in_channels]
-        # Output: The global feature vector : [b x code_size]
-        x = x.transpose(2, 1).contiguous()  # [b x in_channels x num_vertices]
-        y = F.relu(self.bn1(self.conv1(x)))  # [B x 64 x n]
-        z = F.relu(self.bn2(self.conv2(torch.cat((x, y), 1))))  # [B x 128 x n]
-        z = self.bn3(self.conv3(torch.cat((x, y, z), 1)))  # [B x code_size x n]
-        z, _ = torch.max(z, 2)  # [B x code_size]
-        return z
-
-class ShapeEncoder(nn.Module):
-    def __init__(self, code_size=1024, in_channels=3):
-        super().__init__()
-        self.code_size = code_size
-        self.in_channels = in_channels
-
-        features = DensePointNetFeatures(self.code_size, self.in_channels)
-
-
-        self.encoder = nn.Sequential(
-            features,
-            nn.Linear(self.code_size, self.code_size),
-            nn.BatchNorm1d(self.code_size),
-            nn.ReLU()
-        )
-
-    def init_weights(self):
-        bn_gamma_mu = 1.0
-        bn_gamma_sigma = 0.02
-        bn_betta_bias = 0.0
-
-        nn.init.normal_(self.encoder[2].weight, mean=bn_gamma_mu, std=bn_gamma_sigma)  # weight=gamma
-        nn.init.constant_(self.encoder[2].bias, bn_betta_bias)  # bias=betta
-
-# Input: Batch of Point Clouds : [b x num_vertices X in_channels]
-# Output: The global feature vector : [b x code_size]
-    def forward(self, shape):
-        return self.encoder(shape)
-
-class ShapeDecoder(nn.Module):
-    CCFG = [1, 2, 4, 8]  # Enlarge this if you need more
-
-    def __init__(self, pnt_code_size, out_channels, num_convl):
-        super().__init__()
-
-        self.pnt_code_size = pnt_code_size
-        self.out_channels = out_channels
-        if num_convl > len(self.CCFG):
-            raise NotImplementedError("Please enlarge the Conv Config vector")
-
-        self.thl = nn.Tanh()
-        self.convls = []
-        self.bnls = []
-        for i in range(num_convl - 1):
-            self.convls.append(nn.Conv1d(self.pnt_code_size * self.CCFG[i], self.pnt_code_size * self.CCFG[i + 1], 1))
-            self.bnls.append(nn.BatchNorm1d(self.pnt_code_size * self.CCFG[i + 1]))
-        self.convls.append(nn.Conv1d(self.pnt_code_size * self.CCFG[num_convl - 1], self.out_channels, 1))
-        self.convls = nn.ModuleList(self.convls)
-        self.bnls = nn.ModuleList(self.bnls)
-
-    def init_weights(self):
-        conv_mu = 0.0
-        conv_sigma = 0.02
-        bn_gamma_mu = 1.0
-        bn_gamma_sigma = 0.02
-        bn_betta_bias = 0.0
-
-        for m in self.modules():
-            if isinstance(m, nn.Conv1d):
-                nn.init.normal_(m.weight, mean=conv_mu, std=conv_sigma)
-            elif isinstance(m, nn.BatchNorm1d):
-                nn.init.normal_(m.weight, mean=bn_gamma_mu, std=bn_gamma_sigma)  # weight=gamma
-                nn.init.constant_(m.bias, bn_betta_bias)  # bias=betta
-
-    # noinspection PyTypeChecker
-    # Input: Point code for each point: [b x nv x pnt_code_size]
-    # Where pnt_code_size == in_channels + 2*shape_code
-    # Output: predicted coordinates for each point, after the deformation [B x nv x 3]
-    def forward(self, x):
-        # x = x.transpose(2, 1).contiguous()  # [b x nv x in_channels]
-        for convl, bnl in zip(self.convls[:-1], self.bnls):
-            x = F.relu(bnl(convl(x)))
-        out = 2 * self.thl(self.convls[-1](x))  # TODO - Fix this constant - we need a global scale
-        # out = out.transpose(2, 1)
-        out = out.squeeze()
-        return out
-
-class OshriRegressor(nn.Module):
-
-    def __init__(self, numVertices=6890):
-        super(OshriRegressor, self).__init__()
-        self.numVertices = numVertices
-        self.outDim = 3 * numVertices
-        self.enc = ShapeEncoder(code_size=1024, in_channels=3)
-        self.dec = ShapeDecoder(pnt_code_size=1024, out_channels=3 * numVertices, num_convl=4)
-
-        self.enc.init_weights()
-        self.dec.init_weights()
-
-        # self.fc1 = nn.Linear(1024, 4096)
-        # self.relu = nn.ReLU()
-        # self.fc2 = nn.Linear(4096, 8192)
-        # self.dropout = nn.Dropout(p=0.3)
-        # self.relu = nn.ReLU()
-        # self.fc3 = nn.Linear(8192, 6890*3)
-
-    def forward(self, x):
-        x = x.transpose(2,1)
-        x = self.enc(x)
-        x = x.unsqueeze(dim=2)
-        x = self.dec(x)
-        x = x.view(-1, 3, self.numVertices)
-        # x = F.relu(self.fc1(x))
-        # x = F.relu(self.dropout(self.fc2(x)))
-        # x = self.fc3(x)
-        # x = x.view(-1, 3, 6890)  # that's the only difference from pointnet, along with layer sizes
-        return x
 
 ################ MODELS THAT SUPPORT EIGEN VECTORS #############
-
-
-class RegressorOriginalPointnetEigen(nn.Module):
-
-    def __init__(self, run_config):
-        super(RegressorOriginalPointnetEigen, self).__init__()
-        self.k = run_config['K']
-        if self.k <= 170:
-            inner_layer_size = 512
-        elif self.k <= 340:
-            inner_layer_size = 1024
-        else:
-            raise('k is not compatible to model')
-
-        self.feat = PointNetfeat(run_config)
-        self.fc1 = nn.Linear(run_config['LATENT_SPACE_FEAT'], inner_layer_size)
-        self.relu = nn.ReLU()
-        self.fc2 = nn.Linear(inner_layer_size, run_config['MODEL_LAST_LAYER_SIZE'])
-        self.dropout = nn.Dropout(p=run_config['DROPOUT_PROB'])
-        self.relu = nn.ReLU()
-        self.fc3 = nn.Linear(run_config['MODEL_LAST_LAYER_SIZE'], self.k * 3)
-
-        if run_config['MODEL_USE_BN']:
-            self.bn1 = nn.BatchNorm1d(run_config['LATENT_SPACE_FEAT'])
-            self.bn2 = nn.BatchNorm1d(inner_layer_size)
-            self.bn3 = nn.BatchNorm1d(run_config['MODEL_LAST_LAYER_SIZE'])
-        else:
-            self.bn1 = nn.Identity()
-            self.bn2 = nn.Identity()
-            self.bn3 = nn.Identity()
-
-    def forward(self, x):
-        x = self.feat(x)
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.dropout(self.fc2(x)))
-        x = self.fc3(x)
-        x = x.view(-1, 3, self.k)
-        return x
-
 
 class RegressorEigenSeptember(nn.Module):
 
@@ -362,89 +100,9 @@ class RegressorEigenSeptember(nn.Module):
             self.bn2 = nn.Identity()
 
     def forward(self, x):
-        # x, trans, trans_feat = self.feat(x)  # x is 1024, trans is exit from TNET1, trans_Feat is exit from tnet2
-        x = self.feat(x)  # x is 1024, trans is exit from TNET1, trans_Feat is exit from tnet2
+        x = self.feat(x)  # x is 1024
         x = self.drop1(F.relu(self.bn1(self.fc1(x))))
         x = self.drop2(F.relu(self.bn2((self.fc2(x)))))
         x = self.fc3(x)
         x = x.view(-1, 3, self.k)  # that's the only difference from pointnet, along with layer sizes
-        return x
-
-
-class RegressorEigenSeptemberDeep(nn.Module):
-
-    def __init__(self, run_config):
-        super(RegressorEigenSeptemberDeep, self).__init__()
-        self.run_config = run_config
-        self.v_size = run_config['NUM_VERTICES']
-        self.dropout_p = run_config['DROPOUT_PROB']
-        self.k = run_config['K']
-        self.feat = PointNetfeatModelDeep(run_config)
-        layer1_size = 1024
-        layer2_size = layer1_size
-        layer3_size = layer1_size / 4
-
-        self.fc1 = nn.Linear(layer1_size, layer1_size)
-        # self.fc11 = nn.Linear(layer1_size, layer1_size)
-        self.drop1 = nn.Dropout(p=self.dropout_p)
-
-        self.fc2 = nn.Linear(layer1_size, layer2_size)
-        # self.fc22 = nn.Linear(layer2_size, layer2_size)
-        self.drop2 = nn.Dropout(p=self.dropout_p)
-
-        # self.fc3 = nn.Linear(layer2_size, layer3_size)
-        # self.fc33 = nn.Linear(layer3_size, layer3_size)
-        # self.drop3 = nn.Dropout(p=self.dropout_p)
-        # assert layer3_size > self.k * 3, 'cant have output size larger than the last hidden layer'
-
-        self.fc4 = nn.Linear(layer2_size, self.k * 3)
-
-        if self.run_config['MODEL_USE_BN']:
-            self.bn1 = nn.BatchNorm1d(layer1_size)
-            self.bn2 = nn.BatchNorm1d(layer2_size)
-            # self.bn3 = nn.BatchNorm1d(layer3_size)
-
-        else:
-            self.bn1 = nn.Identity()
-            self.bn2 = nn.Identity()
-            self.bn3 = nn.Identity()
-
-    def forward(self, x):
-        # x, trans, trans_feat = self.feat(x)  # x is 1024, trans is exit from TNET1, trans_Feat is exit from tnet2
-        x = self.feat(x)  # x is 1024, trans is exit from TNET1, trans_Feat is exit from tnet2
-        x = self.drop1(F.relu(self.bn1(self.fc1(x))))
-        # x = self.drop1(F.relu(self.bn1(self.fc11(x))))
-        x = self.drop2(F.relu(self.bn2(self.fc2(x))))
-        # x = self.drop2(F.relu(self.bn2(self.fc22(x))))
-        # x = self.drop3(F.relu(self.bn3(self.fc3(x))))
-        # x = self.drop3(F.relu(self.bn3(self.fc33(x))))
-        x = self.fc4(x)
-        x = x.view(-1, 3, self.k)  # that's the only difference from pointnet, along with layer sizes
-        return x
-
-class PointNetfeatModelDeep(nn.Module):
-    def __init__(self, run_config):
-        super(PointNetfeatModelDeep, self).__init__()
-        self.conv1 = torch.nn.Conv1d(3, 64, 1)
-        self.conv2 = torch.nn.Conv1d(64, 128, 1)
-        self.conv3 = torch.nn.Conv1d(128, 1024, 1)
-
-        if run_config['MODEL_USE_BN']:
-            self.bn1 = nn.BatchNorm1d(64)
-            self.bn2 = nn.BatchNorm1d(128)
-        else:
-            self.bn1 = nn.Identity()
-            self.bn2 = nn.Identity()
-            self.bn3 = nn.Identity()
-
-
-    def forward(self, x):
-        # if len(x.shape)<3:
-        #     x = torch.unsqueeze(x.T, 0) ## fix for geometric data loader
-
-        x = F.relu(self.bn1(self.conv1(x)))  # the first MLP layer (mlp64,64 shared)
-        x = F.relu(self.bn2(self.conv2(x)))
-        x = self.conv3(x)
-        x = torch.max(x, 2, keepdim=True)[0]
-        x = x.view(-1, 1024)
         return x

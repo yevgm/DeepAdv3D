@@ -92,15 +92,8 @@ if __name__ == '__main__':
     # classifier and model definition
     classifier = PointNet(config, k=10)
     classifier.load_state_dict(torch.load(config['PARAMS_FILE'], map_location=config['DEVICE']))
-    model = RegressorOriginalPointnet(config)
-    # model = RegressorEigenSeptember(config)
-    # model = nn.DataParallel(model)
-    # classifier = nn.DataParallel(classifier)
-    # model = RegressorOriginalPointnetEigen(config)
-    # model.load_state_dict(torch.load(MODEL_PARAMS_FILE, map_location=run_config['DEVICE']))
-    # model = OshriRegressor()
-    # model = Regressor(numVertices=6890)
-    # model = RegressorOriginalPointnetEigen(K=K)
+    # model = RegressorOriginalPointnet(config)
+    model = RegressorEigenSeptember(config)
     train_ins = Trainer(train_data=trainLoader, validation_data=validationLoader, test_data=testLoader,
                             model=model, classifier=classifier, run_config=config)
 

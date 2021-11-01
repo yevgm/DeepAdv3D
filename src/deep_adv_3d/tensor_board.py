@@ -134,19 +134,6 @@ def generate_new_results_dir(date, run_config, model='adv3d'):
     return new_dir_name
 
 
-# def classifier_report_to_tensorboard(tensor_obj, batch_idx, step_cntr, cur_batch_len, epoch, n_batches, total_loss,
-#                                     num_classified):
-#     if step_cntr % SHOW_LOSS_EVERY == SHOW_LOSS_EVERY - 1:  # every SHOW_LOSS_EVERY mini-batches
-#         # old stdout prints
-#         print('[Epoch #%d: Batch %d/%d] train loss: %f, Classified: [%d/%d]' % (
-#             epoch, n_batches, batch_idx, total_loss, float(cur_batch_len), num_classified.item()))
-#
-#         # ...log the running loss
-#         tensor_obj.add_scalar('Loss/Train_total',
-#                                total_loss, step_cntr)
-#         tensor_obj.add_scalar('Accuracy/Train_classified',
-#                                num_classified / float(cur_batch_len), step_cntr)
-
 def report_to_wandb_classifier(run_config, epoch, split, epoch_loss, epoch_classified=0):
 
     if split == 'train':
@@ -174,14 +161,6 @@ def report_to_wandb_classifier(run_config, epoch, split, epoch_loss, epoch_class
                 "Test/classified": epoch_classified})
 
             print('Test loss: %f, Classified: [%d/%d]' % (epoch_loss, epoch_classified, run_config['DATASET_TEST_SIZE']))
-            # my_data = [
-            #     ["TestLoss", epoch_loss],
-            #     ["TestAccuracy", epoch_classified]
-            # ]
-            # columns = ["Name", "Values"]
-            # data_table = wandb.Table(data=my_data, columns=columns)
-            # wandb.log({"Test_Results":data_table})
-
 
 def report_to_wandb_regressor(run_config, epoch, split, epoch_loss, epoch_misclassified, misloss=None, recon_loss=None
                               , chamfer_loss=None):
@@ -220,17 +199,3 @@ def report_to_wandb_regressor(run_config, epoch, split, epoch_loss, epoch_miscla
                 "Test/misclassified": epoch_misclassified})
 
         print('Test loss: %f, misclassified: [%d/%d]' % (epoch_loss, epoch_misclassified,  run_config['DATASET_TEST_SIZE']))
-
-            # my_data = [
-            #     ["Test Loss", epoch_loss],
-            #     ["Test Misclassified/15", epoch_misclassified]
-            # ]
-            # columns = ["Name", "Values"]
-            # data_table = wandb.Table(data=my_data, columns=columns)
-            # wandb.log({"Test_Results": data_table})
-
-
-
-if __name__ == '__main__':
-    list = findProcessIdByName('firefox')
-    a=1

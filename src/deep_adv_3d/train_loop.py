@@ -10,7 +10,6 @@ from deep_adv_3d.tensor_board import *
 import utils.mesh as mesh
 # from vista.subprocess_plotter import AdversarialPlotter
 
-# debug imports
 import torch
 import wandb
 import torch.nn.functional as F
@@ -85,7 +84,7 @@ class Trainer:
                 if stop_training:
                     self.save_adex_to_drive()
                     self.early_stopping.on_train_end()
-                    torch.save(self.model.state_dict(), os.path.join(self.tensor_log_dir, '_last.pt'))
+                    torch.save(self.model.state_dict(), os.path.join(self.tensor_log_dir, 'last_epoch_weights.pt'))
                     # if self.run_config['USE_PLOTTER']:
                     #     self.plt.finalize()
                     # self.evaluate()  # TODO: uncomment for test
@@ -96,7 +95,7 @@ class Trainer:
         # if self.run_config['USE_PLOTTER']:
         #     self.plt.finalize()
         self.save_adex_to_drive()
-        torch.save(self.model.state_dict(), os.path.join(self.tensor_log_dir, '_last.pt'))
+        torch.save(self.model.state_dict(), os.path.join(self.tensor_log_dir, 'last_epoch_weights.pt'))
         self.evaluate()
 
 
@@ -135,38 +134,25 @@ class Trainer:
         num_clas, num_misclassified, misloss, recon_loss, chamfer = 0, 0, 0, 0, 0
 
         for i, data in enumerate(data, 0):
-            # orig_vertices, label, _, _, vertex_area, targets, faces, edges = data
             orig_vertices, label, _, eigvecs, vertex_area, targets, faces, edges = data
             orig_vertices = orig_vertices.transpose(2, 1)
 
 
             if not self.run_config['TRAINING_CLASSIFIER']:
-                perturbation = self.model(orig_vertices)
-                # eigen_space_v = self.model(orig_vertices)
+                # perturbation = self.model(orig_vertices)
+                eigen_space_v = self.model(orig_vertices)
+
                 # create the adversarial example
-                adex = orig_vertices + perturbation
-                # adex = perturbation
-                # eigvecs = eigvecs.to(torch.float32)
-                # adex = orig_vertices + torch.bmm(eigvecs, eigen_space_v.transpose(2, 1)).transpose(2, 1)  # with addition
+                # adex = orig_vertices + perturbation
+                adex = orig_vertices + torch.bmm(eigvecs, eigen_space_v.transpose(2, 1)).transpose(2, 1)  # with addition
                 # adex = adex - adex.mean(dim=2).reshape(-1, 3, 1)
-                # adex = torch.bmm(eigvecs, eigen_space_v.transpose(2, 1)).transpose(2, 1)  # no addition
 
                 perturbed_logits = self.classifier(adex)  # no grad is already implemented in the constructor
-                # pred_choice_adex = perturbed_logits.data.max(1)[1]
-                # print('adex:   ', pred_choice_adex)
-                #
-                # logits = self.classifier(orig_vertices)
-                # pred_choice_orig = logits.data.max(1)[1]
-                # num_clas = pred_choice_orig.eq(label.squeeze()).sum().cpu()
-                # print('logits: ',pred_choice_orig)
-                # print('labels: ', label.squeeze())
-                # print('Classified: ',num_clas)
                 loss, misloss, recon_loss = self.calculate_loss(perturbed_logits=perturbed_logits, labels=label,
                                                                 targets=targets, orig_vertices=orig_vertices,
                                                                 adex=adex, vertex_area=vertex_area, edges=edges,
                                                                 faces=faces, epoch=epoch)
                 pred_choice = perturbed_logits.data.max(1)[1]
-                # num_misclassified = (~pred_choice.eq(label)).sum().cpu()  # for untargeted attack such as crossentropy
                 num_misclassified = (pred_choice.eq(targets)).sum().cpu()  # for targeted attack
             else:
                 pred = self.model(orig_vertices)
@@ -201,7 +187,6 @@ class Trainer:
 
         # push to visualizer every epoch - last batch
         if self.run_config['USE_PLOTTER'] or self.run_config['SAVE_EXAMPLES_TO_DRIVE']:
-            # self.push_data_to_plotter(orig_vertices, eigvecs.transpose(2,1), faces, epoch, split)
             self.push_data_to_plotter(orig_vertices, adex, faces, epoch, split)
 
         return loss.item()
@@ -215,7 +200,6 @@ class Trainer:
             epoch_loss, epoch_misclassified, epoch_classified = 0, 0, 0
 
             for i, data in enumerate(data, 0):
-                # orig_vertices, label, _, _, vertex_area, targets, faces, edges = data
                 orig_vertices, label, _, eigvecs, vertex_area, targets, faces, edges = data
                 orig_vertices = orig_vertices.transpose(2, 1)
 
@@ -234,7 +218,6 @@ class Trainer:
                     loss, missloss, recon_loss = self.calculate_loss(orig_vertices=orig_vertices, perturbed_logits=perturbed_logits,
                                                labels=label, targets=targets, adex=adex, vertex_area=vertex_area)
                     pred_choice = perturbed_logits.data.max(1)[1]
-                    # num_misclass = (~pred_choice.eq(label)).sum().cpu()  # for untargeted attack such as crossentropy
                     num_misclass = (pred_choice.eq(targets)).sum().cpu()  # for targeted attack
 
                 else:
@@ -261,12 +244,10 @@ class Trainer:
         l2_const = self.run_config['L2_LOSS_CONST']
         edge_loss_const = self.run_config['EDGE_LOSS_CONST']
         laplacian_loss_const = self.run_config['LAPLACIAN_LOSS_CONST']
-        center_loss_const = self.run_config['CENTER_LOSS_CONST']
 
         # only misclassification loss
         if self.run_config['CHOOSE_LOSS'] == 1:
             misclassification_loss = AdversarialLoss()
-        # loss = misclassification_loss(perturbed_logits, labels) # for untargeted attack
             loss = misclassification_loss(perturbed_logits, targets) # for targeted attack
 
         # only reconstruction loss
@@ -290,42 +271,18 @@ class Trainer:
             if self.run_config['LOSS'] == 'l2':
                 reconstruction_loss = L2Similarity(orig_vertices, adex, vertex_area)
                 recon_loss = reconstruction_loss()
-                # edge_loss = EdgeLoss()
-                # chamfer_loss = ChamferDistance()
-                # laplacian_loss = LaplacianLoss(faces=faces, vert=adex.transpose(2, 1), toref=False)
             elif self.run_config['LOSS'] == 'EUCLIDEAN':
-                # recon_loss = LocalEuclideanBatch(original_pos=orig_vertices, perturbed_pos=adex,
-                #                                           run_config=self.run_config)
+                recon_loss = LocalEuclideanBatch(original_pos=orig_vertices, perturbed_pos=adex,
+                                                          run_config=self.run_config)
                 # edgeloss = MeshEdgeLoss()
                 # recon_loss = edgeloss(adex, faces)
-                edge_loss = EdgeLoss()
                 # l2_loss = L2Similarity(orig_vertices, adex, vertex_area)
                 # l2 = l2_loss()
-                # chamfer = chamfer_distance(original_pos=orig_vertices, perturbed_pos=adex)
             else:
                 raise('Not implemented reonstruction loss')
 
-
-            recon_loss = edge_loss(edges, orig_vertices.transpose(2,1), adex.transpose(2,1))
-            # laplace_loss = laplacian_loss(verts=adex.transpose(2, 1))
-            # laplacian_mesh_loss_object = MeshLaplacianSmoothing()
-            # mesh_edge_loss = MeshEdgeLoss()
-            # edge_loss = mesh_edge_loss(verts=adex.transpose(2, 1), faces=faces)
-            # laplace_loss = laplacian_mesh_loss_object(verts=adex.transpose(2, 1), faces=faces)
-
-            # chamfer_loss = chamfer_loss(original_pos=orig_vertices, perturbed_pos=adex, vertex_area=vertex_area)
-            # loss = missloss + recon_const * recon_loss + edge_loss_const * edge_loss + laplacian_loss_const * laplace_loss
-            # loss = edge_loss
-            # center of mass loss
-            # center_loss = CenterOfMassLoss(original_pos=orig_vertices, perturbed_pos=adex,
-            #                                               run_config=self.run_config)
-            loss = missloss + recon_const * recon_loss #+ l2_const * chamfer   #+ center_loss_const * center_loss
-            # loss = laplace_loss
-            # print(f'laplacian loss : {loss} reconstraction : {laplace_loss}')
-            # missloss_out = missloss.item()
-            # recon_loss_out = recon_loss.item()
-            # print(f'misloss: {missloss_out} recon_loss: {recon_loss} laplace: {laplace_loss}')
-            return loss, missloss, recon_loss  #, chamfer
+            loss = missloss + recon_const * recon_loss
+            return loss, missloss, recon_loss
 
         return loss
 

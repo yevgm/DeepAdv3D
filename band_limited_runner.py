@@ -30,6 +30,7 @@ from models.pointnet import PointNet
 from dataset.data_loaders import FaustDataset
 import adversarial.carlini_wagner as cw
 from adversarial.carlini_wagner import CWBuilder, LowbandPerturbation
+from run_config import *
 
 # ----------------------------------------------------------------------------------------------------------------------#
 #                                                   Functions
