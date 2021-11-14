@@ -4,7 +4,8 @@
 </h1>
   <p align="center">
   <a href="mailto:roeebs123@gmail.com">Roee Ben Shlomo</a> •
-    <a href="mailto:yevgenimen@campus.technion.ac.il">Yevgeny Men</a> 
+    <a href="mailto:yevgenimen@campus.technion.ac.il">Yevgeny Men</a> •
+    <a href="mailto:ido.imanuel@gmail.com">Ido Imanuel</a>
   </p>
 
 Generating adversarial examples is the art of creating a noise that is added to an input signal of a classifying neural network, and thus changing the network’s classification, while keeping the noise as tenuous as possible.
