@@ -70,6 +70,6 @@ We've done a pretty thorough check with all kinds of losses, so perhaps a differ
 
 ## References
 * [FAUST dataset](http://faust.is.tue.mpg.de/overview).
-* [Carlini, Nicholas and David Wagner (2017), Towards Evaluating the Robustness of NeuralNetworks](https://arxiv.org/abs/1608.04644).
+* [Carlini, Nicholas and David Wagner (2017), Towards Evaluating the Robustness of Neural Networks](https://arxiv.org/abs/1608.04644).
 * [Qi, Charles R. et al. (2017), PointNet: Deep Learning on Point Sets for 3D Classificationand Segmentation](https://arxiv.org/abs/1612.00593).
 * [Mariani, Giorgio et al. (2020), ‘Generating Adversarial Surfaces via Band-Limited Perturbations’](https://onlinelibrary.wiley.com/doi/10.1111/cgf.14083).
