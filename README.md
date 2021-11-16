@@ -1,12 +1,20 @@
 # Generating Band-Limited Adversarial Surfaces Using Neural Networks
-<h1 align="center">
+
+<p align="center">
   <img src="./assets/attack-gif.gif" width = "500">
-</h1>
+  
+ This is the official repository of the technical report that was published [on arXiv](https://arxiv.org/abs/2111.07424).
+</p>
+
+---
+
   <p align="center">
   <a href="mailto:roeebs123@gmail.com">Roee Ben Shlomo</a> •
     <a href="mailto:yevgenimen@campus.technion.ac.il">Yevgeny Men</a> •
     <a href="mailto:ido.imanuel@gmail.com">Ido Imanuel</a>
   </p>
+  
+  
 
 Generating adversarial examples is the art of creating a noise that is added to an input signal of a classifying neural network, and thus changing the network’s classification, while keeping the noise as tenuous as possible.
 
